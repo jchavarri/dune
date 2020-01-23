@@ -77,6 +77,7 @@ type t = private
   ; ocamldep : Path.t
   ; ocamlmklib : Path.t
   ; ocamlobjinfo : Path.t option  (** Environment variables *)
+  ; bsc : Path.t option
   ; env : Env.t
   ; findlib : Findlib.t
   ; findlib_toolchain : Context_name.t option  (** Misc *)

@@ -1067,7 +1067,7 @@ let build ~ocaml_config ~pp ~dependencies ~c_files
   >>= fun obj_files ->
   let compiled_ml_ext =
     match Config.mode with
-    | Byte -> ".cmo"
+    | Byte -> ".cmj"
     | Native -> ".cmx"
   in
   let compiled_ml_files =

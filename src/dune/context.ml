@@ -56,6 +56,7 @@ module T = struct
     ; ocamldep : Path.t
     ; ocamlmklib : Path.t
     ; ocamlobjinfo : Path.t option
+    ; bsc : Path.t option
     ; env : Env.t
     ; findlib : Findlib.t
     ; findlib_toolchain : Context_name.t option
@@ -94,6 +95,7 @@ module T = struct
       ; ("ocamlopt", option path t.ocamlopt)
       ; ("ocamldep", path t.ocamldep)
       ; ("ocamlmklib", path t.ocamlmklib)
+      ; ("bsc", option path t.bsc)
       ; ("env", Env.to_dyn (Env.diff t.env Env.initial))
       ; ("findlib_path", list path (Findlib.paths t.findlib))
       ; ("arch_sixtyfour", Bool t.arch_sixtyfour)
@@ -283,6 +285,13 @@ let create ~(kind : Kind.t) ~path ~env ~env_nodes ~name ~merlin ~targets
         match which "ocamlc" with
         | Some x -> x
         | None -> prog_not_found_in_path "ocamlc" )
+    in
+    let bsc = 
+      let dune_bsc = Env.get env "DUNE_BSC" in
+      match dune_bsc, which "bsc" with
+      | Some _, Some x -> Some x
+      | Some _, None -> Some (prog_not_found_in_path "bsc")
+      | None, _ -> None
     in
     let dir = Path.parent_exn ocamlc in
     let ocaml_tool_not_found prog =
@@ -478,6 +487,7 @@ let create ~(kind : Kind.t) ~path ~env ~env_nodes ~name ~merlin ~targets
       ; ocamldep = get_ocaml_tool_exn "ocamldep"
       ; ocamlmklib = get_ocaml_tool_exn "ocamlmklib"
       ; ocamlobjinfo = which "ocamlobjinfo"
+      ; bsc
       ; env
       ; findlib = Findlib.create ~stdlib_dir ~paths:findlib_paths ~version
       ; findlib_toolchain

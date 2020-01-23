@@ -126,7 +126,8 @@ let build_cm cctx ~dep_graphs ~precompiled_cmi ~cm_kind (m : Module.t) ~phase =
     let intf_only = cm_kind = Cmi && not (Module.has m ~ml_kind:Impl) in
     if opaque || (intf_only && Ocaml_version.supports_opaque_for_mli ctx.version)
     then
-      Command.Args.A "-opaque"
+      (* Command.Args.A "-opaque" *)
+      Command.Args.empty
     else
       Command.Args.empty
   in
@@ -158,10 +159,15 @@ let build_cm cctx ~dep_graphs ~precompiled_cmi ~cm_kind (m : Module.t) ~phase =
       src
   in
   let modules = Compilation_context.modules cctx in
+  let cmd_path =
+    match ctx.bsc with
+    | Some path as bsc -> path
+    | None -> compiler
+  in
   SC.add_rule sctx ~sandbox ~dir
     (let open Build.O in
     Build.paths extra_deps >>> other_cm_files
-    >>> Command.run ~dir:(Path.build dir) (Ok compiler)
+    >>> Command.run ~dir:(Path.build dir) (Ok cmd_path)
           [ Command.Args.dyn flags
           ; cmt_args
           ; Command.Args.S

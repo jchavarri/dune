@@ -12,7 +12,7 @@ let choose cmi cmo cmx = function
   | Cmo -> cmo
   | Cmx -> cmx
 
-let ext = choose ".cmi" ".cmo" ".cmx"
+let ext = choose ".cmi" ".cmj" ".cmx"
 
 let pp fmt p = Format.pp_print_string fmt (ext p)
 
@@ -40,5 +40,5 @@ let to_dyn =
   let open Dyn.Encoder in
   function
   | Cmi -> constr "cmi" []
-  | Cmo -> constr "cmo" []
+  | Cmo -> constr "cmj" []
   | Cmx -> constr "cmx" []
