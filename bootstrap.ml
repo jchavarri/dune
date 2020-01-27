@@ -35,7 +35,7 @@ let () =
   at_exit (fun () ->
       Array.iter (Sys.readdir "boot") ~f:(fun fn ->
           let fn = Filename.concat "boot" fn in
-          if Filename.check_suffix fn ".cmi" || Filename.check_suffix fn ".cmj"
+          if Filename.check_suffix fn ".cmi" || Filename.check_suffix fn ".cmo"
           then
             Sys.remove fn));
   if not keep_generated_files then

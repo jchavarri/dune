@@ -12,7 +12,13 @@ let choose cmi cmo cmx = function
   | Cmo -> cmo
   | Cmx -> cmx
 
-let ext = choose ".cmi" ".cmj" ".cmx"
+let ext =
+  choose
+    ".cmi"
+    (match (Env.get Env.initial "DUNE_BSC") with
+      | Some _ -> ".cmj"
+      | None -> ".cmo")
+    ".cmx"
 
 let pp fmt p = Format.pp_print_string fmt (ext p)
 
@@ -40,5 +46,5 @@ let to_dyn =
   let open Dyn.Encoder in
   function
   | Cmi -> constr "cmi" []
-  | Cmo -> constr "cmj" []
+  | Cmo -> constr "cmo" []
   | Cmx -> constr "cmx" []

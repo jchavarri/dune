@@ -2,7 +2,7 @@ open! Stdune
 open Import
 open Build.O
 
-let default_ocamlc_flags = [ ]
+let default_ocamlc_flags = [ "-g" ]
 
 let default_ocamlopt_flags = [ "-g" ]
 

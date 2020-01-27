@@ -123,17 +123,23 @@ let build_cm cctx ~dep_graphs ~precompiled_cmi ~cm_kind (m : Module.t) ~phase =
       (fn :: other_targets, A "-bin-annot")
   in
   let opaque_arg =
-    let intf_only = cm_kind = Cmi && not (Module.has m ~ml_kind:Impl) in
-    if opaque || (intf_only && Ocaml_version.supports_opaque_for_mli ctx.version)
-    then
-      (* Command.Args.A "-opaque" *)
-      Command.Args.empty
-    else
-      Command.Args.empty
+    match ctx.bsc with
+    | Some _ -> Command.Args.empty
+    | None ->
+      let intf_only = cm_kind = Cmi && not (Module.has m ~ml_kind:Impl) in
+      if opaque || (intf_only && Ocaml_version.supports_opaque_for_mli ctx.version)
+      then
+        Command.Args.A "-opaque"
+      else
+        Command.Args.empty
   in
   let dir = ctx.build_dir in
   let flags =
-    let flags = Ocaml_flags.get (CC.flags cctx) mode in
+    let flags =
+    match ctx.bsc with
+    | Some _ -> Build.return []
+    | None -> Ocaml_flags.get (CC.flags cctx) mode
+    in
     match Module.pp_flags m with
     | None -> flags
     | Some pp ->
@@ -164,6 +170,24 @@ let build_cm cctx ~dep_graphs ~precompiled_cmi ~cm_kind (m : Module.t) ~phase =
     | Some path as bsc -> path
     | None -> compiler
   in
+  let bs_args =
+    match ctx.bsc with
+    | Some _ ->
+      [ Command.Args.A "-bs-suffix"
+      ; A "-bs-package-name"
+      (* TODO: read from dune file? *)
+      ; A "bs-dummy-pkg-name"
+      ; A "-bs-package-output"
+      (* TODO: maybe add stanza to read package output (commonjs/es6) from dune file? *)
+      ; A ("es6:" ^ (Filename.dirname (Path.reach src ~from:(Path.build dir))))
+      ]
+    | None -> []
+  in
+  let ml_kind_flag =
+    match ctx.bsc with
+    | Some _ -> Command.Args.S []
+    | None -> Command.Ml_kind.flag ml_kind
+  in
   SC.add_rule sctx ~sandbox ~dir
     (let open Build.O in
     Build.paths extra_deps >>> other_cm_files
@@ -181,6 +205,7 @@ let build_cm cctx ~dep_graphs ~precompiled_cmi ~cm_kind (m : Module.t) ~phase =
             else
               A "-nodynlink" )
           ; A "-no-alias-deps"
+          ; S bs_args
           ; opaque_arg
           ; As (Fdo.phase_flags phase)
           ; opens modules m
@@ -193,7 +218,7 @@ let build_cm cctx ~dep_graphs ~precompiled_cmi ~cm_kind (m : Module.t) ~phase =
           ; A "-o"
           ; Target output
           ; A "-c"
-          ; Command.Ml_kind.flag ml_kind
+          ; ml_kind_flag
           ; Dep src
           ; Hidden_targets other_targets
           ]))
