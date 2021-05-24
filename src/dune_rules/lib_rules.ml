@@ -53,31 +53,52 @@ let build_lib (lib : Library.t) ~native_archives ~sctx ~expander ~flags ~dir
       in
       Super_context.add_rule ~dir sctx ~loc:lib.buildable.loc
         (let open Action_builder.With_targets.O in
-        Action_builder.with_no_targets obj_deps
-        >>> Command.run (Ok compiler) ~dir:(Path.build ctx.build_dir)
-              [ Command.Args.dyn ocaml_flags
-              ; A "-a"
-              ; A "-o"
-              ; Target target
-              ; As stubs_flags
-              ; Dyn
-                  (Action_builder.map cclibs ~f:(fun x ->
-                       Command.quote_args "-cclib" (map_cclibs x)))
-              ; Command.Args.dyn library_flags
-              ; As
-                  (match lib.kind with
-                  | Normal -> []
-                  | Ppx_deriver _
-                  | Ppx_rewriter _ ->
-                    [ "-linkall" ])
-              ; Dyn
-                  (Cm_files.top_sorted_cms cm_files ~mode
-                  |> Action_builder.map ~f:(fun x -> Command.Args.Deps x))
-              ; Hidden_targets
-                  (match mode with
-                  | Byte -> []
-                  | Native -> native_archives)
-              ]))
+        match Env.get Env.initial "DUNE_BSC" with
+        | Some _ ->
+          Action_builder.with_no_targets obj_deps
+          >>> Action_builder.progn
+                [ Command.run
+                    (Ok
+                       (Path.external_ @@ Path.External.of_string
+                      @@ "/bin/mkdir"))
+                    ~dir:(Path.build ctx.build_dir) [ Target target ]
+                ; Command.run
+                    (Ok (Path.external_ @@ Path.External.of_string @@ "/bin/cp"))
+                    ~dir:(Path.build ctx.build_dir)
+                    [ A "-t"
+                    ; Target target
+                    ; Dyn
+                        (Cm_files.top_sorted_cms cm_files ~mode
+                        |> Action_builder.map ~f:(fun x -> Command.Args.Deps x)
+                        )
+                    ]
+                ]
+        | None ->
+          Action_builder.with_no_targets obj_deps
+          >>> Command.run (Ok compiler) ~dir:(Path.build ctx.build_dir)
+                [ Command.Args.dyn ocaml_flags
+                ; A "-a"
+                ; A "-o"
+                ; Target target
+                ; As stubs_flags
+                ; Dyn
+                    (Action_builder.map cclibs ~f:(fun x ->
+                         Command.quote_args "-cclib" (map_cclibs x)))
+                ; Command.Args.dyn library_flags
+                ; As
+                    (match lib.kind with
+                    | Normal -> []
+                    | Ppx_deriver _
+                    | Ppx_rewriter _ ->
+                      [ "-linkall" ])
+                ; Dyn
+                    (Cm_files.top_sorted_cms cm_files ~mode
+                    |> Action_builder.map ~f:(fun x -> Command.Args.Deps x))
+                ; Hidden_targets
+                    (match mode with
+                    | Byte -> []
+                    | Native -> native_archives)
+                ]))
 
 let gen_wrapped_compat_modules (lib : Library.t) cctx =
   let modules = Compilation_context.modules cctx in
