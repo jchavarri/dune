@@ -13,6 +13,9 @@ _perf
 # emacs lock files
 .#*
 
+# vscode config
+.vscode
+
 .duneboot.*
 /boot/*.cm*
 dune.exe
