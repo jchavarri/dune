@@ -1,4 +1,4 @@
-open Dune
+open Dune_rules
 open! Stdune
 open Dune_tests_common
 
@@ -48,10 +48,10 @@ Interfaces imported:
         0971650cdf1fa8e506e733e9a5da2628        Lexing
         0a88e320f172d3413ba0d5e0f9c70ccd        Hashtbl
         1a17539924469551f027475153d4d3b5        Format
-        a4afff2bf4082efda68a6a65cf31f8e2        Dune_caml__Result_compat
-        de733b926f4af640c957c8129aba4139        Dune_caml__Result
-        ba19641102c1711bdb2476bb8b8dbe32        Dune_caml__
-        7b10d1bd2d88af9c1da841149c988d94        Dune_caml
+        a4afff2bf4082efda68a6a65cf31f8e2        Stdlib__Result_compat
+        de733b926f4af640c957c8129aba4139        Stdlib__Result
+        ba19641102c1711bdb2476bb8b8dbe32        Stdlib__
+        7b10d1bd2d88af9c1da841149c988d94        Stdlib
         cd4856c93f21942683ce190142e88396        Complex
         79ae8c0eb753af6b441fe05456c7970b        CamlinternalFormatBasics
         4ff98b0650eef9c38ee9c9930e0c3e9b        CamlinternalBigarray
@@ -83,69 +83,67 @@ let%expect_test _ =
   parse fixture;
   [%expect
     {|
-{
-impl =
-  set
-    { "Printf"
-    ; "Stdune__Array"
-    ; "Stdune__Bin"
-    ; "Stdune__Exn"
-    ; "Stdune__List"
-    ; "Stdune__Map"
-    ; "Stdune__Set"
-    ; "Stdune__Sexp"
-    ; "Stdune__String"
-    ; "Sys"
-    ; "Unix"
-    }
-;
-intf =
-  set
-    { "ArrayLabels"
-    ; "Buffer"
-    ; "CamlinternalBigarray"
-    ; "CamlinternalFormatBasics"
-    ; "Complex"
-    ; "Dune_caml"
-    ; "Dune_caml__"
-    ; "Dune_caml__Result"
-    ; "Dune_caml__Result_compat"
-    ; "Format"
-    ; "Hashtbl"
-    ; "Lexing"
-    ; "ListLabels"
-    ; "Map"
-    ; "MoreLabels"
-    ; "Pervasives"
-    ; "Printexc"
-    ; "Printf"
-    ; "Set"
-    ; "Stdune__"
-    ; "Stdune__Array"
-    ; "Stdune__Bin"
-    ; "Stdune__Comparator"
-    ; "Stdune__Either"
-    ; "Stdune__Env"
-    ; "Stdune__Exn"
-    ; "Stdune__Hashable"
-    ; "Stdune__Hashtbl"
-    ; "Stdune__Hashtbl_intf"
-    ; "Stdune__List"
-    ; "Stdune__Loc"
-    ; "Stdune__Map"
-    ; "Stdune__Map_intf"
-    ; "Stdune__Ordering"
-    ; "Stdune__Path"
-    ; "Stdune__Result"
-    ; "Stdune__Set"
-    ; "Stdune__Set_intf"
-    ; "Stdune__Sexp"
-    ; "Stdune__Sexp_intf"
-    ; "Stdune__String"
-    ; "StringLabels"
-    ; "Sys"
-    ; "Uchar"
-    ; "Unix"
-    }
+{ impl =
+    set
+      { "printf"
+      ; "stdune__Array"
+      ; "stdune__Bin"
+      ; "stdune__Exn"
+      ; "stdune__List"
+      ; "stdune__Map"
+      ; "stdune__Set"
+      ; "stdune__Sexp"
+      ; "stdune__String"
+      ; "sys"
+      ; "unix"
+      }
+; intf =
+    set
+      { "arrayLabels"
+      ; "buffer"
+      ; "camlinternalBigarray"
+      ; "camlinternalFormatBasics"
+      ; "complex"
+      ; "format"
+      ; "hashtbl"
+      ; "lexing"
+      ; "listLabels"
+      ; "map"
+      ; "moreLabels"
+      ; "pervasives"
+      ; "printexc"
+      ; "printf"
+      ; "set"
+      ; "stdlib"
+      ; "stdlib__"
+      ; "stdlib__Result"
+      ; "stdlib__Result_compat"
+      ; "stdune__"
+      ; "stdune__Array"
+      ; "stdune__Bin"
+      ; "stdune__Comparator"
+      ; "stdune__Either"
+      ; "stdune__Env"
+      ; "stdune__Exn"
+      ; "stdune__Hashable"
+      ; "stdune__Hashtbl"
+      ; "stdune__Hashtbl_intf"
+      ; "stdune__List"
+      ; "stdune__Loc"
+      ; "stdune__Map"
+      ; "stdune__Map_intf"
+      ; "stdune__Ordering"
+      ; "stdune__Path"
+      ; "stdune__Result"
+      ; "stdune__Set"
+      ; "stdune__Set_intf"
+      ; "stdune__Sexp"
+      ; "stdune__Sexp_intf"
+      ; "stdune__String"
+      ; "stringLabels"
+      ; "sys"
+      ; "uchar"
+      ; "unix"
+      }
 }
 |}]

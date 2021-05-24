@@ -17,11 +17,17 @@ homepage: "https://github.com/ocaml/dune"
 doc: "https://dune.readthedocs.io/"
 bug-reports: "https://github.com/ocaml/dune/issues"
 depends: [
-  "dune" {>= "2.0"}
+  "dune" {>= "2.8"}
+  "csexp" {>= "1.4.0"}
+  "stdune-unstable" {= version}
+  "ocaml" {>= "4.08"}
+  "odoc" {with-doc}
 ]
 dev-repo: "git+https://github.com/ocaml/dune.git"
 build: [
-  ["dune" "subst"] {pinned}
+  ["dune" "subst"] {dev}
+  ["rm" "-rf" "vendor/csexp"]
+  ["rm" "-rf" "vendor/pp"]
   [
     "dune"
     "build"

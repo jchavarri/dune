@@ -20,21 +20,21 @@ let man =
       {|Substitute $(b,%%ID%%) strings in source files, in a similar fashion to
           what topkg does in the default configuration.|}
   ; `P
-      ( {|This command is only meant to be called when a user pins a package to
+      ({|This command is only meant to be called when a user pins a package to
           its development version. Especially it replaces $(b,|}
-      ^ literal_version
-      ^ {|) strings by the version obtained from the vcs. Currently only git is
+     ^ literal_version
+     ^ {|) strings by the version obtained from the vcs. Currently only git is
             supported and the version is obtained from the output of:|}
       )
   ; `Pre {|  \$ git describe --always --dirty|}
   ; `P
       {|$(b,dune subst) substitutes the variables that topkg substitutes with
-          the defatult configuration:|}
+          the default configuration:|}
   ; var "NAME" "the name of the project (from the dune-project file)"
   ; var "VERSION" "output of $(b,git describe --always --dirty)"
   ; var "VERSION_NUM"
-      ( "same as $(b," ^ literal_version
-      ^ ") but with a potential leading 'v' or 'V' dropped" )
+      ("same as $(b," ^ literal_version
+     ^ ") but with a potential leading 'v' or 'V' dropped")
   ; var "VCS_COMMIT_ID" "commit hash from the vcs"
   ; opam "maintainer"
   ; opam "authors"
@@ -58,14 +58,22 @@ let man =
 let info = Term.info "subst" ~doc ~man
 
 let term =
-  let+ () = Common.build_info in
-  let config : Config.t =
-    { Config.default with display = Quiet; concurrency = Fixed 1 }
+  let+ () = Common.build_info
+  and+ debug_backtraces = Common.debug_backtraces in
+  let config : Dune_config.t =
+    { Dune_config.default with
+      display = { verbosity = Quiet; status_line = false }
+    ; concurrency = Fixed 1
+    }
   in
+  Dune_engine.Clflags.debug_backtraces debug_backtraces;
   Path.set_root (Path.External.cwd ());
   Path.Build.set_build_dir (Path.Build.Kind.of_string Common.default_build_dir);
-  Console.init config.display;
+  Dune_config.init config;
   Log.init_disabled ();
-  Dune.Scheduler.go ~config Watermarks.subst
+  Dune_engine.Scheduler.Run.go
+    ~on_event:(fun _ _ -> ())
+    (Dune_config.for_scheduler config None None)
+    Watermarks.subst
 
 let command = (term, info)

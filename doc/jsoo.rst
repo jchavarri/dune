@@ -1,7 +1,7 @@
 .. _jsoo:
 
 **********************
-Javascript compilation
+JavaScript compilation
 **********************
 
 js_of_ocaml_ is a compiler from OCaml to JavaScript. The compiler works by
@@ -29,7 +29,7 @@ With the following dune file:
 
 .. code:: scheme
 
-  (executable (name foo))
+  (executable (name foo) (modes js))
 
 And then request the ``.js`` target:
 
@@ -41,6 +41,16 @@ And then request the ``.js`` target:
 
 Similar targets are created for libraries, but we recommend sticking to the
 executable targets.
+
+If you're using the js_of_ocaml syntax extension, you must remember to add the
+appropriate ppx in the ``preprocess`` field:
+
+.. code:: scheme
+
+  (executable
+   (name foo)
+   (modes js)
+   (preprocess (pps js_of_ocaml-ppx)))
 
 Separate compilation
 ====================

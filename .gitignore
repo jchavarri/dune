@@ -1,11 +1,18 @@
+_opam
 _build
 /_boot
 _perf
 *.install
 .merlin
 *.corrected
+
+# vim swap files
 *.swp
 *.swo
+
+# emacs lock files
+.#*
+
 .duneboot.*
 /boot/*.cm*
 dune.exe

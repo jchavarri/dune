@@ -1,5 +1,6 @@
 open Stdune
-open Dune
+open Dune_engine
+open Dune_rules
 
 module Kind = struct
   type t =
@@ -26,11 +27,13 @@ end
 type t =
   { dir : string
   ; to_cwd : string list
+  ; reach_from_root_prefix : string
   ; kind : Kind.t
-  ; ancestor_vcs : Dune.Vcs.t option
+  ; ancestor_vcs : Dune_engine.Vcs.t option
   }
 
-let make kind dir = { kind; dir; to_cwd = []; ancestor_vcs = None }
+let make kind dir =
+  { kind; dir; to_cwd = []; ancestor_vcs = None; reach_from_root_prefix = "" }
 
 let find () =
   let cwd = Sys.getcwd () in
@@ -52,7 +55,14 @@ let find () =
       let new_candidate =
         match Kind.of_dir_contents files with
         | Some kind when Kind.priority kind <= Kind.priority candidate.kind ->
-          Some { kind; dir; to_cwd; ancestor_vcs = None }
+          Some
+            { kind
+            ; dir
+            ; to_cwd
+            ; ancestor_vcs = None
+            ; (* This field is computed at the end *) reach_from_root_prefix =
+                ""
+            }
         | _ -> None
       in
       let candidate =
@@ -65,7 +75,7 @@ let find () =
             { candidate with
               ancestor_vcs = Some { kind; root = Path.of_string dir }
             }
-          | None -> candidate )
+          | None -> candidate)
       in
       cont counter ~candidate dir ~to_cwd
   and cont counter ~candidate ~to_cwd dir =
@@ -79,14 +89,26 @@ let find () =
         let base = Filename.basename dir in
         loop (counter + 1) parent ~candidate ~to_cwd:(base :: to_cwd)
   in
-  loop 0 ~to_cwd:[] cwd
-    ~candidate:{ kind = Cwd; dir = cwd; to_cwd = []; ancestor_vcs = None }
+  let t =
+    loop 0 ~to_cwd:[] cwd
+      ~candidate:
+        { kind = Cwd
+        ; dir = cwd
+        ; to_cwd = []
+        ; ancestor_vcs = None
+        ; reach_from_root_prefix = ""
+        }
+  in
+  { t with
+    reach_from_root_prefix =
+      String.concat ~sep:"" (List.map t.to_cwd ~f:(sprintf "%s/"))
+  }
 
 let create ~specified_by_user =
   match specified_by_user with
   | Some dn -> make Explicit dn
   | None ->
-    if Config.inside_dune then
+    if Dune_util.Config.inside_dune then
       make Cwd "."
     else
       find ()

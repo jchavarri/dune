@@ -1,5 +1,5 @@
 open Stdune
-open Dune
+open Dune_rules
 module Re = Dune_re
 
 let () =
@@ -31,9 +31,9 @@ let () =
            subst |> encode |> decode: %s"
           (Dyn.to_string (Artifact_substitution.to_dyn subst))
           (Artifact_substitution.encode subst ?min_len)
-          ( match subst' with
+          (match subst' with
           | None -> "-"
-          | Some x -> Dyn.to_string (Artifact_substitution.to_dyn x) )
+          | Some x -> Dyn.to_string (Artifact_substitution.to_dyn x))
     in
     let test s =
       let value = Artifact_substitution.Repeat (n, s) in
@@ -70,7 +70,7 @@ let simple_subst =
     let slen = String.length s in
     let extract_placeholder pos =
       let open Option.O in
-      (* Look at the begining manually otherwise it's too slow *)
+      (* Look at the beginning manually otherwise it's too slow *)
       if
         pos + 3 >= slen
         || s.[pos] <> '%'
@@ -105,10 +105,10 @@ let simple_subst =
           Buffer.add_string buf
             (Artifact_substitution.encode_replacement ~len
                ~repl:
-                 ( match subst with
+                 (match subst with
                  | Repeat (n, s) ->
                    Array.make n s |> Array.to_list |> String.concat ~sep:""
-                 | _ -> failwith "substitution value not supported" ));
+                 | _ -> failwith "substitution value not supported"));
           loop (pos + len)
     in
     loop 0
@@ -145,6 +145,7 @@ let test input =
   let expected = simple_subst input in
   let buf = Buffer.create (String.length expected) in
   Fiber.run
+    ~iter:(fun () -> assert false)
     (let ofs = ref 0 in
      let input buf pos len =
        let to_copy = min len (String.length input - !ofs) in
@@ -154,7 +155,9 @@ let test input =
        to_copy
      in
      let output = Buffer.add_subbytes buf in
-     Artifact_substitution.copy ~get_vcs:(fun _ -> None) ~input ~output);
+     Artifact_substitution.copy ~conf:Artifact_substitution.conf_dummy
+       ~input_file:(Path.of_string "<memory>")
+       ~input ~output);
   let result = Buffer.contents buf in
   if result <> expected then
     fail

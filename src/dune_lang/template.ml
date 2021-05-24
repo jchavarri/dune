@@ -1,20 +1,55 @@
 open! Stdune
 
-type var_syntax =
-  | Dollar_brace
-  | Dollar_paren
-  | Percent
+module Pform = struct
+  type t =
+    { loc : Loc.t
+    ; name : string
+    ; payload : string option
+    }
 
-type var =
-  { loc : Loc.t
-  ; name : string
-  ; payload : string option
-  ; syntax : var_syntax
-  }
+  let loc (t : t) = t.loc
+
+  let name { name; _ } = name
+
+  let compare_no_loc v1 v2 =
+    match String.compare v1.name v2.name with
+    | (Ordering.Lt | Gt) as a -> a
+    | Eq -> Option.compare String.compare v1.payload v2.payload
+
+  let full_name t =
+    match t.payload with
+    | None -> t.name
+    | Some v -> t.name ^ ":" ^ v
+
+  let payload t = t.payload
+
+  let to_string { loc = _; name; payload } =
+    let before, after = ("%{", "}") in
+    match payload with
+    | None -> before ^ name ^ after
+    | Some p -> before ^ name ^ ":" ^ p ^ after
+
+  let to_dyn { loc = _; name; payload } =
+    let open Dyn.Encoder in
+    record [ ("name", string name); ("payload", option string payload) ]
+
+  let with_name t ~name = { t with name }
+
+  let describe t =
+    to_string
+      (match t.payload with
+      | None -> t
+      | Some _ -> { t with payload = Some ".." })
+
+  let describe_kind t =
+    match t.payload with
+    | None -> "variable"
+    | Some _ -> "macro"
+end
 
 type part =
   | Text of string
-  | Var of var
+  | Pform of Pform.t
 
 type t =
   { quoted : bool
@@ -22,31 +57,12 @@ type t =
   ; loc : Loc.t
   }
 
-let compare_var_syntax x y =
-  match (x, y) with
-  | Percent, Percent
-  | Dollar_brace, Dollar_brace
-  | Dollar_paren, Dollar_paren ->
-    Ordering.Eq
-  | Percent, (Dollar_brace | Dollar_paren) -> Ordering.Lt
-  | (Dollar_brace | Dollar_paren), Percent -> Ordering.Gt
-  | Dollar_brace, Dollar_paren -> Ordering.Lt
-  | Dollar_paren, Dollar_brace -> Ordering.Gt
-
-let compare_var_no_loc v1 v2 =
-  match String.compare v1.name v2.name with
-  | (Ordering.Lt | Gt) as a -> a
-  | Eq -> (
-    match Option.compare String.compare v1.payload v2.payload with
-    | (Ordering.Lt | Gt) as a -> a
-    | Eq -> compare_var_syntax v1.syntax v2.syntax )
-
 let compare_part p1 p2 =
   match (p1, p2) with
   | Text s1, Text s2 -> String.compare s1 s2
-  | Var v1, Var v2 -> compare_var_no_loc v1 v2
-  | Text _, Var _ -> Ordering.Lt
-  | Var _, Text _ -> Ordering.Gt
+  | Pform v1, Pform v2 -> Pform.compare_no_loc v1 v2
+  | Text _, Pform _ -> Ordering.Lt
+  | Pform _, Text _ -> Ordering.Gt
 
 let compare_no_loc t1 t2 =
   match List.compare ~compare:compare_part t1.parts t2.parts with
@@ -58,15 +74,15 @@ module Pp : sig
 end = struct
   let buf = Buffer.create 16
 
-  let add_var { loc = _; syntax = _; name; payload } =
+  let add_pform { Pform.loc = _; name; payload } =
     let before, after = ("%{", "}") in
     Buffer.add_string buf before;
     Buffer.add_string buf name;
-    ( match payload with
+    (match payload with
     | None -> ()
     | Some payload ->
       Buffer.add_char buf ':';
-      Buffer.add_string buf payload );
+      Buffer.add_string buf payload);
     Buffer.add_string buf after
 
   let check_valid_unquoted s ~loc =
@@ -90,14 +106,14 @@ end = struct
       | [] -> commit_text acc_text
       | Text s :: rest ->
         add_parts
-          ( if acc_text = "" then
+          (if acc_text = "" then
             s
           else
-            acc_text ^ s )
+            acc_text ^ s)
           rest
-      | Var v :: rest ->
+      | Pform v :: rest ->
         commit_text acc_text;
-        add_var v;
+        add_pform v;
         add_parts "" rest
     in
     add_parts "" parts;
@@ -107,12 +123,6 @@ end
 
 let to_string = Pp.to_string
 
-let string_of_var { loc = _; syntax = _; name; payload } =
-  let before, after = ("%{", "}") in
-  match payload with
-  | None -> before ^ name ^ after
-  | Some p -> before ^ name ^ ":" ^ p ^ after
-
 let pp t = Stdune.Pp.verbatim (Pp.to_string t)
 
 let pp_split_strings ppf (t : t) =
@@ -120,10 +130,10 @@ let pp_split_strings ppf (t : t) =
     t.quoted
     || List.exists t.parts ~f:(function
          | Text s -> String.contains s '\n'
-         | Var _ -> false)
+         | Pform _ -> false)
   then (
     List.iter t.parts ~f:(function
-      | Var s -> Format.pp_print_string ppf (string_of_var s)
+      | Pform s -> Format.pp_print_string ppf (Pform.to_string s)
       | Text s -> (
         match String.split s ~on:'\n' with
         | [] -> assert false
@@ -131,7 +141,7 @@ let pp_split_strings ppf (t : t) =
         | split ->
           Format.pp_print_list
             ~pp_sep:(fun ppf () -> Format.fprintf ppf "@,\\n")
-            Format.pp_print_string ppf split ));
+            Format.pp_print_string ppf split));
     Format.fprintf ppf "@}\"@]"
   ) else
     Format.pp_print_string ppf (Pp.to_string t)
@@ -141,30 +151,15 @@ let remove_locs t =
     loc = Loc.none
   ; parts =
       List.map t.parts ~f:(function
-        | Var v -> Var { v with loc = Loc.none }
+        | Pform v -> Pform { v with loc = Loc.none }
         | Text _ as s -> s)
   }
-
-let dyn_of_var_syntax =
-  let open Dyn.Encoder in
-  function
-  | Dollar_brace -> constr "Dollar_brace" []
-  | Dollar_paren -> constr "Dollar_paren" []
-  | Percent -> constr "Percent" []
-
-let dyn_of_var { loc = _; name; payload; syntax } =
-  let open Dyn.Encoder in
-  record
-    [ ("name", string name)
-    ; ("payload", option string payload)
-    ; ("syntax", dyn_of_var_syntax syntax)
-    ]
 
 let dyn_of_part =
   let open Dyn.Encoder in
   function
   | Text s -> constr "Text" [ string s ]
-  | Var v -> constr "Var" [ dyn_of_var v ]
+  | Pform v -> constr "Pform" [ Pform.to_dyn v ]
 
 let to_dyn { quoted; parts; loc = _ } =
   let open Dyn.Encoder in

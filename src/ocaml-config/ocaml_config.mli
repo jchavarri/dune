@@ -2,13 +2,11 @@
 
     This library is internal to dune and guarantees no API stability. *)
 
-open! Stdune
-
 (** Represent a parsed and interpreted output of [ocamlc -config] and contents
     of [Makefile.config]. *)
 type t
 
-val to_dyn : t Dyn.Encoder.t
+val to_dyn : t Stdune.Dyn.Encoder.t
 
 module Prog_and_args : sig
   type t =
@@ -22,10 +20,16 @@ end
 (** Represent the parsed but uninterpreted output of [ocamlc -config] or
     contents of [Makefile.config]. *)
 module Vars : sig
-  type t = string String.Map.t
+  type t
+
+  val find : t -> string -> string option
+
+  val of_list_exn : (string * string) list -> t
+
+  val to_list : t -> (string * string) list
 
   (** Parse the output of [ocamlc -config] given as a list of lines. *)
-  val of_lines : string list -> (t, string) Result.t
+  val of_lines : string list -> (t, string) result
 end
 
 (** {1 Creation} *)
@@ -33,17 +37,36 @@ end
 module Origin : sig
   type t =
     | Ocamlc_config
-    | Makefile_config of Path.t
+    | Makefile_config of Stdune.Path.t
+end
+
+module Os_type : sig
+  type t =
+    | Win32
+    | Unix
+    | Other of string
+
+  val to_string : t -> string
+end
+
+module Ccomp_type : sig
+  type t =
+    | Msvc
+    | Other of string
+
+  val to_dyn : t -> Stdune.Dyn.t
+
+  val to_string : t -> string
 end
 
 (** Interpret raw bindings (this function also loads the [Makefile.config] file
     in the stdlib directory). *)
-val make : Vars.t -> (t, Origin.t * string) Result.t
+val make : Vars.t -> (t, Origin.t * string) result
 
 (** {1 Query} *)
 
-(** The following parameters match the variables in the output of [ocamlc
-    -config] but are stable across versions of OCaml. *)
+(** The following parameters match the variables in the output of
+    [ocamlc -config] but are stable across versions of OCaml. *)
 
 val version : t -> int * int * int
 
@@ -55,13 +78,17 @@ val standard_library : t -> string
 
 val standard_runtime : t -> string
 
-val ccomp_type : t -> string
+val ccomp_type : t -> Ccomp_type.t
 
 val c_compiler : t -> string
 
 val ocamlc_cflags : t -> string list
 
+val ocamlc_cppflags : t -> string list
+
 val ocamlopt_cflags : t -> string list
+
+val ocamlopt_cppflags : t -> string list
 
 val bytecomp_c_compiler : t -> Prog_and_args.t
 
@@ -99,7 +126,7 @@ val ext_lib : t -> string
 
 val ext_dll : t -> string
 
-val os_type : t -> string
+val os_type : t -> Os_type.t
 
 val default_executable_name : t -> string
 
@@ -155,9 +182,11 @@ module Value : sig
 
   val to_string : t -> string
 
-  val to_dyn : t Dyn.Encoder.t
+  val to_dyn : t Stdune.Dyn.Encoder.t
 end
 
 val to_list : t -> (string * Value.t) list
+
+val by_name : t -> string -> Value.t option
 
 val is_dev_version : t -> bool

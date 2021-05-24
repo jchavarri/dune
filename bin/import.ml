@@ -1,99 +1,118 @@
 open Stdune
-open Dune
+open Dune_engine
 module Term = Cmdliner.Term
 module Manpage = Cmdliner.Manpage
-module Super_context = Dune.Super_context
-module Context = Dune.Context
-module Config = Dune.Config
-module Lib_name = Dune.Lib_name
-module Lib_deps_info = Dune.Lib_deps_info
-module Build_system = Dune.Build_system
-module Findlib = Dune.Findlib
-module Package = Dune.Package
-module Dune_package = Dune.Dune_package
-module Hooks = Dune.Hooks
-module Build = Dune.Build
-module Action = Dune.Action
-module Dep = Dune.Dep
-module Action_to_sh = Dune.Action_to_sh
-module Dpath = Dune.Dpath
-module Install = Dune.Install
-module Watermarks = Dune.Watermarks
-module Promotion = Dune.Promotion
-module Colors = Dune.Colors
-module Report_error = Dune.Report_error
-module Dune_project = Dune.Dune_project
-module Workspace = Dune.Workspace
-module Cached_digest = Dune.Cached_digest
-module Profile = Dune.Profile
+module Super_context = Dune_rules.Super_context
+module Context = Dune_rules.Context
+module Config = Dune_util.Config
+module Local_install_path = Dune_engine.Local_install_path
+module Lib_name = Dune_engine.Lib_name
+module Build_system = Dune_engine.Build_system
+module Findlib = Dune_rules.Findlib
+module Package = Dune_engine.Package
+module Dune_package = Dune_rules.Dune_package
+module Hooks = Dune_engine.Hooks
+module Action_builder = Dune_engine.Action_builder
+module Action = Dune_engine.Action
+module Dep = Dune_engine.Dep
+module Action_to_sh = Dune_engine.Action_to_sh
+module Dpath = Dune_engine.Dpath
+module Install = Dune_engine.Install
+module Section = Dune_engine.Section
+module Watermarks = Dune_rules.Watermarks
+module Promotion = Dune_engine.Promotion
+module Colors = Dune_rules.Colors
+module Dune_project = Dune_engine.Dune_project
+module Workspace = Dune_rules.Workspace
+module Cached_digest = Dune_engine.Cached_digest
+module Profile = Dune_rules.Profile
+module Log = Dune_util.Log
+module Dune_rpc = Dune_rpc_private
 include Common.Let_syntax
 
-let make_cache (config : Config.t) =
-  let make_cache () =
-    let handle (Dune_cache.Dedup file) = Scheduler.send_dedup file in
-    match config.cache_transport with
-    | Config.Caching.Transport.Direct ->
-      let cache =
-        Result.ok_exn
-          (Result.map_error
-             ~f:(fun s -> User_error.E (User_error.make [ Pp.text s ]))
-             (Dune_cache.Cache.make handle))
-      in
-      Dune_cache.make_caching (module Dune_cache.Cache) cache
-    | Daemon ->
-      let cache = Result.ok_exn (Dune_cache_daemon.Client.make handle) in
-      Dune_cache.make_caching (module Dune_cache_daemon.Client) cache
-  in
-  Fiber.return
-    ( match config.cache_mode with
-    | Config.Caching.Mode.Check ->
-      Some { Build_system.cache = make_cache (); check_probability = 1. }
-    | Config.Caching.Mode.Enabled ->
-      Some
-        { Build_system.cache = make_cache ()
-        ; check_probability = config.cache_check_probability
-        }
-    | Config.Caching.Mode.Disabled -> None )
+let in_group (t, info) = (Term.Group.Term t, info)
 
 module Main = struct
-  include Dune.Main
+  include Dune_rules.Main
 
-  let scan_workspace (common : Common.t) =
-    let workspace_file =
-      Common.workspace_file common |> Option.map ~f:Arg.Path.path
-    in
-    let x = Common.x common in
-    let profile = Common.profile common in
-    let capture_outputs = Common.capture_outputs common in
-    let ancestor_vcs = (Common.root common).ancestor_vcs in
-    scan_workspace ?workspace_file ?x ?profile ~capture_outputs ~ancestor_vcs ()
-
-  let setup ?external_lib_deps_mode common =
+  let setup () =
     let open Fiber.O in
-    let only_packages = Common.only_packages common in
-    let* caching = make_cache (Common.config common) in
-    let* workspace = scan_workspace common in
-    init_build_system workspace
-      ~sandboxing_preference:(Common.config common).sandboxing_preference
-      ?caching ?external_lib_deps_mode ?only_packages
+    let* setup = Memo.Build.run (get ()) in
+    let* scheduler = Scheduler.t () in
+    Console.Status_line.set_live (fun () ->
+        let progression = Build_system.get_current_progress () in
+        Some
+          (Pp.verbatim
+             (sprintf "Done: %u/%u (jobs: %u)"
+                progression.number_of_rules_executed
+                progression.number_of_rules_discovered
+                (Scheduler.running_jobs_count scheduler))));
+    Fiber.return setup
 end
 
 module Scheduler = struct
-  include Dune.Scheduler
-  open Fiber.O
+  include Dune_engine.Scheduler
 
-  let go ~(common : Common.t) f =
-    let config = Common.config common in
-    let f () = Main.set_concurrency config >>= f in
-    Scheduler.go ~config f
+  let maybe_clear_screen (dune_config : Dune_config.t) =
+    match dune_config.terminal_persistence with
+    | Clear_on_rebuild -> Console.reset ()
+    | Preserve ->
+      Console.print_user_message
+        (User_message.make
+           [ Pp.nop
+           ; Pp.tag User_message.Style.Success
+               (Pp.verbatim "********** NEW BUILD **********")
+           ; Pp.nop
+           ])
 
-  let poll ~(common : Common.t) ~once ~finally () =
-    let config = Common.config common in
-    let once () =
-      let* () = Main.set_concurrency config in
-      once ()
+  let on_event dune_config _config = function
+    | Scheduler.Run.Event.Tick -> Console.Status_line.refresh ()
+    | Scheduler.Run.Event.Source_files_changed -> maybe_clear_screen dune_config
+    | Build_interrupted ->
+      let status_line =
+        Some
+          (Pp.seq
+             (* XXX Why do we print "Had errors"? The user simply edited a file *)
+             (Pp.tag User_message.Style.Error (Pp.verbatim "Had errors"))
+             (Pp.verbatim ", killing current build..."))
+      in
+      Console.Status_line.set_constant status_line
+    | Build_finish build_result ->
+      let message =
+        match build_result with
+        | Success -> Pp.tag User_message.Style.Success (Pp.verbatim "Success")
+        | Failure -> Pp.tag User_message.Style.Error (Pp.verbatim "Had errors")
+      in
+      Console.Status_line.set_constant
+        (Some
+           (Pp.seq message (Pp.verbatim ", waiting for filesystem changes...")))
+
+  let go ~(common : Common.t) ~config:dune_config f =
+    let stats = Common.stats common in
+    let config = Dune_config.for_scheduler dune_config None stats in
+    Scheduler.Run.go config ~on_event:(on_event dune_config) f
+
+  let poll ~(common : Common.t) ~config:dune_config ~every ~finally =
+    let stats = Common.stats common in
+    let rpc_where = Some (Dune_rpc_private.Where.default ()) in
+    let config = Dune_config.for_scheduler dune_config rpc_where stats in
+    let file_watcher = Common.file_watcher common in
+    let run =
+      let run () =
+        Scheduler.Run.poll (fun () ->
+            Fiber.finalize every ~finally:(fun () -> Fiber.return (finally ())))
+      in
+      match Common.rpc common with
+      | None -> run
+      | Some rpc ->
+        fun () ->
+          Fiber.fork_and_join_unit
+            (fun () ->
+              let rpc_config = Dune_rpc_impl.Server.config rpc in
+              Dune_rpc_impl.Run.run rpc_config config.stats)
+            run
     in
-    Scheduler.poll ~config ~once ~finally ()
+    Scheduler.Run.go config ~file_watcher ~on_event:(on_event dune_config) run
 end
 
 let restore_cwd_and_execve (common : Common.t) prog argv env =
@@ -106,4 +125,19 @@ let restore_cwd_and_execve (common : Common.t) prog argv env =
   in
   Proc.restore_cwd_and_execve prog argv ~env
 
-let do_build targets = Build_system.do_build ~request:(Target.request targets)
+(* Adapted from
+   https://github.com/ocaml/opam/blob/fbbe93c3f67034da62d28c8666ec6b05e0a9b17c/src/client/opamArg.ml#L759 *)
+let command_alias cmd name =
+  let term, info = cmd in
+  let orig = Term.name info in
+  let doc = Printf.sprintf "An alias for $(b,%s)." orig in
+  let man =
+    [ `S "DESCRIPTION"
+    ; `P
+        (Printf.sprintf "$(mname)$(b, %s) is an alias for $(mname)$(b, %s)."
+           name orig)
+    ; `P (Printf.sprintf "See $(mname)$(b, %s --help) for details." orig)
+    ; `Blocks Common.help_secs
+    ]
+  in
+  (term, Term.info name ~docs:"COMMAND ALIASES" ~doc ~man)

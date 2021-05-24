@@ -9,7 +9,7 @@ Scopes
 
 Any directory containing at least one ``<package>.opam`` file defines
 a scope. This scope is the sub-tree starting from this directory,
-excluding any other scopes rooted in sub-direcotries.
+excluding any other scopes rooted in sub-directories.
 
 Typically, any given project will define a single scope. Libraries and
 executables that are not meant to be installed will be visible inside
@@ -83,7 +83,7 @@ error.
 Here's a simple example of a condition that expresses running on OSX and having
 an flambda compiler with the help of variable expansion:
 
-.. code:: scheme
+.. code:: lisp
 
    (and %{ocamlc-config:flambda} (= %{ocamlc-config:system} macosx))
 
@@ -116,7 +116,7 @@ Variables
 =========
 
 Some fields can contains variables that are expanded by dune.
-The syntax of variables is as follow:
+The syntax of variables is as follows:
 
 .. code::
 
@@ -140,8 +140,7 @@ Dune supports the following variables:
   the value of ``workspace_root`` is not constant and depends on
   whether your project is vendored or not
 -  ``CC`` is the C compiler command line (list made of the compiler
-   name followed by its flags) that was used to compile OCaml in the
-   current build context
+   name followed by its flags) that will be used to compile foreign code. For more details about its content see :ref:`this section <flags-flow>`.
 -  ``CXX`` is the C++ compiler command line being used in the
    current build context
 -  ``ocaml_bin`` is the path where ``ocamlc`` lives
@@ -156,6 +155,8 @@ Dune supports the following variables:
 -  ``null`` is ``/dev/null`` on Unix or ``nul`` on Windows
 -  ``ext_obj``, ``ext_asm``, ``ext_lib``, ``ext_dll`` and ``ext_exe``
    are the file extension used for various artifacts
+- ``ext_plugin`` is ``.cmxs`` if ``natdynlink`` is supported and
+  ``.cma`` otherwise.
 - ``ocaml-config:v`` for every variable ``v`` in the output of
   ``ocamlc -config``. Note that dune processes the output
   of ``ocamlc -config`` in order to make it a bit more stable across
@@ -166,19 +167,23 @@ Dune supports the following variables:
 - ``profile`` the profile selected via ``--profile``
 - ``context_name`` the name of the context (``default`` or defined in the
   workspace file)
-- ``os_type`` is the type of the OS the build is targetting. This is
+- ``os_type`` is the type of the OS the build is targeting. This is
   the same as ``ocaml-config:os_type``
-- ``architecture`` is the type of the architecture the build is targetting. This
+- ``architecture`` is the type of the architecture the build is targeting. This
   is the same as ``ocaml-config:architecture``
-- ``model`` is the type of the cpu the build is targetting. This is
+- ``model`` is the type of the CPU the build is targeting. This is
   the same as ``ocaml-config:model``
-- ``system`` is the name of the OS the build is targetting. This is the same as
+- ``system`` is the name of the OS the build is targeting. This is the same as
   ``ocaml-config:system``
 - ``ignoring_promoted_rule`` is ``true`` if
   ``--ignore-promoted-rules`` was passed on the command line and
   ``false`` otherwise
 - ``<ext>:<path>`` where ``<ext>`` is one of ``cmo``, ``cmi``, ``cma``,
   ``cmx``, or ``cmxa``. See :ref:`variables-for-artifacts`.
+- ``env:<var>=<default``, which expands to the value of the environment
+  variable ``<var>``, or ``<default>`` if it does not exist.
+  For example, ``%{env:BIN=/usr/bin}``.
+  Available since dune 1.4.0.
 
 In addition, ``(action ...)`` fields support the following special variables:
 
@@ -212,7 +217,7 @@ In addition, ``(action ...)`` fields support the following special variables:
   host build context.
 - ``lib-available:<library-name>`` expands to ``true`` or ``false`` depending on
   whether the library is available or not. A library is available iff at least
-  one of the following condition holds:
+  one of the following conditions holds:
 
   -  it is part the installed worlds
   -  it is available locally and is not optional
@@ -220,8 +225,9 @@ In addition, ``(action ...)`` fields support the following special variables:
      available
 
 - ``version:<package>`` expands to the version of the given
-  package. Note that this is only supported for packages that are
-  being defined in the current scope. How dune determines the version
+  package. Packages defined in the current scope have priority over the
+  public packages. Public packages that do not install any libraries
+  will not be detected. How dune determines the version
   of a package is described :ref:`here <package-version>`
 - ``read:<path>`` expands to the contents of the given file
 - ``read-lines:<path>`` expands to the list of lines in the given
@@ -247,7 +253,7 @@ Forms that expands to list of items, such as ``%{cc}``, ``%{deps}``,
 ``%{targets}`` or ``%{read-lines:...}``, are suitable to be used in, say,
 ``(run <prog> <arguments>)``.  For instance in:
 
-.. code:: scheme
+.. code:: lisp
 
     (run foo %{deps})
 
@@ -275,7 +281,7 @@ which is equivalent to the following shell command:
 Note that, since ``%{deps}`` is a list of items, the first one may be
 used as a program name, for instance:
 
-.. code:: scheme
+.. code:: lisp
 
     (rule
      (targets result.txt)
@@ -284,7 +290,7 @@ used as a program name, for instance:
 
 Here is another example:
 
-.. code:: scheme
+.. code:: lisp
 
     (rule
      (target foo.exe)
@@ -345,6 +351,32 @@ all the literals evaluate to true. It is an error if none of the clauses are
 selectable. You can add a fallback by adding a clause of the form ``(->
 <file>)`` at the end of the list.
 
+Re-exported dependencies
+------------------------
+
+A dependency ``foo`` may be marked as always *re-exported* using the
+following syntax:
+
+.. code:: scheme
+
+   (re_export foo)
+
+For instance:
+
+.. code:: scheme
+
+   (library
+    (name bar)
+    (libraries (re_export foo)))
+
+This states that this library explicitly re-exports the interface of
+``foo``.  Concretely, when something depends on ``bar`` it will also
+be able to see ``foo`` independently of whether :ref:`implicit
+transitive dependencies<implicit_transitive_deps>` are allowed or
+not. When they are allowed, which is the default, all transitive
+dependencies are visible whether they are marked as re-exported or
+not.
+
 .. _preprocessing-spec:
 
 Preprocessing specification
@@ -400,7 +432,7 @@ be an action that reads the file given as only dependency named
 More precisely, ``(preprocess (action <action>))`` acts as if
 you had setup a rule for every file of the form:
 
-   .. code:: scheme
+   .. code:: lisp
 
        (rule
         (target file.pp.ml)
@@ -456,7 +488,7 @@ names.
 
 For instance:
 
- .. code:: scheme
+ .. code:: lisp
 
     (preprocess (per_module
                  (((action (run ./pp.sh X=1 %{input-file})) foo bar))
@@ -479,8 +511,17 @@ introduced in 4.08, allowing the user to define custom let operators.
 
 Note that this feature is implemented by the third-party
 `ocaml-syntax-shims project
-<https://github.com/ocaml-ppx/ocaml-syntax-shims>`, so if you use this
-feature you must also declare a dependency on this package.
+<https://github.com/ocaml-ppx/ocaml-syntax-shims>`_, so if you use
+this feature you must also declare a dependency on this package.
+
+.. _preprocessor-deps:
+
+Preprocessor dependencies
+-------------------------
+
+If your preprocessor needs extra dependencies you should use the
+``preprocessor_deps`` field available in the ``library``, ``executable`` and
+``executables`` stanzas.
 
 .. _deps-field:
 
@@ -491,7 +532,7 @@ Dependencies in ``dune`` files can be specified using one of the following:
 
 .. _source_tree:
 
-- ``(:name <dependencies>)`` will bind the the list of dependencies to the
+- ``(:name <dependencies>)`` will bind the list of dependencies to the
   ``name`` variable. This variable will be available as ``%{name}`` in actions.
 - ``(file <filename>)`` or simply ``<filename>``: depend on this file
 - ``(alias <alias-name>)``: depend on the construction of this alias, for
@@ -537,7 +578,7 @@ in actions (like the ``%{deps}``, ``%{target}`` and ``%{targets}`` built in vari
 One instance where this is useful is for naming globs. Here's an
 example of an imaginary bundle command:
 
-.. code:: scheme
+.. code:: lisp
 
    (rule
     (target archive.tar)
@@ -564,7 +605,7 @@ You can use globs to declare dependencies on a set of files. Note that globs
 will match files that exist in the source tree as well as buildable targets, so
 for instance you can depend on ``*.cmi``.
 
-Currently dune only support globbing files in a single directory. And in
+Currently dune only supports globbing files in a single directory. And in
 particular the glob is interpreted as follows:
 
 - anything before the last ``/`` is taken as a literal path
@@ -638,7 +679,7 @@ The following constructions are available:
 - ``(run <prog> <args>)`` to execute a program. ``<prog>`` is resolved
   locally if it is available in the current workspace, otherwise it is
   resolved using the ``PATH``
-- ``(dynamic-run <prog> <args>)`` to execute a program that was linkied
+- ``(dynamic-run <prog> <args>)`` to execute a program that was linked
   against ``dune-action-plugin`` library. ``<prog>`` is resolved in
   the same way as in ``run``
 - ``(chdir <dir> <DSL>)`` to change the current directory
@@ -646,13 +687,15 @@ The following constructions are available:
 - ``(with-<outputs>-to <file> <DSL>)`` to redirect the output to a file, where
   ``<outputs>`` is one of: ``stdout``, ``stderr`` or ``outputs`` (for both
   ``stdout`` and ``stderr``)
-- ``(ignore-<outputs> <DSL)`` to ignore the output, where
+- ``(ignore-<outputs> <DSL>)`` to ignore the output, where
   ``<outputs>`` is one of: ``stdout``, ``stderr`` or ``outputs``
 - ``(with-stdin-from <file> <DSL>)`` to redirect the input from a file
 - ``(with-accepted-exit-codes <pred> <DSL>)`` specifies the list of expected exit codes
   for the programs executed in ``<DSL>``. ``<pred>`` is a predicate on integer
-  values, and is specified using the :ref:`predicate-lang`. ``<DSL>`` must be
-  one of ``run``, ``bash`` or ``system``. This action is available since dune 2.0.
+  values, and is specified using the :ref:`predicate-lang`. ``<DSL>`` can only
+  contain nested occurrences of ``run``, ``bash``, ``system``, ``chdir``,
+  ``setenv``, ``ignore-<outputs>``, ``with-stdin-from`` and
+  ``with-<outputs>-to``. This action is available since dune 2.0.
 - ``(progn <DSL>...)`` to execute several commands in sequence
 - ``(echo <string>)`` to output a string on stdout
 - ``(write-file <file> <string>)`` writes ``<string>`` to ``<file>``
@@ -674,6 +717,13 @@ The following constructions are available:
 - ``(cmp <file1> <file2>)`` is similar to ``(run cmp <file1>
   <file2>)`` but allows promotion.  See `Diffing and promotion`_ for
   more details
+- ``(no-infer <DSL>)`` to perform an action without inference of dependencies
+  and targets. This is useful if you are generating dependencies in a way
+  that Dune doesn't know about, for instance by calling an external build system.
+- ``(pipe-<outputs> <DSL> <DSL> <DSL>...)`` to execute several actions (at least two)
+  in sequence, filtering the ``<outputs>`` of the first command through the other
+  command, piping the standard output of each one into the input of the next.
+  This action is available since dune 2.7.
 
 As mentioned ``copy#`` inserts a line directive at the beginning of
 the destination file. More precisely, it inserts the following line:
@@ -696,11 +746,11 @@ Note: expansion of the special ``%{<kind>:...}`` is done relative to the current
 working directory of the part of the DSL being executed. So for instance if you
 have this action in a ``src/foo/dune``:
 
-.. code:: scheme
+.. code:: lisp
 
-    (action (chdir ../../.. (echo %{path:dune})))
+    (action (chdir ../../.. (echo %{dep:dune})))
 
-Then ``%{path:dune}`` will expand to ``src/foo/dune``. When you run various
+Then ``%{dep:dune}`` will expand to ``src/foo/dune``. When you run various
 tools, they often use the filename given on the command line in error messages.
 As a result, if you execute the command from the original directory, it will
 only see the basename.
@@ -764,9 +814,9 @@ directory, filtering it to only contain the files that were declared as
 dependencies. Then we run the action in that directory, and then we copy
 the targets back to the build directory.
 
-You can configure dune to use sandboxing modes ``symlink`` or ``copy``, which
-determines how the individual files are populated (they will be symlinked or
-copied into the sandbox directory).
+You can configure dune to use sandboxing modes ``symlink``, ``hardlink`` or
+``copy``, which determines how the individual files are populated (they will be
+symlinked, hardlinked or copied into the sandbox directory).
 
 This approach is very simple and portable, but that comes with
 certain limitations:
@@ -781,7 +831,7 @@ certain limitations:
 - Performance impact is usually small, but it can get noticeable for
   fast actions with very large sets of dependencies.
 
-Per-action sandboxing confuguration
+Per-action sandboxing configuration
 -----------------------------------
 
 Some actions may rely on sandboxing to work correctly.
@@ -822,7 +872,7 @@ Locks
 Given two rules that are independent, dune will assume that there
 associated action can be run concurrently. Two rules are considered
 independent if none of them depend on the other, either directly or
-through a chain of dependencies. This basic assumption allows to
+through a chain of dependencies. This basic assumption allows dune to
 parallelize the build.
 
 However, it is sometimes the case that two independent rules cannot be
@@ -831,7 +881,7 @@ complicated tests. In order to prevent dune from running the
 actions at the same time, you can specify that both actions take the
 same lock:
 
-.. code:: scheme
+.. code:: lisp
 
     (rule
      (alias  runtest)
@@ -857,7 +907,7 @@ contexts setup, the same rule might still be executed concurrently between the
 two build contexts. If you want a lock that is global to all build contexts,
 simply use an absolute filename:
 
-.. code:: scheme
+.. code:: lisp
 
     (rule
      (alias   runtest)
@@ -871,7 +921,7 @@ Diffing and promotion
 ``(diff <file1> <file2>)`` is very similar to ``(run diff <file1>
 <file2>)``. In particular it behaves in the same way:
 
-- when ``<file1>`` and ``<file2>`` are equal, it doesn't nothing
+- when ``<file1>`` and ``<file2>`` are equal, it does nothing
 - when they are not, the differences are shown and the action fails
 
 However, it is different for the following reason:
@@ -887,10 +937,10 @@ However, it is different for the following reason:
 
      $ opam install patdiff
 
-- on Windows, both ``(diff a b)`` and ``(diff? a b)`` normalize the end of
-  lines before comparing the files
+- on Windows, both ``(diff a b)`` and ``(diff? a b)`` normalize
+  end-of-line characters before comparing the files
 
-- since ``(diff a b)`` is a builtin action, dune knowns that ``a``
+- since ``(diff a b)`` is a builtin action, dune knows that ``a``
   and ``b`` are needed and so you don't need to specify them
   explicitly as dependencies
 
@@ -898,9 +948,11 @@ However, it is different for the following reason:
   produce ``b``. For cases where commands optionally produce a
   *corrected* file
 
+- if ``<file1>`` doesn't exists it will compare with the empty file
+
 - it allows promotion. See below
 
-Note that ``(cmp a b)`` does no end of lines normalization and doesn't
+Note that ``(cmp a b)`` does no end-of-line normalization and doesn't
 print a diff when the files differ. ``cmp`` is meant to be used with
 binary files.
 
@@ -951,13 +1003,15 @@ In this section, we will describe how to define a package, how to
 "attach" various elements to it and how to proceed with installing it
 on the system.
 
+.. _declaring-a-package:
+
 Declaring a package
 -------------------
 
 To declare a package, simply add a ``package`` stanza to your
 ``dune-project`` file:
 
-.. code:: scheme
+.. code:: lisp
 
           (package
            (name mypackage)
@@ -976,11 +1030,14 @@ release two packages with the same name.
 
 .. TODO: describe this more in details
 
-In older projects using Dune, packages were defined by the presence of
-a file called ``<package-name>.opam`` at the root of the project.
-However, it is not recommended to use this method in new projects as
-we expect to deprecate it in the future.  The right way to define a
-package is with a ``package`` stanza in the ``dune-project`` file.
+In older projects using Dune, packages were defined by manually writing a file
+called ``<package-name>.opam`` at the root of the project. However, it is not
+recommended to use this method in new projects as we expect to deprecate it in
+the future. The right way to define a package is with a ``package`` stanza in
+the ``dune-project`` file.
+
+See :ref:`opam-generation` for instructions on configuring dune to automatically
+generate ``.opam`` files based on the ``package`` stanzas.
 
 Attaching elements to a package
 -------------------------------
@@ -998,6 +1055,17 @@ the installation directory is either guessed or can be manually
 specified by the user.  This is described more in detail in the last
 section of this page.
 
+Sites of a package
+------------------
+
+When packages need additional resources outside their binary, their location
+could be hard to find. Moreover some packages could add resources to another
+package, for example in the case of plugins. These location are called sites in
+dune. One package can define them. During execution one site corresponds to a
+list of directories. They are like layers, the first directories have an higher
+priority. Examples and precisions are available at :ref:`sites`.
+
+
 Libraries
 ^^^^^^^^^
 
@@ -1012,9 +1080,9 @@ For instance:
 
 .. code:: scheme
 
-          (library
-           (name mylib)
-           (public_name mypackage.mylib))
+   (library
+    (name mylib)
+    (public_name mypackage.mylib))
 
 After you have added a public name to a library, Dune will know to
 install it as part of the package it is attached to.  Dune installs
@@ -1113,6 +1181,10 @@ Here is a complete list of supported subfields:
 - ``flags`` are passed when compiling source files. This field is specified
   using the :ref:`ordered-set-language`, where the ``:standard`` value comes
   from the environment settings ``c_flags`` and ``cxx_flags``, respectively.
+  Note that, for C stubs, Dune unconditionally adds the flags present in the
+  fields ``ocamlc_cflags`` and ``ocamlc_cppflags`` of the OCaml config to the
+  compiler command line. This behavior can be disabled since Dune 2.8 via the
+  ``dune-project`` option :ref:`always-add-cflags`.
 - ``include_dirs`` are tracked as dependencies and passed to the compiler
   via the ``-I`` flag. You can use :ref:`variables` in this field, and
   refer to a library source directory using the ``(lib library-name)`` syntax.
@@ -1175,3 +1247,24 @@ foreign archive is a bit like a foreign library, hence the name of the stanza.
 Foreign archives are particularly useful when embedding a library written in
 a foreign language and/or built with another build system. See
 :ref:`foreign-sandboxing` for more details.
+
+.. _flags-flow:
+
+Flags
+-----
+
+Depending on the :ref:`always-add-cflags` option, the base `:standard` set of
+flags for C will contain only ``ocamlc_cflags`` or both ``ocamlc_cflags`` and
+``ocamlc_cppflags``.
+
+There are multiple levels where one can declare custom flags (using the
+:ref:`ordered-set-language`), and each level inherits the flags of the previous
+one in its `:standard` set:
+
+- In the global `env` definition of a `dune-workspace` file
+- In the per-context `env` definitions in a `dune-workspace` file
+- In the env definition of a `dune` file
+- In a `foreign_` field of an executable or a library
+
+The ``%{cc}`` :ref:`variable <variables>` will contain the flags from the first
+three levels only.

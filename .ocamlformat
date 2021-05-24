@@ -1,4 +1,5 @@
-version=0.12
+version=0.17.0
+profile=conventional
 break-separators=before
 dock-collection-brackets=false
 break-sequences=true
@@ -16,3 +17,4 @@ space-around-arrays
 cases-exp-indent=2
 break-cases=all
 indicate-nested-or-patterns=unsafe-no
+parse-docstrings=true

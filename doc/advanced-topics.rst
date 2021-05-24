@@ -57,12 +57,15 @@ set of predicates:
   it is linked as part of a driver or meant to add a ``-ppx`` argument
   to the compiler, choose the former behavior
 
-Dynamic loading of packages
-===========================
+
+Dynamic loading of packages with findlib
+========================================
+
+The preferred way for new development is to use :ref:`plugins`.
 
 Dune supports the ``findlib.dynload`` package from `findlib
-<http://projects.camlcity.org/projects/findlib.html>`_ that allows to
-dynamically load packages and their dependencies (using OCaml Dynlink module).
+<http://projects.camlcity.org/projects/findlib.html>`_ that enables
+dynamically loading packages and their dependencies (using the OCaml Dynlink module).
 So adding the ability for an application to have plugins just requires to add
 ``findlib.dynload`` to the set of library dependencies:
 
@@ -198,7 +201,7 @@ interpreted relative to the current directory:
   ``library`` stanza (*not* its public name).
 
 In each case, the expansion of the variable is a path pointing inside the build
-context (ie ``_build/<context>``).
+context (i.e. ``_build/<context>``).
 
 Building an ad-hoc ``.cmxs``
 ----------------------------
@@ -215,7 +218,7 @@ Below is an example where we build ``my.cmxs`` containing ``foo.cmxa`` and
 ``d.cmx``. Note how we use a :ref:`library` stanza to set up the compilation of
 ``d.cmx``.
 
-.. code:: scheme
+.. code:: lisp
 
     (library
      (name foo)

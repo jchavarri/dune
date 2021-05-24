@@ -1,7 +1,12 @@
-(lang dune 2.0)
+(lang dune 2.8)
+;          ^^^
+; When changing the version, don't forget to regenerate *.opam files
+; by running [dune build].
 (name dune)
 
 (generate_opam_files true)
+
+(cram enable)
 
 ; Reserved for Dune itself. This is to help with the bootstrap
 (using dune-bootstrap-info 0.1)
@@ -16,15 +21,14 @@
 
 (package
  (name dune)
- (depends
-  ;; Please keep the lower bound in sync with .travis.yml and
-  ;; min_ocaml_version in bootstrap.ml
-  (ocaml (>= 4.06))
-  base-unix
-  base-threads)
+ ; The "depends" and "build" field are written in dune.opam.template
  (conflicts
+  (merlin (< 3.4.0))
+  (ocaml-lsp-server (< 1.3.0))
+  (dune-configurator (< 2.3.0))
   (odoc (< 1.3.0))
   (dune-release (< 1.3.0))
+  (js_of_ocaml-compiler (< 3.6.0))
   (jbuilder (= transition)))
  (synopsis "Fast, portable, and opinionated build system")
  (description "
@@ -60,6 +64,10 @@ executable was built.
 
 (package
  (name dune-private-libs)
+ (depends
+  (csexp (>= 1.4.0))
+  (stdune-unstable (= :version))
+  (ocaml (>= 4.08)))
  (synopsis "Private libraries of Dune")
  (description "\
 !!!!!!!!!!!!!!!!!!!!!!
@@ -74,7 +82,9 @@ no stability guarantee.
 (package
  (name dune-configurator)
  (depends
-  (dune-private-libs (= :version)))
+  (ocaml (>= 4.04.0))
+  result
+  (csexp (>= 1.3.0)))
  (synopsis "Helper library for gathering system configuration")
  (description "\
 dune-configurator is a small library that helps writing OCaml scripts that
@@ -91,7 +101,9 @@ Among other things, dune-configurator allows one to:
  (name dune-action-plugin)
  (depends
   dune-glob
+  (csexp (>= 1.4.0))
   (ppx_expect :with-test)
+  (stdune-unstable (= :version))
   (dune-private-libs (= :version)))
  (synopsis "[experimental] API for writing dynamic Dune actions")
  (description "\
@@ -107,8 +119,47 @@ execution of the action.
 (package
  (name dune-glob)
  (depends
+  (stdune-unstable (= :version))
   (dune-private-libs (= :version)))
  (synopsis "Glob string matching language supported by dune")
  (description "\
 dune-glob provides a parser and interpreter for globs as \
 understood by dune language."))
+
+(package
+ (name dune-site)
+ (depends (dune-private-libs (= :version)))
+ (synopsis "Embed locations informations inside executable and libraries")
+ (description ""))
+
+(package
+ (name dune-rpc)
+ (depends (stdune-unstable (= :version)) (pp (>= 1.1.0)) csexp)
+ (synopsis "Communicate with dune using rpc")
+ (description "Library to connect and control a running dune instance"))
+
+(package
+ (name dune-rpc-lwt)
+ (depends
+  (dune-rpc (= :version))
+  (stdune-unstable (= :version))
+  (csexp (>= 1.4.0))
+  lwt)
+ (synopsis "Communicate with dune using rpc and Lwt")
+ (description "Specialization of dune-rpc to Lwt"))
+
+(package
+ (name stdune-unstable)
+ (synopsis "Dune's unstable standard library")
+ (depends
+  (ocaml (>= 4.08.0))
+  pp
+  csexp)
+ (description "This library offers no backwards compatibility guarantees. Use at your own risk."))
+
+(package
+ (name dune-bench)
+ (synopsis "Dune's benchmarking suite")
+ (depends
+  (ocaml (>= 4.08.0)))
+ (description "Dune's private benchmarking suite"))

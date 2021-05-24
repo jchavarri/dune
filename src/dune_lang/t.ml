@@ -14,30 +14,28 @@ let atom_or_quoted_string s =
 
 let atom s = Atom (Atom.of_string s)
 
-let unsafe_atom_of_string s = atom s
-
 let rec to_string t =
   match t with
-  | Atom a -> Atom.print a
+  | Atom (A s) -> s
   | Quoted_string s -> Escape.quoted s
   | List l ->
     Printf.sprintf "(%s)" (List.map l ~f:to_string |> String.concat ~sep:" ")
   | Template t -> Template.to_string t
 
 let rec pp = function
-  | Atom s -> Pp.verbatim (Atom.print s)
+  | Atom (A s) -> Pp.verbatim s
   | Quoted_string s -> Pp.verbatim (Escape.quoted s)
   | List [] -> Pp.verbatim "()"
   | List l ->
     let open Pp.O in
     Pp.box ~indent:1
-      ( Pp.char '('
+      (Pp.char '('
       ++ Pp.hvbox (Pp.concat_map l ~sep:Pp.space ~f:pp)
-      ++ Pp.char ')' )
+      ++ Pp.char ')')
   | Template t -> Template.pp t
 
 module Deprecated = struct
-  let pp ppf t = Pp.render_ignore_tags ppf (pp t)
+  let pp ppf t = Pp.to_fmt ppf (pp t)
 
   let pp_print_quoted_string ppf s =
     if String.contains s '\n' then (
@@ -52,7 +50,7 @@ module Deprecated = struct
       Format.pp_print_string ppf (Escape.quoted s)
 
   let rec pp_split_strings ppf = function
-    | Atom s -> Format.pp_print_string ppf (Atom.print s)
+    | Atom (A s) -> Format.pp_print_string ppf s
     | Quoted_string s -> pp_print_quoted_string ppf s
     | List [] -> Format.pp_print_string ppf "()"
     | List (first :: rest) ->
@@ -80,29 +78,29 @@ module Deprecated = struct
     let tfuncs =
       (Format.pp_get_formatter_tag_functions ppf () [@warning "-3"])
     in
-    (Format.pp_set_formatter_tag_functions ppf
-       { tfuncs with
-         mark_open_tag =
-           (function
-           | "atom" ->
-             state := In_atom :: !state;
-             ""
-           | "makefile-action" ->
-             state := In_makefile_action :: !state;
-             ""
-           | "makefile-stuff" ->
-             state := In_makefile_stuff :: !state;
-             ""
-           | s -> tfuncs.mark_open_tag s)
-       ; mark_close_tag =
-           (function
-           | "atom"
-           | "makefile-action"
-           | "makefile-stuff" ->
-             state := List.tl !state;
-             ""
-           | s -> tfuncs.mark_close_tag s)
-       } [@warning "-3"]);
+    Format.pp_set_formatter_tag_functions ppf
+      { tfuncs with
+        mark_open_tag =
+          (function
+          | "atom" ->
+            state := In_atom :: !state;
+            ""
+          | "makefile-action" ->
+            state := In_makefile_action :: !state;
+            ""
+          | "makefile-stuff" ->
+            state := In_makefile_stuff :: !state;
+            ""
+          | s -> tfuncs.mark_open_tag s)
+      ; mark_close_tag =
+          (function
+          | "atom"
+          | "makefile-action"
+          | "makefile-stuff" ->
+            state := List.tl !state;
+            ""
+          | s -> tfuncs.mark_close_tag s)
+      } [@warning "-3"];
     Format.pp_set_formatter_out_functions ppf
       { ofuncs with
         out_newline =
@@ -117,9 +115,9 @@ module Deprecated = struct
       ; out_spaces =
           (fun n ->
             ofuncs.out_spaces
-              ( match !state with
+              (match !state with
               | In_atom :: _ -> max 0 (n - 2)
-              | _ -> n ))
+              | _ -> n))
       }
 end
 

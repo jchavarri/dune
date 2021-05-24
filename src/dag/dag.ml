@@ -2,6 +2,9 @@ open! Stdune
 include Dag_intf
 
 module Make (Value : Value) : S with type value := Value.t = struct
+  (* Raw_graph here should have the same complexity than the assumed interface
+     on the incremental_cycles proofs, in particular [get_outgoing] should run
+     in constant time. *)
   module Raw_graph = struct
     type mark = int
 
@@ -11,6 +14,8 @@ module Make (Value : Value) : S with type value := Value.t = struct
       }
 
     type graph = t
+
+    module Node_map = Map.Make (Int)
 
     type node_info =
       { id : int
@@ -59,10 +64,7 @@ module Make (Value : Value) : S with type value := Value.t = struct
 
     let set_parent _ v p = v.info.parent <- Some p
 
-    let raw_add_edge _ v w =
-      v.info.deps <- w :: v.info.deps;
-      if v.info.level = w.info.level then
-        w.info.rev_deps <- v :: w.info.rev_deps
+    let raw_add_edge _ v w = v.info.deps <- w :: v.info.deps
 
     let raw_add_vertex _ _ = ()
   end
@@ -79,7 +81,10 @@ module Make (Value : Value) : S with type value := Value.t = struct
     g.fresh_id <- g.fresh_id + 1;
     { id; mark = -1; level = 1; deps = []; rev_deps = []; parent = None }
 
-  let add g v w =
+  (* [add_assuming_missing dag v w] creates an arc going from [v] to [w]. @raise
+     Cycle if creating the arc would create a cycle. This assumes that the arc
+     does not already exist. *)
+  let add_assuming_missing g v w =
     match IC.add_edge_or_detect_cycle g v w with
     | IC.EdgeAdded -> ()
     | IC.EdgeCreatesCycle compute_cycle ->
@@ -88,9 +93,7 @@ module Make (Value : Value) : S with type value := Value.t = struct
            (let path = compute_cycle () in
             assert (List.hd path == w);
             assert (Option.value_exn (List.last path) == v);
-            List.rev path @ [ v ]))
-
-  let children node = node.info.deps
+            List.rev path))
 
   let rec pp_depth depth pp_value fmt n =
     if depth >= 20 then
@@ -98,12 +101,10 @@ module Make (Value : Value) : S with type value := Value.t = struct
     else
       Format.fprintf fmt "(%d: k=%d) (%a) [@[%a@]]" n.info.id n.info.level
         pp_value n.data
-        ( pp_depth (depth + 1) pp_value
-        |> Fmt.list ~pp_sep:(fun fmt () -> Format.fprintf fmt ";@, ") )
+        (pp_depth (depth + 1) pp_value
+        |> Format.pp_print_list ~pp_sep:(fun fmt () ->
+               Format.fprintf fmt ";@, "))
         n.info.deps
 
   let pp_node pp_value fmt n = pp_depth 0 pp_value fmt n
-
-  let is_child v w =
-    v.info.deps |> List.exists ~f:(fun c -> c.info.id = w.info.id)
 end

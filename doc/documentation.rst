@@ -19,7 +19,7 @@ Writing documentation
 =====================
 
 Documentation comments will be automatically extracted from your OCaml source
-files following the syntax described in the the section ``Text formatting`` of
+files following the syntax described in the section ``Text formatting`` of
 the `OCaml manual <http://caml.inria.fr/pub/docs/manual-ocaml/ocamldoc.html>`_.
 
 Additional documentation pages may by attached to a package can be attached
@@ -48,15 +48,16 @@ Documentation for private libraries may also be built with:
 
   $ dune build @doc-private
 
-But this libraries will not be in the main html listing above, since they do not
+But these libraries will not be in the main html listing above, since they do not
 belong to any particular package. But the generated html will still be found in
 ``_build/default/_doc/_html/<library>``.
 
-Examples
---------
 
-This stanza use attach all the .mld files in the current directory in a project
-with a single package.
+documentation stanza: Examples
+------------------------------
+
+The :ref:`documentation-stanza` stanza will attach all the .mld files
+in the current directory in a project with a single package.
 
 .. code-block:: lisp
 
@@ -78,5 +79,42 @@ directory to the inferred package:
 
    (documentation
     (mld_files :standard \ wip))
+
+All mld files attached to a package will be included in the generated
+``.install`` file for that package, and hence will be installed by opam.
+
+Package entry page
+------------------
+
+The ``index.mld`` file (specified as ``index`` in ``mld_files``) is
+treated specially by dune. This will be the file used to generate the
+entry page for the package, linked from the main package listing.
+
+To generate pleasant documentation, we recommend writing an
+``index.mld`` file with at least short description of your package,
+and possibly some examples.
+
+If you do not write your own ``index.mld`` file, dune will generate
+one with the entry modules for your package. But this generated file
+will not be installed.
+
+.. _odoc-options:
+
+Passing options to Odoc
+=======================
+
+.. code-block:: lisp
+
+    (env
+     (<profile>
+      (odoc <optional-fields>)))
+
+See :ref:`dune-env` for more details on the ``(env ...)`` stanza.
+``<optional-fields>`` are:
+
+- ``(warnings <mode>)`` specifies how warnings should be handled.
+  ``<mode>`` can be: ``fatal`` or ``nonfatal``.
+  The default value is ``nonfatal``.
+  This field is available since Dune 2.4.0 and requires Odoc 1.5.0.
 
 .. _odoc: https://github.com/ocaml-doc/odoc

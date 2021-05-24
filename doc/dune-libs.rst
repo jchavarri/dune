@@ -26,8 +26,8 @@ Configurator is designed to be cross compilation friendly and avoids _running_
 any compiled code to extract any of the information above.
 
 Configurator started as an `independent library
-<https://github.com/janestreet/configurator>`__, but now lives in dune. You do
-not need to install anything to use configurator.
+<https://github.com/janestreet/configurator>`__, but now lives in dune.
+It is released as the package ``dune-configurator``.
 
 Usage
 -----
@@ -57,7 +57,8 @@ example:
 
   let () =
     C.main ~name:"foo" (fun c ->
-      let has_clock_gettime = C.c_test c clock_gettime_code ~link_flags:["-lrt"] in
+      let has_clock_gettime =
+        C.c_test c clock_gettime_code ~link_flags:["-lrt"] in
 
       C.C_define.gen_header_file c ~fname:"config.h"
         [ "HAS_CLOCK_GETTIME", Switch has_clock_gettime ]);
@@ -69,7 +70,7 @@ invoke it as an executable and tell dune about the targets that it produces:
 
   (executable
    (name discover)
-   (libraries dune.configurator))
+   (libraries dune-configurator))
 
   (rule
    (targets config.h)
@@ -82,7 +83,7 @@ this flag file using ``:include``:
 
   (library
    (name mylib)
-   (c_names foo)
+   (foreign_stubs (language c) (names foo))
    (c_library_flags (:include (flags.sexp))))
 
 For this, generate the list of flags for your library — for example
@@ -106,9 +107,10 @@ the transition include:
 
 The following steps must be taken to transition from the old configurator:
 
-* Mentions of the ``configurator`` opam package should be removed.
+* Mentions of the ``configurator`` opam package should be replaced
+  with ``dune-configurator``.
 
-* The library name ``configurator`` should be changed ``dune.configurator``.
+* The library name ``configurator`` should be changed ``dune-configurator``.
 
 * The ``-ocamlc`` flag in rules that run configurator scripts should be removed.
   This information is now passed automatically by dune.
@@ -128,9 +130,9 @@ The following steps must be taken to transition from the old configurator:
 build-info
 ==========
 
-Dune allows to embed build information such as versions in executbles
-via the special ``dune-build-info`` library. This library exposes a
-few informations about how the executable was built such as the
+Dune can embed build information such as versions in executables
+via the special ``dune-build-info`` library. This library exposes
+some information about how the executable was built such as the
 version of the project containing the executable or the list of
 statically linked libraries with their versions. Printing the version
 at which the current executable was built is as simple as:
@@ -143,7 +145,7 @@ at which the current executable was built is as simple as:
              | Some v -> Build_info.V1.Version.to_string v)
 
 For libraries and executables from development repositories that don't
-have version informations written directly in the ``dune-project``
+have version information written directly in the ``dune-project``
 file, the version is obtained by querying the version control
 system. For instance, the following git command is used in git
 repositories:
@@ -155,14 +157,14 @@ repositories:
 which produces a human readable version string of the form
 ``<version>-<commits-since-version>-<hash>[-dirty]``.
 
-Note that in the case where the version string is ontained from the
-the version control system, the version string will only be written in
+Note that in the case where the version string is obtained from the
+version control system, the version string will only be written in
 the binary once it is installed or promoted to the source tree. In
-particular, if you evalute this expression as part of the build of
+particular, if you evaluate this expression as part of the build of
 your package, it will return ``None``. This is to ensure that
 committing does not hurt your development experience. Indeed, if dune
 stored the version directly inside the freshly built binaries, then
-everytime you commit your code the version would change and dune would
+every time you commit your code the version would change and dune would
 need to rebuild all the binaries and everything that depend on them,
 such as tests. Instead Dune leaves a placeholder inside the binary and
 fills it during installation or promotion.

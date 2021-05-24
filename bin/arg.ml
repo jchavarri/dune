@@ -1,9 +1,9 @@
 open Stdune
-open Dune
+open Dune_engine
+open Dune_rules
 include Cmdliner.Arg
 
-let package_name =
-  conv ((fun p -> Ok (Package.Name.of_string p)), Package.Name.pp)
+let package_name = conv Package.Name.conv
 
 module Path = struct
   type t = string
@@ -17,10 +17,7 @@ end
 
 let path = Path.conv
 
-let profile =
-  conv
-    ( (fun p -> Ok (Profile.of_string p))
-    , fun fmt t -> Format.pp_print_string fmt (Profile.to_string t) )
+let profile = conv Dune_rules.Profile.conv
 
 module Dep = struct
   module Dep_conf = Dep_conf
@@ -31,7 +28,7 @@ module Dep = struct
 
   let make_alias_sw ~dir s =
     let path =
-      Dune.Alias.Name.to_string s
+      Dune_engine.Alias.Name.to_string s
       |> Stdune.Path.Local.relative dir
       |> Stdune.Path.Local.to_string
     in
@@ -51,20 +48,22 @@ module Dep = struct
         else
           (1, true)
       in
-      let s = String.drop s pos in
-      let dir, alias =
-        let path = Stdune.Path.Local.of_string s in
-        Dune.Alias.Name.parse_local_path (Loc.none, path)
-      in
-      Some (recursive, dir, alias)
+      let s = String_with_vars.make_text Loc.none (String.drop s pos) in
+      Some
+        (if recursive then
+          Dep_conf.Alias_rec s
+        else
+          Dep_conf.Alias s)
 
   let dep_parser =
-    Dune_lang.Syntax.set Stanza.syntax Stanza.latest_version Dep_conf.decode
+    Dune_lang.Syntax.set Stanza.syntax (Active Stanza.latest_version)
+      (String_with_vars.set_decoding_env
+         (Pform.Env.initial Stanza.latest_version)
+         Dep_conf.decode)
 
   let parser s =
     match parse_alias s with
-    | Some (true, dir, name) -> `Ok (alias_rec ~dir name)
-    | Some (false, dir, name) -> `Ok (alias ~dir name)
+    | Some dep -> `Ok dep
     | None -> (
       match
         Dune_lang.Decoder.parse dep_parser Univ_map.empty
@@ -72,7 +71,7 @@ module Dep = struct
              ~mode:Dune_lang.Parser.Mode.Single s)
       with
       | x -> `Ok x
-      | exception User_error.E msg -> `Error (User_message.to_string msg) )
+      | exception User_error.E (msg, _) -> `Error (User_message.to_string msg))
 
   let string_of_alias ~recursive sv =
     let prefix =
@@ -106,6 +105,26 @@ end
 
 let dep = Dep.conv
 
-let context_name =
-  let printer ppf t = Format.pp_print_string ppf (Context_name.to_string t) in
-  (Context_name.arg_parse, printer)
+let bytes =
+  let decode repr =
+    let ast =
+      Dune_lang.Parser.parse_string ~fname:"command line"
+        ~mode:Dune_lang.Parser.Mode.Single repr
+    in
+    match
+      Dune_lang.Decoder.parse Dune_lang.Decoder.bytes_unit Univ_map.empty ast
+    with
+    | x -> Result.Ok x
+    | exception User_error.E (msg, _) ->
+      Result.Error (`Msg (User_message.to_string msg))
+  in
+  let pp_print_int64 state i =
+    Format.pp_print_string state (Int64.to_string i)
+  in
+  conv (decode, pp_print_int64)
+
+let context_name : Context_name.t conv = conv Context_name.conv
+
+let lib_name = conv Dune_engine.Lib_name.conv
+
+let version = pair ~sep:'.' int int

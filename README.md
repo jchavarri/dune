@@ -35,7 +35,7 @@ dune.
 [merlin]:         https://github.com/ocaml/merlin
 [opam]:           https://opam.ocaml.org
 [issues]:         https://github.com/ocaml/dune/issues
-[topkg-jbuilder]: https://github.com/diml/topkg-jbuilder
+[dune-release]:   https://github.com/ocamllabs/dune-release
 [video]:          https://youtu.be/BNZhmMAJarw
 
 Overview
@@ -88,14 +88,15 @@ several configurations simultaneously. This helps maintaining packages
 across several versions of OCaml as you can test them all at once
 without hassle.
 
-In particular, this makes it easy to handle [cross-compilation](https://dune.readthedocs.io/en/latest/advanced-topics.html#cross-compilation).
+In particular, this makes it easy to handle [cross-compilation](https://dune.readthedocs.io/en/latest/cross-compilation.html).
 
 This feature requires [opam][opam].
 
 Requirements
 ------------
 
-Dune requires OCaml version 4.02.3 or greater.
+Dune requires OCaml version 4.08.0 to build itself and can build OCaml
+projects using ocaml 4.02.3 or greater.
 
 Installation
 ------------
@@ -106,10 +107,15 @@ The recommended way to install dune is via the [opam package manager][opam]:
 $ opam install dune
 ```
 
+If you are new to opam, make sure to run `eval $(opam config env)` to
+make `dune` available in your `PATH`. The dune binary is self
+contained and relocatable, so you can safely copy it somewhere else to
+make it permanently available.
+
 You can also build it manually with:
 
 ```sh
-$ make
+$ make release
 $ make install
 ```
 
@@ -134,7 +140,7 @@ Support
 -------
 
 If you have questions about dune, you can send an email to
-ocaml-core@googlegroups.com or [open a ticket on github][issues].
+ocaml-core@googlegroups.com or [open a ticket on GitHub][issues].
 
 
 Migration from jbuilder

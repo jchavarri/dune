@@ -38,13 +38,13 @@ module C_define : sig
 
   (** Import some #define from the given header files. For instance:
 
-      {[ # C.C_define.import c ~includes:"caml/config.h" ["ARCH_SIXTYFOUR",
-      Switch];; - (string * Configurator.C_define.Value.t) list =
-      ["ARCH_SIXTYFOUR", Switch true] ]} *)
+      {v
+        # C.C_define.import c ~includes:"caml/config.h" ["ARCH_SIXTYFOUR", Switch];;
+        - (string * Configurator.C_define.Value.t) list = ["ARCH_SIXTYFOUR", Switch true]
+      v} *)
   val import :
        t
-    -> ?prelude:
-         string
+    -> ?prelude:string
          (** Define extra code be used with extracting values below. Note that
              the compiled code is never executed. *)
     -> ?c_flags:string list
@@ -101,8 +101,8 @@ with type configurator := t
 
 module Flags : sig
   (** [write_sexp fname s] writes the list of strings [s] to the file [fname] in
-      an appropriate format so that it can used in [dune] files with [(:include
-      [fname])]. *)
+      an appropriate format so that it can used in [dune] files with
+      [(:include \[fname\])]. *)
   val write_sexp : string -> string list -> unit
 
   (** [write_lines fname s] writes the list of string [s] to the file [fname]
@@ -142,8 +142,9 @@ module Process : sig
       status together with the content of stdout and stderr. The action is
       logged.
 
-      @param dir change to [dir] before running the command. @param env specify
-      additional environment variables as a list of the form NAME=VALUE. *)
+      @param dir change to [dir] before running the command.
+      @param env specify additional environment variables as a list of the form
+      NAME=VALUE. *)
   val run :
     t -> ?dir:string -> ?env:string list -> string -> string list -> result
 

@@ -17,7 +17,7 @@ to the definition of a build context.
 
 Note that at the moment, there is no official support for
 cross-compilation in OCaml. Dune supports the opam-cross-x
-repositories from the `ocaml-cross organization on github
+repositories from the `ocaml-cross organization on GitHub
 <https://github.com/ocaml-cross/>`_, such as:
 
 - `opam-cross-windows <https://github.com/ocaml-cross/opam-cross-windows>`_
@@ -97,6 +97,6 @@ Some packages might still have to be updated to support cross-compilation. For
 instance if the ``foo.exe`` program in the previous example was using
 ``Sys.os_type``, it should instead take it as a command line argument:
 
-.. code:: scheme
+.. code:: lisp
 
   (rule (with-stdout-to blah (run ./foo.exe -os-type %{os_type})))

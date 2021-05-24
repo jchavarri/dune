@@ -1,4 +1,8 @@
-(** Concurrency library *)
+(** Concurrency library
+
+    This module implements
+    {{:https://en.wikipedia.org/wiki/Structured_concurrency} "structured
+    concurrency"}. *)
 
 open! Stdune
 
@@ -37,38 +41,16 @@ module O : sig
   val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
 
   val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t
+
+  (** Similar to [fork_and_join] *)
+  val ( and* ) : 'a t -> 'b t -> ('a * 'b) t
+
+  val ( and+ ) : 'a t -> 'b t -> ('a * 'b) t
 end
 
 val map : 'a t -> f:('a -> 'b) -> 'b t
 
 val bind : 'a t -> f:('a -> 'b t) -> 'b t
-
-(** {1 Forking execution} *)
-
-module Future : sig
-  type 'a fiber
-
-  (** A future represent a promise that will eventually yield a value. It is
-      used to represent the result of a fiber running in the background. *)
-  type 'a t
-
-  (** Wait for the given future to yield a value. *)
-  val wait : 'a t -> 'a fiber
-
-  (** Return [Some x] if [t] has already returned. *)
-  val peek : 'a t -> 'a option
-end
-with type 'a fiber := 'a t
-
-(** [fork f] creates a sub-fiber and return a [Future.t] to wait its result. *)
-val fork : (unit -> 'a t) -> 'a Future.t t
-
-(** [nfork l] is similar to [fork] but creates [n] sub-fibers. *)
-val nfork : (unit -> 'a t) list -> 'a Future.t list t
-
-(** [nfork_map l ~f] is the same as [nfork (List.map l ~f:(fun x () -> f x))]
-    but more efficient. *)
-val nfork_map : 'a list -> f:('a -> 'b t) -> 'b Future.t list t
 
 (** {1 Joining} *)
 
@@ -77,6 +59,10 @@ val nfork_map : 'a list -> f:('a -> 'b t) -> 'b Future.t list t
 
 val both : 'a t -> 'b t -> ('a * 'b) t
 
+(** Execute a list of fibers in sequence. We use the short name to conform with
+    the [Applicative] interface.*)
+val all : 'a t list -> 'a list t
+
 val sequential_map : 'a list -> f:('a -> 'b t) -> 'b list t
 
 val sequential_iter : 'a list -> f:('a -> unit t) -> unit t
@@ -84,56 +70,44 @@ val sequential_iter : 'a list -> f:('a -> unit t) -> unit t
 (** {1 Forking + joining} *)
 
 (** The following functions combine forking 2 or more fibers followed by joining
-    the results. For every function, we give an equivalent implementation using
-    the more basic functions as documentation. Note however that these functions
-    are implemented as primitives and so are more efficient that the suggested
-    implementation. *)
+    the results. The execution of the various fibers might be interleaved,
+    however once the combining fiber has terminated, it is guaranteed that there
+    are no fibers lingering around. *)
 
-(** For two fibers and wait for their results:
-
-    {[ let fork_and_join f g = fork f >>= fun a -> fork g >>= fun b -> both
-    (Future.wait a) (Future.wait b) ]} *)
+(** Start two fibers and wait for their result. Note that this function combines
+    both successes and errors: if one of the computations fails, we let the
+    other one run to completion, to give it a chance to raise its errors too.
+    All other parallel execution combinators have the same error semantics. *)
 val fork_and_join : (unit -> 'a t) -> (unit -> 'b t) -> ('a * 'b) t
 
-(** Same but assume the first fiber returns [unit]:
-
-    {[ let fork_and_join_unit f g = fork f >>= fun a -> fork g >>= fun b ->
-    Future.wait a >>> Future.wait b ]} *)
+(** Same but assume the first fiber returns [unit]. *)
 val fork_and_join_unit : (unit -> unit t) -> (unit -> 'a t) -> 'a t
 
-(** Map a list in parallel:
-
-    {[ let parallel_map l ~f = nfork_map l ~f >>= fun futures -> all (List.map
-    futures ~f:Future.wait) ]} *)
+(** Map a list in parallel. *)
 val parallel_map : 'a list -> f:('a -> 'b t) -> 'b list t
 
-(** Iter over a list in parallel:
+(* CR-someday amokhov: For discoverability and fast code completion it would be
+   better to name functions [foo_sequentially] rather than [sequential_foo]. *)
 
-    {[ let parallel_iter l ~f = nfork_map l ~f >>= fun futures -> all_unit
-    (List.map futures ~f:Future.wait) ]} *)
+(** Like [all] but executes the fibers concurrently. *)
+val all_concurrently : 'a t list -> 'a list t
+
+(** Iter over a list in parallel. *)
 val parallel_iter : 'a list -> f:('a -> unit t) -> unit t
 
-(** {1 Execute once fibers} *)
+val parallel_iter_set :
+     (module Set.S with type elt = 'a and type t = 's)
+  -> 's
+  -> f:('a -> unit t)
+  -> unit t
 
-module Once : sig
-  type 'a fiber = 'a t
+(** Provide efficient parallel iter/map functions for maps. *)
+module Make_map_traversals (Map : Map.S) : sig
+  val parallel_iter : 'a Map.t -> f:(Map.key -> 'a -> unit t) -> unit t
 
-  type 'a t
-
-  val create : (unit -> 'a fiber) -> 'a t
-
-  (** [get t] returns the value of [t]. If [get] was never called before on this
-      [t], it is executed at this point, otherwise returns a fiber that waits
-      for the fiber from the first call to [get t] to terminate. *)
-  val get : 'a t -> 'a fiber
-
-  (** [peek t] returns [Some v] if [get t] has already been called and has
-      yielded a value [v]. *)
-  val peek : 'a t -> 'a option
-
-  val peek_exn : 'a t -> 'a
+  val parallel_map : 'a Map.t -> f:(Map.key -> 'a -> 'b t) -> 'b Map.t t
 end
-with type 'a fiber := 'a t
+[@@inline always]
 
 (** {1 Local storage} *)
 
@@ -147,10 +121,10 @@ module Var : sig
   val create : unit -> 'a t
 
   (** [get var] reads the value of [var]. *)
-  val get : 'a t -> 'a option
+  val get : 'a t -> 'a option fiber
 
   (** Same as [get] but raises if [var] is unset. *)
-  val get_exn : 'a t -> 'a
+  val get_exn : 'a t -> 'a fiber
 
   (** [set var value fiber] sets [var] to [value] during the execution of
       [fiber].
@@ -160,56 +134,30 @@ module Var : sig
       {[ set v x (get_exn v >>| fun y -> x = y) ]} *)
   val set : 'a t -> 'a -> (unit -> 'b fiber) -> 'b fiber
 
-  val set_sync : 'a t -> 'a -> (unit -> 'b) -> 'b
-
   val unset : 'a t -> (unit -> 'b fiber) -> 'b fiber
-
-  val unset_sync : 'a t -> (unit -> 'b) -> 'b
 end
 with type 'a fiber := 'a t
 
 (** {1 Error handling} *)
 
 (** [with_error_handler f ~on_error] calls [on_error] for every exception raised
-    during the execution of [f]. This include exceptions raised when calling [f
-    ()] or during the execution of fibers after [f ()] has returned. Exceptions
-    raised by [on_error] are passed on to the parent error handler.
+    during the execution of [f]. This include exceptions raised when calling
+    [f ()] or during the execution of fibers after [f ()] has returned.
+    Exceptions raised by [on_error] are passed on to the parent error handler.
 
     It is guaranteed that after the fiber has returned a value, [on_error] will
     never be called. *)
 val with_error_handler :
-  (unit -> 'a t) -> on_error:(Exn_with_backtrace.t -> unit) -> 'a t
+  (unit -> 'a t) -> on_error:(Exn_with_backtrace.t -> Nothing.t t) -> 'a t
 
-(** If [f ()] completes without raising, then [wait_errors f] is the same as [f
-    () >>| fun x -> Ok x]. However, if the execution of [f ()] is aborted by an
-    exception, then [wait_errors f] will complete and yield [Error ()].
+val map_reduce_errors :
+     (module Monoid with type t = 'a)
+  -> on_error:(Exn_with_backtrace.t -> 'a t)
+  -> (unit -> 'b t)
+  -> ('b, 'a) result t
 
-    Note that [wait_errors] only completes after all sub-fibers have completed.
-    For instance, in the following code [wait_errors] will only complete after
-    3s:
-
-    {[ wait_errors (fun () -> fork_and_join (fun () -> sleep 1 >>| fun () ->
-    raise Exit) (fun () -> sleep 3)) ]}
-
-    same for this code:
-
-    {[ wait_errors (fun () -> fork (fun () -> sleep 3) >>= fun _ -> raise Exit)
-    ]} *)
-val wait_errors : (unit -> 'a t) -> ('a, unit) Result.t t
-
-(** [fold_errors f ~init ~on_error] calls [on_error] for every exception raised
-    during the execution of [f]. This include exceptions raised when calling [f
-    ()] or during the execution of fibers after [f ()] has returned.
-
-    Exceptions raised by [on_error] are passed on to the parent error handler. *)
-val fold_errors :
-     (unit -> 'a t)
-  -> init:'b
-  -> on_error:(Exn_with_backtrace.t -> 'b -> 'b)
-  -> ('a, 'b) Result.t t
-
-(** [collect_errors f] is: {[ fold_errors f ~init:[] ~on_error:(fun e l -> e ::
-    l) ]} *)
+(** [collect_errors f] is:
+    [fold_errors f ~init:\[\] ~on_error:(fun e l -> e :: l)] *)
 val collect_errors :
   (unit -> 'a t) -> ('a, Exn_with_backtrace.t list) Result.t t
 
@@ -217,11 +165,14 @@ val collect_errors :
     fails or succeeds. *)
 val finalize : (unit -> 'a t) -> finally:(unit -> unit t) -> 'a t
 
+(** [reraise_all exns] re-raises all [exns] to the current error handler *)
+val reraise_all : Exn_with_backtrace.t list -> 'a t
+
 (** {1 Synchronization} *)
 
 (** Write once variables *)
 module Ivar : sig
-  type 'a fiber = 'a t
+  type 'a fiber
 
   (** A ivar is a synchronization variable that can be written only once. *)
   type 'a t
@@ -237,7 +188,31 @@ module Ivar : sig
   val fill : 'a t -> 'a -> unit fiber
 
   (** Return [Some x] is [fill t x] has been called previously. *)
-  val peek : 'a t -> 'a option
+  val peek : 'a t -> 'a option fiber
+end
+with type 'a fiber := 'a t
+
+(** Mailbox variables *)
+module Mvar : sig
+  type 'a fiber
+
+  (** A mailbox variable can be thought of as a box that is either empty or
+      full. [create ()] creates a new empty box, and [create_full x] creates a
+      new full box containing [x].
+
+      [read] removes the value from a full mailbox variable and returns it, but
+      blocks if the mvar is currently empty. Symmetrically, [write] puts a value
+      into the mvar but blocks if the mvar is already full. *)
+
+  type 'a t
+
+  val create : unit -> 'a t
+
+  val create_full : 'a -> 'a t
+
+  val read : 'a t -> 'a fiber
+
+  val write : 'a t -> 'a -> unit fiber
 end
 with type 'a fiber := 'a t
 
@@ -252,13 +227,152 @@ module Mutex : sig
 end
 with type 'a fiber := 'a t
 
+module Throttle : sig
+  (** Limit the number of jobs *)
+
+  type 'a fiber = 'a t
+
+  type t
+
+  (** [create n] creates a throttler that allows to run [n] jobs at once *)
+  val create : int -> t
+
+  (** How many jobs can run at the same time *)
+  val size : t -> int
+
+  (** Change the number of jobs that can run at once *)
+  val resize : t -> int -> unit fiber
+
+  (** Execute a fiber, waiting if too many jobs are already running *)
+  val run : t -> f:(unit -> 'a fiber) -> 'a fiber
+
+  (** Return the number of jobs currently running *)
+  val running : t -> int
+end
+with type 'a fiber := 'a t
+
+val repeat_while : f:('a -> 'a option t) -> init:'a -> unit t
+
+module Stream : sig
+  (** Destructive streams that can be composed to pipelines.
+
+      Streams can be finite or infinite. Streams have no storage and can only
+      have one writer and/or one reader at any given time. If you'd like to
+      access a stream concurrently, you need to protect it via a mutex.
+
+      Trying to access the same side of a stream concurrently will result in an
+      error. *)
+
+  type 'a fiber
+
+  module In : sig
+    (** Stream inputs.
+
+        A [In.t] value represents the side of a stream where values can be read
+        from. A stream input can only be consumed by one fiber at a time. Trying
+        to access a stream input concurrently will result in an exception.
+
+        When passing a stream input through one of the transformation functions
+        such as {!filter_map} or iteration function, the original stream input
+        can no longer be used for another purpose. *)
+    type 'a t
+
+    (** Create a stream that is fed from a generator function. Every time a
+        value is requested, this function is called to produce a new value. If
+        the function raises, the stream will no longer be usable. *)
+    val create : (unit -> 'a option fiber) -> 'a t
+
+    (** Create a stream that yields elements from the given list in order. *)
+    val of_list : 'a list -> 'a t
+
+    (** The empty stream. *)
+    val empty : unit -> 'a t
+
+    (** Consumes and returns the next element from the stream. Once the stream
+        is exhausted, [read] always returns [None]. *)
+    val read : 'a t -> 'a option fiber
+
+    val filter_map : 'a t -> f:('a -> 'b option) -> 'b t
+
+    val sequential_iter : 'a t -> f:('a -> unit fiber) -> unit fiber
+
+    val parallel_iter : 'a t -> f:('a -> unit fiber) -> unit fiber
+
+    val append : 'a t -> 'a t -> 'a t
+
+    val cons : 'a -> 'a t -> 'a t
+  end
+
+  module Out : sig
+    (** Stream outputs.
+
+        A [Out.t] value represents the side of a stream where values can be
+        pushed to. Only one value can be pushed at a time. Trying to push two
+        values concurrently will result in an error. *)
+    type 'a t
+
+    (** Create a stream output. The callback is the consumer for values pushed
+        to the stream. *)
+    val create : ('a option -> unit fiber) -> 'a t
+
+    val write : 'a t -> 'a option -> unit fiber
+
+    val null : unit -> 'a t
+  end
+
+  (** [connect i o] reads from [i] and writes to [o]. Closes [o] when [i] is
+      exhausted. Returned fiber terminates when [i] is exhausted *)
+  val connect : 'a In.t -> 'a Out.t -> unit fiber
+
+  (** [supply i o] like [connect i o] but does not close [o] once [i] is
+      exhausted, allowing more values to be pused to [o]. Returned fiber
+      terminates when [i] is exhausted*)
+  val supply : 'a In.t -> 'a Out.t -> unit fiber
+
+  (** [pipe ()] returns [(i, o)] where values pushed through [o] can be read
+      through [i]. *)
+  val pipe : unit -> 'a In.t * 'a Out.t
+end
+with type 'a fiber := 'a t
+
+module Pool : sig
+  (** Pool is used to submit asynchronous tasks without waiting for their
+      completion. *)
+  type t
+
+  type 'a fiber
+
+  (** Create a new pool. *)
+  val create : unit -> t
+
+  (** [running pool] returns whether it's possible to submit tasks to [pool] *)
+  val running : t -> bool fiber
+
+  (** [task pool ~f] submit [f] to be done in [pool]. Errors raised [pool] will
+      not be raised in the current fiber, but inside the [Pool.run] fiber.
+
+      If [running pool] returns [false], this function will raise a
+      [Code_error]. *)
+  val task : t -> f:(unit -> unit fiber) -> unit fiber
+
+  (** [stop pool] stops the pool from receiving new tasks. After this function
+      is called, [task pool ~f] will fail to submit new tasks.
+
+      Note that stopping the pool does not prevent already queued tasks from
+      running. *)
+  val stop : t -> unit fiber
+
+  (** [run pool] Runs all tasks submitted to [pool] in parallel. Errors raised
+      by such tasks must be caught here.*)
+  val run : t -> unit fiber
+end
+with type 'a fiber := 'a t
+
 (** {1 Running fibers} *)
 
-(** Wait for one iteration of the scheduler *)
-val yield : unit -> unit t
+type fill = Fill : 'a Ivar.t * 'a -> fill
 
-(** [run t] runs a fiber until it (and all the fibers it forked) terminate.
-    Returns the result if it's determined in the end, otherwise raises [Never]. *)
-val run : 'a t -> 'a
-
-exception Never
+(** [run t ~iter] runs a fiber until it terminates. [iter] is used to implement
+    the scheduler, it should block waiting for an event and return an ivar to
+    fill. *)
+val run : 'a t -> iter:(unit -> fill) -> 'a

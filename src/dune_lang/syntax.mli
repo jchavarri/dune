@@ -11,8 +11,6 @@ module Version : sig
 
   include Conv.S with type t := t
 
-  val pp : t Fmt.t
-
   val to_dyn : t Dyn.Encoder.t
 
   val hash : t -> int
@@ -25,6 +23,10 @@ module Version : sig
   val can_read : parser_version:t -> data_version:t -> bool
 
   val compare : t -> t -> Ordering.t
+
+  val min : t -> t -> t
+
+  val max : t -> t -> t
 
   module Infix : Comparator.OPS with type t = t
 end
@@ -58,16 +60,21 @@ module Warning : sig
 end
 
 (** [create ~name ~desc supported_versions] defines a new syntax.
-    [supported_version] is the list of the last minor version of each supported
-    major version. [desc] is used to describe what this syntax represent in
-    error messages. *)
-val create : name:string -> desc:string -> Version.t list -> t
+    [supported_version] is the list of all the supported versions paired with
+    the versions of the dune lang in which they where introduced. [desc] is used
+    to describe what this syntax represent in error messages. *)
+val create :
+     ?experimental:bool
+  -> name:string
+  -> desc:string
+  -> (Version.t * [ `Since of Version.t ]) list
+  -> t
 
 (** Return the name of the syntax. *)
 val name : t -> string
 
 (** Check that the given version is supported and raise otherwise. *)
-val check_supported : t -> Loc.t * Version.t -> unit
+val check_supported : dune_lang_ver:Version.t -> t -> Loc.t * Version.t -> unit
 
 val greatest_supported_version : t -> Version.t
 
@@ -94,8 +101,19 @@ val since : ?fatal:bool -> t -> Version.t -> (unit, _) Decoder.parser
 
 (** {2 Low-level functions} *)
 
-val set : t -> Version.t -> ('a, 'k) Decoder.parser -> ('a, 'k) Decoder.parser
+module Key : sig
+  type nonrec t =
+    | Active of Version.t
+    | Inactive of
+        { lang : t
+        ; dune_lang_ver : Version.t
+        }
+end
+
+val set : t -> Key.t -> ('a, 'k) Decoder.parser -> ('a, 'k) Decoder.parser
+
+val key : t -> Key.t Univ_map.Key.t
 
 val get_exn : t -> (Version.t, 'k) Decoder.parser
 
-val key : t -> Version.t Univ_map.Key.t
+val experimental : t -> bool

@@ -10,13 +10,11 @@ type t =
   | List of t list
   | Template of Template.t
 
-(** [atom s] convert the string [s] to an Atom. @raise Exn.Code_error if [s]
-    does not satisfy [Atom.is_valid s]. *)
+(** [atom s] convert the string [s] to an Atom. NOTE No validity check is
+    performed. *)
 val atom : string -> t
 
 val atom_or_quoted_string : string -> t
-
-val unsafe_atom_of_string : string -> t
 
 (** Serialize a S-expression *)
 val to_string : t -> string
@@ -32,7 +30,7 @@ module Deprecated : sig
       been prepared with [prepare_formatter]. *)
   val pp_split_strings : Format.formatter -> t -> unit
 
-  (** Prepare a formatter for [pp_split_strings]. Additionaly the formatter
+  (** Prepare a formatter for [pp_split_strings]. Additionally the formatter
       escape newlines when the tags "makefile-action" or "makefile-stuff" are
       active. *)
   val prepare_formatter : Format.formatter -> unit
