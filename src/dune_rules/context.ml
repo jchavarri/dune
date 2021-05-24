@@ -385,10 +385,12 @@ let create ~(kind : Kind.t) ~path ~env ~env_nodes ~name ~merlin ~targets
     in
     let* bsc =
       let dune_bsc = Env.get env "DUNE_BSC" in
-      match (dune_bsc, which "bsc") with
-      | Some _, Some x -> x
-      | Some _, None -> prog_not_found_in_path "bsc"
-      | None, _ -> None
+      match dune_bsc with
+      | Some _ -> (
+        which "bsc" >>| function
+        | Some x -> Some x
+        | None -> prog_not_found_in_path "bsc")
+      | None -> Memo.Build.return None
     in
     let dir = Path.parent_exn ocamlc in
     let get_ocaml_tool prog =

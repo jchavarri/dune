@@ -142,19 +142,22 @@ let build_cm cctx ~dep_graphs ~precompiled_cmi ~cm_kind (m : Module.t) ~phase =
     match ctx.bsc with
     | Some _ -> Command.Args.empty
     | None ->
-    let intf_only = cm_kind = Cmi && not (Module.has m ~ml_kind:Impl) in
-    if opaque || (intf_only && Ocaml_version.supports_opaque_for_mli ctx.version)
-    then
-      Command.Args.A "-opaque"
-    else
-      Command.Args.empty
+      let intf_only = cm_kind = Cmi && not (Module.has m ~ml_kind:Impl) in
+      if
+        opaque
+        || (intf_only && Ocaml_version.supports_opaque_for_mli ctx.version)
+      then
+        Command.Args.A "-opaque"
+      else
+        Command.Args.empty
   in
   let dir = ctx.build_dir in
   let flags =
-    let flags =  match ctx.bsc with
-    | Some _ -> Build.return []
-    | None -> Ocaml_flags.get (CC.flags cctx) mode
-  in 
+    let flags =
+      match ctx.bsc with
+      | Some _ -> Action_builder.return []
+      | None -> Ocaml_flags.get (CC.flags cctx) mode
+    in
     match Module.pp_flags m with
     | None -> flags
     | Some pp ->
@@ -187,19 +190,21 @@ let build_cm cctx ~dep_graphs ~precompiled_cmi ~cm_kind (m : Module.t) ~phase =
   in
   let cmd_path =
     match ctx.bsc with
-    | Some path as bsc -> path
+    | Some path -> path
     | None -> compiler
   in
   let bs_args =
     match ctx.bsc with
     | Some _ ->
-      [ Command.Args.A "-bs-suffix"
-      ; A "-bs-package-name"
-      (* TODO: read from dune file? *)
+      [ Command.Args.A "-bs-package-name" (* TODO: read from dune file? *)
       ; A "bs-dummy-pkg-name"
       ; A "-bs-package-output"
-      (* TODO: maybe add stanza to read package output (commonjs/es6) from dune file? *)
-      ; A ("es6:" ^ (Filename.dirname (Path.reach src ~from:(Path.build dir))))
+        (* TODO: maybe add stanza to read package output (commonjs/es6) from
+           dune file? *)
+      ; A
+          ("es6:"
+          ^ Filename.dirname (Path.reach src ~from:(Path.build dir))
+          ^ ":.bs.js")
       ]
     | None -> []
   in
