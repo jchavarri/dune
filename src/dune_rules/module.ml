@@ -212,7 +212,7 @@ let to_dyn { source; obj_name; pp; visibility; kind } =
     ; ("kind", Kind.to_dyn kind)
     ]
 
-let ml_gen = ".ml-gen"
+let ml_gen = ".ml-gen.ml"
 
 let wrapped_compat t =
   assert (t.visibility = Public);
