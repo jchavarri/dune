@@ -14,7 +14,12 @@ let choose cmi cmo cmx = function
   | Cmo -> cmo
   | Cmx -> cmx
 
-let ext = choose ".cmi" ".cmo" ".cmx"
+let ext =
+  choose ".cmi"
+    (match Env.get Env.initial "DUNE_BSC" with
+    | Some _ -> ".cmj"
+    | None -> ".cmo")
+    ".cmx"
 
 let source = choose Ml_kind.Intf Impl Impl
 

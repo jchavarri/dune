@@ -72,6 +72,7 @@ type t =
   ; ocaml_bin : Path.t
   ; ocaml : Action.Prog.t
   ; ocamlc : Path.t
+  ; bsc : Path.t option
   ; ocamlopt : Action.Prog.t
   ; ocamldep : Action.Prog.t
   ; ocamlmklib : Action.Prog.t
@@ -114,6 +115,7 @@ let to_dyn t : Dyn.t =
     ; ("ocaml_bin", path t.ocaml_bin)
     ; ("ocaml", Action.Prog.to_dyn t.ocaml)
     ; ("ocamlc", path t.ocamlc)
+    ; ("bsc", option path t.bsc)
     ; ("ocamlopt", Action.Prog.to_dyn t.ocamlopt)
     ; ("ocamldep", Action.Prog.to_dyn t.ocamldep)
     ; ("ocamlmklib", Action.Prog.to_dyn t.ocamlmklib)
@@ -381,6 +383,13 @@ let create ~(kind : Kind.t) ~path ~env ~env_nodes ~name ~merlin ~targets
         | Some x -> x
         | None -> prog_not_found_in_path "ocamlc")
     in
+    let* bsc =
+      let dune_bsc = Env.get env "DUNE_BSC" in
+      match (dune_bsc, which "bsc") with
+      | Some _, Some x -> x
+      | Some _, None -> prog_not_found_in_path "bsc"
+      | None, _ -> None
+    in
     let dir = Path.parent_exn ocamlc in
     let get_ocaml_tool prog =
       get_tool_using_findlib_config prog >>| function
@@ -589,6 +598,7 @@ let create ~(kind : Kind.t) ~path ~env ~env_nodes ~name ~merlin ~targets
       ; ocaml_bin
       ; ocaml
       ; ocamlc
+      ; bsc
       ; ocamlopt
       ; ocamldep
       ; ocamlmklib

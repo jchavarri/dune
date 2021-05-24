@@ -75,6 +75,7 @@ type t = private
   ; ocaml_bin : Path.t
   ; ocaml : Action.Prog.t
   ; ocamlc : Path.t
+  ; bsc : Path.t option
   ; ocamlopt : Action.Prog.t
   ; ocamldep : Action.Prog.t
   ; ocamlmklib : Action.Prog.t
