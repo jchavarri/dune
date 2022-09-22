@@ -8,7 +8,7 @@ type t =
 
 let compare = Poly.compare
 
-let all = [ Cmi; Cmo; Cmx ]
+let all = [ Cmi; Cmo; Cmx; Cmj ]
 
 let choose cmi cmo cmx cmj = function
   | Cmi -> cmi
