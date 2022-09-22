@@ -512,7 +512,8 @@ module Mode_conf = struct
       let open Details in
       let byte = get Byte ||| validate best ~if_:(best_mode = Byte) in
       let native = get Native ||| validate best ~if_:(best_mode = Native) in
-      { Mode.Dict.byte; native }
+      let melange = get Byte ||| validate best ~if_:(best_mode = Byte) in
+      { Mode.Dict.byte; native; melange }
 
     let eval t ~has_native =
       eval_detailed t ~has_native |> Mode.Dict.map ~f:Option.is_some
@@ -863,7 +864,7 @@ module Library = struct
     in
     let foreign_objects = Lib_info.Source.Local in
     let archives, plugins =
-      if virtual_library then (Mode.Dict.make_both [], Mode.Dict.make_both [])
+      if virtual_library then (Mode.Dict.make_all [], Mode.Dict.make_all [])
       else
         let plugins =
           let archive_file ~mode =
@@ -874,6 +875,7 @@ module Library = struct
                archive_file ~mode:Native
               else [])
           ; byte = archive_file ~mode:Byte
+          ; melange = archive_file ~mode:Melange
           }
         in
         (archives_for_mode ~f_ext:Mode.compiled_lib_ext, plugins)
@@ -1262,6 +1264,7 @@ module Executables = struct
         | Native, Shared_object -> ext_dll
         | mode, Plugin -> Mode.plugin_ext mode
         | Byte, Js -> ".bc.js"
+        | Melange, _ -> ".bs.js"
         | Native, Js ->
           User_error.raise ~loc
             [ Pp.text "Javascript generation only supports bytecode!" ])

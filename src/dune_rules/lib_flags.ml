@@ -115,7 +115,7 @@ module L = struct
             else acc
           in
           match mode with
-          | Mode.Byte -> acc
+          | Mode.Byte | Melange -> acc
           | Native ->
             let native_dir = Obj_dir.native_dir obj_dir in
             Path.Set.add acc native_dir)

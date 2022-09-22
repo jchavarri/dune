@@ -77,6 +77,7 @@ type t = private
   ; ocamldep : Action.Prog.t
   ; ocamlmklib : Action.Prog.t
   ; ocamlobjinfo : Action.Prog.t
+  ; melc : Action.Prog.t
   ; env : Env.t
   ; findlib_paths : Path.t list
   ; findlib_toolchain : Context_name.t option  (** Misc *)

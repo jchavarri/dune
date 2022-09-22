@@ -3,6 +3,7 @@ open! Stdune
 type t =
   | Byte
   | Native
+  | Melange
 
 val equal : t -> t -> bool
 
@@ -36,6 +37,7 @@ module Dict : sig
   type 'a t =
     { byte : 'a
     ; native : 'a
+    ; melange : 'a
     }
 
   val equal : ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
@@ -69,9 +71,9 @@ module Dict : sig
 
   val iteri : 'a t -> f:(mode -> 'a -> unit) -> unit
 
-  val make_both : 'a -> 'a t
+  val make_all : 'a -> 'a t
 
-  val make : byte:'a -> native:'a -> 'a t
+  val make : byte:'a -> native:'a -> melange:'a -> 'a t
 
   module Set : sig
     type nonrec t = bool t

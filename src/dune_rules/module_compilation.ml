@@ -86,10 +86,10 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
         (* If there is no mli, [ocamlY -c file.ml] produces both the .cmY and
            .cmi. We choose to use ocamlc to produce the cmi and to produce the
            cmx we have to wait to avoid race conditions. *)
-        | Cmo, None, false ->
+        | (Cmo | Cmj), None, false ->
           let+ () = copy_interface ~dir ~obj_dir ~sctx m in
           ([], [], [ Obj_dir.Module.cm_file_exn obj_dir m ~kind:Cmi ])
-        | Cmo, None, true | (Cmo | Cmx), _, _ ->
+        | (Cmo | Cmj), None, true | (Cmo | Cmj | Cmx), _, _ ->
           Memo.return
             ( force_read_cmi src
             , [ Path.build (Obj_dir.Module.cm_file_exn obj_dir m ~kind:Cmi) ]
@@ -105,7 +105,7 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
       | Some Compile -> linear :: other_targets
       | Some Emit -> other_targets
       | Some All | None -> obj :: other_targets)
-    | Cmi | Cmo -> other_targets
+    | Cmi | Cmo | Cmj -> other_targets
   in
   let dep_graph = Ml_kind.Dict.get (CC.dep_graphs cctx) ml_kind in
   let opaque = CC.opaque cctx in
@@ -116,7 +116,7 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
   let other_targets, cmt_args =
     match cm_kind with
     | Cmx -> (other_targets, Command.Args.empty)
-    | Cmi | Cmo ->
+    | Cmi | Cmo | Cmj ->
       if Compilation_context.bin_annot cctx then
         let fn =
           Option.value_exn (Obj_dir.Module.cmt_file obj_dir m ~ml_kind)

@@ -133,7 +133,7 @@ end = struct
     in
     let { Lib_config.has_native; ext_obj; _ } = lib_config in
     let modes = Dune_file.Mode_conf.Set.eval lib.modes ~has_native in
-    let { Mode.Dict.byte; native } = modes in
+    let { Mode.Dict.byte; native; melange } = modes in
     let module_files =
       let inside_subdir f =
         match lib_subdir with
@@ -163,6 +163,7 @@ end = struct
           let open Cm_kind in
           [ if_ true (Cmi, cm_file Cmi)
           ; if_ native (Cmx, cm_file Cmx)
+          ; if_ melange (Cmj, cm_file Cmj)
           ; if_ (byte && virtual_library) (Cmo, cm_file Cmo)
           ; if_
               (native && virtual_library)

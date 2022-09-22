@@ -50,7 +50,7 @@ module External = struct
     | Cmi, Private, None ->
       Code_error.raise "External.cm_dir" [ ("t", to_dyn t) ]
     | Cmi, Public, _ -> public_cmi_dir t
-    | (Cmo | Cmx), _, _ -> t.public_dir
+    | (Cmo | Cmx | Cmj), _, _ -> t.public_dir
 
   let encode { public_dir; private_dir; public_cmi_dir } =
     let open Dune_lang.Encoder in
@@ -78,6 +78,8 @@ module External = struct
 
   let native_dir t = t.public_dir
 
+  let melange_dir t = t.public_dir
+
   let dir t = t.public_dir
 
   let obj_dir t = t.public_dir
@@ -93,6 +95,7 @@ module External = struct
     match cm_kind with
     | Cmx -> native_dir t
     | Cmo -> byte_dir t
+    | Cmj -> melange_dir t
     | Cmi -> public_cmi_dir t
 end
 
@@ -141,7 +144,7 @@ module Local = struct
     let dirs = [ t.byte_dir; public_cmi_dir t ] in
     let dirs =
       match mode with
-      | Byte -> dirs
+      | Byte | Melange -> dirs
       | Native -> t.native_dir :: dirs
     in
     Path.Build.Set.of_list dirs |> Path.Build.Set.to_list
@@ -166,12 +169,12 @@ module Local = struct
   let cm_dir t cm_kind _ =
     match cm_kind with
     | Cm_kind.Cmx -> native_dir t
-    | Cmo | Cmi -> byte_dir t
+    | Cmo | Cmi | Cmj -> byte_dir t
 
   let cm_public_dir t (cm_kind : Cm_kind.t) =
     match cm_kind with
     | Cmx -> native_dir t
-    | Cmo -> byte_dir t
+    | Cmo | Cmj -> byte_dir t
     | Cmi -> public_cmi_dir t
 end
 
@@ -318,7 +321,7 @@ module Module = struct
 
   let has_impl_if_needed m ~kind =
     match (kind : Cm_kind.t) with
-    | Cmo | Cmx -> Module.has m ~ml_kind:Impl
+    | Cmo | Cmj | Cmx -> Module.has m ~ml_kind:Impl
     | Cmi -> true
 
   let raise_no_impl m ~kind =

@@ -15,6 +15,8 @@ let byte = "byte"
 
 let native = "native"
 
+let melange = "melange"
+
 let plugin = "plugin"
 
 let encode t = Dune_sexp.atom_or_quoted_string t

@@ -28,7 +28,7 @@ let build_lib (lib : Library.t) ~native_archives ~sctx ~expander ~flags ~dir
             let dllib = [ "-dllib"; lname ] in
             match mode with
             | Native -> cclib
-            | Byte -> dllib @ cclib)
+            | Byte | Melange -> dllib @ cclib)
       in
       let map_cclibs =
         (* https://github.com/ocaml/dune/issues/119 *)
@@ -80,7 +80,7 @@ let build_lib (lib : Library.t) ~native_archives ~sctx ~expander ~flags ~dir
                   |> Action_builder.map ~f:(fun x -> Command.Args.Deps x))
               ; Hidden_targets
                   (match mode with
-                  | Byte -> []
+                  | Byte | Melange -> []
                   | Native -> native_archives)
               ; Dyn
                   (Action_builder.map ctypes_cclib_flags ~f:(fun x ->

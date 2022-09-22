@@ -34,4 +34,6 @@ val byte : t
 
 val native : t
 
+val melange : t
+
 val plugin : t

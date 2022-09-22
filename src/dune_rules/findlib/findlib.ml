@@ -294,9 +294,11 @@ end = struct
              To workaround this problem, for builtin packages we check that at
              least one of the archive is present. *)
           match archives t with
-          | { byte = []; native = [] } -> Memo.return true
-          | { byte; native } ->
-            Memo.List.exists (byte @ native) ~f:(fun p ->
+          | { byte = []; native = []; melange = [] } -> Memo.return true
+          | { byte; native; melange } ->
+            Memo.List.exists
+              (byte @ native @ melange)
+              ~f:(fun p ->
                 Path.as_outside_build_dir_exn p |> Fs_memo.file_exists))
 
     let to_dune_library t ~(lib_config : Lib_config.t) =

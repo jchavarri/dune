@@ -33,7 +33,11 @@ module Includes = struct
                       ~groups:[ Lib_file_deps.Group.Cmi; Cmx ])
               ]))
     in
-    { cmi = cmi_includes; cmo = cmi_includes; cmx = cmx_includes }
+    { cmi = cmi_includes
+    ; cmo = cmi_includes
+    ; cmx = cmx_includes
+    ; cmj = cmi_includes
+    }
 
   let empty = Cm_kind.Dict.make_all Command.Args.empty
 end
@@ -147,7 +151,7 @@ let create ~super_context ~scope ~expander ~obj_dir ~modules ~flags
   in
   let modes =
     let default =
-      Mode.Dict.make_both (Some Dune_file.Mode_conf.Kind.Inherited)
+      Mode.Dict.make_all (Some Dune_file.Mode_conf.Kind.Inherited)
     in
     Option.value ~default modes |> Mode.Dict.map ~f:Option.is_some
   in
