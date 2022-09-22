@@ -24,6 +24,7 @@ let rules (t : Dune_file.Tests.t) ~sctx ~dir ~scope ~expander ~dir_contents =
              | Byte_complete -> Some `exe
              | Other { kind = Exe; mode = Native | Best } -> Some `exe
              | Other { kind = Exe; mode = Byte } -> Some `bc
+             | Other { kind = Exe; mode = Melange } -> Some `mel
              | Other { kind = Js; _ } -> Some `js
              | Other { kind = C | Object | Shared_object | Plugin; _ } ->
                (* We don't know how to run tests in theses cases *)
@@ -38,11 +39,12 @@ let rules (t : Dune_file.Tests.t) ~sctx ~dir ~scope ~expander ~dir_contents =
               | `js -> ".bc.js"
               | `bc -> ".bc"
               | `exe -> ".exe"
+              | `mel -> ".bs.js"
             in
             let custom_runner =
               match runtest_mode with
               | `js -> Some Jsoo_rules.runner
-              | `bc | `exe -> None
+              | `bc | `exe | `mel -> None
             in
             let test_pform = Pform.Var Test in
             let run_action =
@@ -69,7 +71,7 @@ let rules (t : Dune_file.Tests.t) ~sctx ~dir ~scope ~expander ~dir_contents =
             let* runtest_alias =
               match runtest_mode with
               | `js -> Super_context.js_of_ocaml_runtest_alias sctx ~dir
-              | `exe | `bc -> Memo.return Alias.Name.runtest
+              | `exe | `bc | `mel -> Memo.return Alias.Name.runtest
             in
             let add_alias ~loc ~action ~locks =
               let alias =

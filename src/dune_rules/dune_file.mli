@@ -79,6 +79,7 @@ module Mode_conf : sig
     | Byte
     | Native
     | Best  (** [Native] if available and [Byte] if not *)
+    | Melange
 
   val decode : t Dune_lang.Decoder.t
 
@@ -97,6 +98,7 @@ module Mode_conf : sig
       { byte : 'a
       ; native : 'a
       ; best : 'a
+      ; melange : 'a
       }
   end
 

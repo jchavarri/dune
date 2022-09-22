@@ -403,6 +403,7 @@ module Mode_conf = struct
       | Byte
       | Native
       | Best
+      | Melange
 
     let compare x y =
       match (x, y) with
@@ -413,16 +414,20 @@ module Mode_conf = struct
       | Native, _ -> Lt
       | _, Native -> Gt
       | Best, Best -> Eq
+      | Best, _ -> Lt
+      | _, Best -> Gt
+      | Melange, Melange -> Eq
   end
 
   include T
 
-  let decode = enum [ ("byte", Byte); ("native", Native); ("best", Best) ]
+  let decode = enum [ ("byte", Byte); ("native", Native); ("best", Best); ("melange", Melange) ]
 
   let to_string = function
     | Byte -> "byte"
     | Native -> "native"
     | Best -> "best"
+    | Melange -> "melange"
 
   let to_dyn t = Dyn.variant (to_string t) []
 
@@ -439,20 +444,23 @@ module Mode_conf = struct
       { byte : 'a
       ; native : 'a
       ; best : 'a
+      ; melange : 'a
       }
 
     let find t = function
       | Byte -> t.byte
       | Native -> t.native
       | Best -> t.best
+      | Melange -> t.melange
 
     let update t key ~f =
       match key with
       | Byte -> { t with byte = f t.byte }
       | Native -> { t with native = f t.native }
       | Best -> { t with best = f t.best }
+      | Melange -> { t with melange = f t.melange }
 
-    let make_one x = { byte = x; native = x; best = x }
+    let make_one x = { byte = x; native = x; best = x; melange = x }
   end
 
   module Set = struct
@@ -492,7 +500,7 @@ module Mode_conf = struct
 
     let eval_detailed t ~has_native =
       let exists = function
-        | Best | Byte -> true
+        | Best | Byte | Melange -> true
         | Native -> has_native
       in
       let get key : Details.t =
@@ -512,7 +520,7 @@ module Mode_conf = struct
       let open Details in
       let byte = get Byte ||| validate best ~if_:(best_mode = Byte) in
       let native = get Native ||| validate best ~if_:(best_mode = Native) in
-      let melange = get Byte ||| validate best ~if_:(best_mode = Byte) in
+      let melange = get Melange ||| validate best ~if_:(best_mode = Melange) in
       { Mode.Dict.byte; native; melange }
 
     let eval t ~has_native =
@@ -1246,6 +1254,7 @@ module Executables = struct
         let same_as_mode : Mode.t =
           match mode with
           | Byte -> Byte
+          | Melange -> Melange
           | Native | Best ->
             (* From the point of view of the extension, [native] and [best] are
                the same *)
@@ -1415,6 +1424,7 @@ module Executables = struct
             match mode with
             | Byte_complete | Other { mode = Byte; _ } -> ".bc"
             | Other { mode = Native | Best; _ } -> ".exe"
+            | Other { mode = Melange; _ } -> ".bs.js"
           in
           Names.install_conf names ~ext ~enabled_if
       in
