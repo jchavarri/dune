@@ -71,6 +71,7 @@ end = struct
       ~f:(List.map ~f:(fun f -> (Section.Lib, f)))
       [ archives.byte
       ; archives.native
+      ; archives.melange
       ; foreign_archives
       ; Lib_info.eval_native_archives_exn lib ~modules
       ; Lib_info.jsoo_runtime lib

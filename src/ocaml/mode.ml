@@ -140,12 +140,13 @@ module Dict = struct
 
     let encode t = List.map ~f:encode (to_list t)
 
-    let is_empty t = not (t.byte || t.native)
+    let is_empty t = not (t.byte || t.native || t.melange)
 
     let iter_concurrently t ~f =
       let open Memo.O in
       let+ () = Memo.when_ t.byte (fun () -> f Byte)
-      and+ () = Memo.when_ t.native (fun () -> f Native) in
+      and+ () = Memo.when_ t.native (fun () -> f Native)
+      and+ () = Memo.when_ t.melange (fun () -> f Melange) in
       ()
   end
 

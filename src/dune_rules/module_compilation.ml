@@ -115,8 +115,8 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
   in
   let other_targets, cmt_args =
     match cm_kind with
-    | Cmx -> (other_targets, Command.Args.empty)
-    | Cmi | Cmo | Cmj ->
+    | Cmx | Cmj -> (other_targets, Command.Args.empty)
+    | Cmi | Cmo ->
       if Compilation_context.bin_annot cctx then
         let fn =
           Option.value_exn (Obj_dir.Module.cmt_file obj_dir m ~ml_kind)
@@ -127,7 +127,7 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
   let opaque_arg =
     let intf_only = cm_kind = Cmi && not (Module.has m ~ml_kind:Impl) in
     if opaque || (intf_only && Ocaml.Version.supports_opaque_for_mli ctx.version)
-    then Command.Args.A "-opaque"
+    then Command.Args.empty
     else Command.Args.empty
   in
   let dir = ctx.build_dir in
@@ -178,7 +178,7 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
               | None -> []
               | Some _ ->
                 (* XXX why aren't these just normal library flags? *)
-                [ "-nopervasives"; "-nostdlib" ])
+                [ (* "-nopervasives"; "-nostdlib" *) ])
           ; A "-o"
           ; Target output
           ; A "-c"
@@ -191,7 +191,14 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
 
 let build_module ?(precompiled_cmi = false) cctx m =
   let open Memo.O in
-  let* () = build_cm cctx m ~precompiled_cmi ~cm_kind:Cmo ~phase:None
+  let* () =
+    let modes = Compilation_context.modes cctx in
+    Memo.when_ (not modes.melange) (fun () ->
+        build_cm cctx m ~precompiled_cmi ~cm_kind:Cmo ~phase:None)
+  and* () =
+    let modes = Compilation_context.modes cctx in
+    Memo.when_ modes.melange (fun () ->
+        build_cm cctx m ~precompiled_cmi ~cm_kind:Cmj ~phase:None)
   and* () =
     let ctx = CC.context cctx in
     let can_split =
