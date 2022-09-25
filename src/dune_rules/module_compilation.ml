@@ -183,7 +183,7 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
               | None -> []
               | Some _ ->
                 (* XXX why aren't these just normal library flags? *)
-                [ (* "-nopervasives"; "-nostdlib" *) ])
+                [ "-nopervasives"; "-nostdlib" ])
           ; A "-o"
           ; Target output
           ; A "-c"

@@ -218,7 +218,7 @@ let for_alias_module t alias_module =
   { t with
     flags =
       Ocaml_flags.append_common flags
-        [ "-w"; "-49"; (* unsupported by melange "-nopervasives"; "-nostdlib" *) ]
+        [ "-w"; "-49"; "-nopervasives"; "-nostdlib" ]
   ; includes = Includes.empty
   ; stdlib = None
   ; sandbox
@@ -235,7 +235,7 @@ let for_root_module t root_module =
   { t with
     flags =
       Ocaml_flags.append_common flags
-        [ "-w"; "-49"; (* unsupported by melange "-nopervasives"; "-nostdlib" *) ]
+        [ "-w"; "-49"; "-nopervasives"; "-nostdlib" ]
   ; stdlib = None
   ; modules = singleton_modules root_module
   }
