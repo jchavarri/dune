@@ -60,10 +60,8 @@ let archives ?(preds = []) lib =
   let make ps = String.concat ~sep:" " (List.map ps ~f:Path.basename) in
   [ archive (preds @ [ Pos "byte" ]) (make archives.byte)
   ; archive (preds @ [ Pos "native" ]) (make archives.native)
-  ; archive (preds @ [ Pos "melange" ]) (make archives.melange)
   ; plugin (preds @ [ Pos "byte" ]) (make plugins.byte)
   ; plugin (preds @ [ Pos "native" ]) (make plugins.native)
-  ; plugin (preds @ [ Pos "melange" ]) (make plugins.melange)
   ]
 
 let gen_lib pub_name lib ~path ~version =

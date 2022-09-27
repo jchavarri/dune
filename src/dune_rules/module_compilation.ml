@@ -134,7 +134,7 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
   let opaque_arg =
     let intf_only = cm_kind = Cmi && not (Module.has m ~ml_kind:Impl) in
     if opaque || (intf_only && Ocaml.Version.supports_opaque_for_mli ctx.version)
-    then Command.Args.empty
+    then Command.Args.A "-opaque"
     else Command.Args.empty
   in
   let dir = ctx.build_dir in
@@ -199,13 +199,14 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
 let build_module ?(precompiled_cmi = false) cctx m =
   let open Memo.O in
   let* () =
-    let modes = Compilation_context.modes cctx in
-    Memo.when_ (not modes.melange) (fun () ->
-        build_cm cctx m ~precompiled_cmi ~cm_kind:Cmo ~phase:None)
-  and* () =
+    (* let modes = Compilation_context.modes cctx in *)
+    (* Memo.when_ (not modes.melange) (fun () -> *)
+        build_cm cctx m ~precompiled_cmi ~cm_kind:Cmo ~phase:None
+        (* ) *)
+  (* and* () =
     let modes = Compilation_context.modes cctx in
     Memo.when_ modes.melange (fun () ->
-        build_cm cctx m ~precompiled_cmi ~cm_kind:Cmj ~phase:None)
+        build_cm cctx m ~precompiled_cmi ~cm_kind:Cmj ~phase:None) *)
   and* () =
     let ctx = CC.context cctx in
     let can_split =

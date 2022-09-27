@@ -75,11 +75,11 @@ let print_pkg_archives pkg =
 
 let%expect_test _ =
   print_pkg_archives "qux";
-  [%expect {| Ok { byte = [ "/qux/qux.cma" ]; native = [] } |}]
+  [%expect {| Ok { byte = [ "/qux/qux.cma" ]; native = []; melange = [] } |}]
 
 let%expect_test _ =
   print_pkg_archives "xyz";
-  [%expect {| Ok { byte = [ "/xyz.cma" ]; native = [] } |}]
+  [%expect {| Ok { byte = [ "/xyz.cma" ]; native = []; melange = [] } |}]
 
 let%expect_test _ =
   let pkg =

@@ -1,7 +1,7 @@
 open Import
 open Action_builder.O
 
-let default_ocamlc_flags = [ (* unsupported by melange "-g" *) ]
+let default_ocamlc_flags = [ "-g" ]
 
 let default_ocamlopt_flags = [ "-g" ]
 
@@ -62,8 +62,8 @@ let default_flags ~dune_version ~profile =
   if Profile.is_dev profile then
     [ "-w"
     ; dev_mode_warnings ~dune_version ^ default_warnings
-    (* ; "-strict-sequence"
-    ; "-strict-formats" *)
+    ; "-strict-sequence"
+    ; "-strict-formats"
     ; "-short-paths"
     ; "-keep-locs"
     ]

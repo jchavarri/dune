@@ -335,7 +335,6 @@ let setup_build_archives (lib : Dune_file.Library.t) ~top_sorted_modules ~cctx
               implicitly adds this module. *)
            [ (Cm_kind.Cmx, Cm_kind.ext Cmx)
            ; (Cmo, Cm_kind.ext Cmo)
-           ; (Cmj, Cm_kind.ext Cmj)
            ; (Cmx, ext_obj)
            ]
            |> Memo.parallel_iter ~f:(fun (kind, ext) ->
