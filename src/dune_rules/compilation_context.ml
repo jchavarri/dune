@@ -151,7 +151,10 @@ let create ~super_context ~scope ~expander ~obj_dir ~modules ~flags
   in
   let modes =
     let default =
-      Mode.Dict.make_all (Some Dune_file.Mode_conf.Kind.Inherited)
+      { Mode.Dict.byte = Some Dune_file.Mode_conf.Kind.Inherited
+      ; native = Some Dune_file.Mode_conf.Kind.Inherited
+      ; melange = None
+      }
     in
     Option.value ~default modes |> Mode.Dict.map ~f:Option.is_some
   in
