@@ -71,7 +71,10 @@ reinstall: uninstall install
 install-ocamlformat:
 	opam install -y ocamlformat.$$(awk -F = '$$1 == "version" {print $$2}' .ocamlformat)
 
-dev-deps:
+melange:
+	opam pin add melange https://github.com/jchavarri/melange.git#0b1d9eacb39b5aa9d3353d8f22574164a375cf56
+
+dev-deps: melange
 	opam install -y $(TEST_DEPS)
 
 .PHONY: dev-switch
