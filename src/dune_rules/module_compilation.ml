@@ -73,6 +73,7 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
   let linear_fdo =
     Obj_dir.Module.obj_file obj_dir m ~kind:Cmx ~ext:Fdo.linear_fdo_ext
   in
+  let melange_js = Obj_dir.Module.obj_file obj_dir m ~kind:Cmj ~ext:".js" in
   let open Memo.O in
   let* extra_args, extra_deps, other_targets =
     if precompiled_cmi then Memo.return (force_read_cmi src, [], [])
@@ -105,7 +106,8 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
       | Some Compile -> linear :: other_targets
       | Some Emit -> other_targets
       | Some All | None -> obj :: other_targets)
-    | Cmi | Cmo | Cmj -> other_targets
+    | Cmi | Cmo -> other_targets
+    | Cmj -> melange_js :: other_targets
   in
   let dep_graph = Ml_kind.Dict.get (CC.dep_graphs cctx) ml_kind in
   let opaque = CC.opaque cctx in
