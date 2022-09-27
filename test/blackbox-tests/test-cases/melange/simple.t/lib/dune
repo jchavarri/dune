@@ -1,0 +1,4 @@
+(library
+ (name x)
+ (public_name x)
+ (modes melange))
