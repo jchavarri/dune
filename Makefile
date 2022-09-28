@@ -72,7 +72,7 @@ install-ocamlformat:
 	opam install -y ocamlformat.$$(awk -F = '$$1 == "version" {print $$2}' .ocamlformat)
 
 melange:
-	opam pin add melange https://github.com/jchavarri/melange.git#0b1d9eacb39b5aa9d3353d8f22574164a375cf56
+	opam pin add melange https://github.com/jchavarri/melange.git#cb7d065a5c1cf747c25063508035ff8a955a9bc1
 
 dev-deps: melange
 	opam install -y $(TEST_DEPS)
@@ -97,6 +97,9 @@ test-js: $(BIN)
 
 test-coq: $(BIN)
 	$(BIN) build @runtest-coq
+
+test-melange: $(BIN)
+	$(BIN) build @runtest-melange
 
 test-all: $(BIN)
 	$(BIN) build @runtest @runtest-js @runtest-coq
