@@ -53,7 +53,8 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
   let obj_dir = CC.obj_dir cctx in
   let ctx = Super_context.context sctx in
   let stdlib = CC.stdlib cctx in
-  let mode = Mode.of_cm_kind cm_kind in
+  let modes = Compilation_context.modes cctx in
+  let mode = if modes.melange then Mode.Melange else Mode.of_cm_kind cm_kind in
   let sandbox =
     let default = CC.sandbox cctx in
     match Module.kind m with
