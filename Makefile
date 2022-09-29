@@ -72,7 +72,7 @@ install-ocamlformat:
 	opam install -y ocamlformat.$$(awk -F = '$$1 == "version" {print $$2}' .ocamlformat)
 
 melange:
-	opam pin add melange https://github.com/jchavarri/melange.git#cb7d065a5c1cf747c25063508035ff8a955a9bc1
+	opam pin add melange https://github.com/jchavarri/melange.git#b1498afa30ff45c08a41f99d59621590719376ba
 
 dev-deps: melange
 	opam install -y $(TEST_DEPS)
