@@ -421,7 +421,13 @@ module Mode_conf = struct
 
   include T
 
-  let decode = enum [ ("byte", Byte); ("native", Native); ("best", Best); ("melange", Melange) ]
+  let decode =
+    enum
+      [ ("byte", Byte)
+      ; ("native", Native)
+      ; ("best", Best)
+      ; ("melange", Melange)
+      ]
 
   let to_string = function
     | Byte -> "byte"
