@@ -33,6 +33,9 @@ let other_cm_files ~opaque ~(cm_kind : Cm_kind.t) ~dep_graph ~obj_dir m =
       if Module.has m ~ml_kind:Impl && cm_kind = Cmx && not opaque then
         let cmx = Obj_dir.Module.cm_file_exn obj_dir m ~kind:Cmx in
         Path.build cmx :: deps
+      else if Module.has m ~ml_kind:Impl && cm_kind = Cmj then
+        let cmj = Obj_dir.Module.cm_file_exn obj_dir m ~kind:Cmj in
+        Path.build cmj :: deps
       else deps)
 
 let copy_interface ~sctx ~dir ~obj_dir m =
