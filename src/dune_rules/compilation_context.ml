@@ -15,6 +15,15 @@ module Includes = struct
               ; Hidden_deps (Lib_file_deps.deps libs ~groups:[ Cmi ])
               ]))
     in
+    let cmj_includes =
+      Command.Args.memo
+        (Resolve.Memo.args
+           (let+ libs = requires in
+            Command.Args.S
+              [ iflags libs Byte
+              ; Hidden_deps (Lib_file_deps.deps libs ~groups:[ Cmi; Cmj ])
+              ]))
+    in
     let cmx_includes =
       Command.Args.memo
         (Resolve.Memo.args
@@ -36,7 +45,7 @@ module Includes = struct
     { cmi = cmi_includes
     ; cmo = cmi_includes
     ; cmx = cmx_includes
-    ; cmj = cmi_includes
+    ; cmj = cmj_includes
     }
 
   let empty = Cm_kind.Dict.make_all Command.Args.empty

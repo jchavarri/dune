@@ -3,19 +3,22 @@ open Import
 module Group = struct
   type t =
     | Cmi
+    | Cmj
     | Cmx
     | Header
 
-  let all = [ Cmi; Cmx; Header ]
+  let all = [ Cmi; Cmj; Cmx; Header ]
 
   let ext = function
     | Cmi -> Cm_kind.ext Cmi
+    | Cmj -> Cm_kind.ext Cmj
     | Cmx -> Cm_kind.ext Cmx
     | Header -> Foreign_language.header_extension
 
   let obj_dir t obj_dir =
     match t with
     | Cmi -> Obj_dir.public_cmi_dir obj_dir
+    | Cmj -> Obj_dir.public_cmi_dir obj_dir
     | Cmx -> Obj_dir.native_dir obj_dir
     | Header -> Obj_dir.dir obj_dir
 

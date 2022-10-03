@@ -3,6 +3,7 @@ open Import
 module Group : sig
   type t =
     | Cmi
+    | Cmj
     | Cmx
     | Header
 end
