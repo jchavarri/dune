@@ -1,0 +1,5 @@
+(library
+ (name lib)
+ (public_name x.lib)
+ (wrapped false)
+ (modes melange))
