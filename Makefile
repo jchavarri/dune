@@ -102,7 +102,7 @@ test-melange: $(BIN)
 	$(BIN) build @runtest-melange
 
 test-all: $(BIN)
-	$(BIN) build @runtest @runtest-js @runtest-coq
+	$(BIN) build @runtest @runtest-js @runtest-coq @runtest-melange
 
 .PHONY: check
 check: $(BIN)
