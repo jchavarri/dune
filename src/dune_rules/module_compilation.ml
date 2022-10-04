@@ -131,12 +131,7 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
         let fn =
           Option.value_exn (Obj_dir.Module.cmt_file obj_dir m ~ml_kind)
         in
-        let bin_annot_arg =
-          match cm_kind with
-          | Cmj -> (* -bin-annot not supported by melange *) Command.Args.empty
-          | Cmi | Cmo | Cmx -> A "-bin-annot"
-        in
-        (fn :: other_targets, bin_annot_arg)
+        (fn :: other_targets, A "-bin-annot")
       else (other_targets, Command.Args.empty)
   in
   let opaque_arg =
