@@ -11,7 +11,7 @@ module Group = struct
 
   let ext = function
     | Cmi -> Cm_kind.ext Cmi
-    | Cmj -> Cm_kind.ext Cmj
+    | Cmj -> Melange.object_extension
     | Cmx -> Cm_kind.ext Cmx
     | Header -> Foreign_language.header_extension
 

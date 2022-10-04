@@ -294,8 +294,8 @@ end = struct
              To workaround this problem, for builtin packages we check that at
              least one of the archive is present. *)
           match archives t with
-          | { byte = []; native = []; melange = [] } -> Memo.return true
-          | { byte; native; melange = _ } ->
+          | { byte = []; native = [] } -> Memo.return true
+          | { byte; native } ->
             Memo.List.exists (byte @ native) ~f:(fun p ->
                 Path.as_outside_build_dir_exn p |> Fs_memo.file_exists))
 
