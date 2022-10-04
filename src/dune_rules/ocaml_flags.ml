@@ -84,7 +84,7 @@ module Spec = struct
 
   let standard =
     { common = Ordered_set_lang.Unexpanded.standard
-    ; specific = Mode.Dict.make_all Ordered_set_lang.Unexpanded.standard
+    ; specific = Mode.Dict.make_both Ordered_set_lang.Unexpanded.standard
     }
 
   let decode =
@@ -93,7 +93,7 @@ module Spec = struct
     let+ common = field_oslu "flags"
     and+ byte = field_oslu "ocamlc_flags"
     and+ native = field_oslu "ocamlopt_flags" in
-    let specific = Mode.Dict.make ~native ~byte ~melange:byte in
+    let specific = Mode.Dict.make ~native ~byte in
     { common; specific }
 end
 
@@ -101,7 +101,7 @@ type t = string list Action_builder.t t'
 
 let empty =
   let build = Action_builder.return [] in
-  { common = build; specific = Mode.Dict.make_all build }
+  { common = build; specific = Mode.Dict.make_both build }
 
 let of_list l = { empty with common = Action_builder.return l }
 
@@ -110,7 +110,6 @@ let default ~dune_version ~profile =
   ; specific =
       { byte = Action_builder.return default_ocamlc_flags
       ; native = Action_builder.return default_ocamlopt_flags
-      ; melange = Action_builder.return default_ocamlc_flags
       }
   }
 
@@ -123,8 +122,6 @@ let make ~spec ~default ~eval =
   ; specific =
       { byte = f "ocamlc flags" spec.specific.byte default.specific.byte
       ; native = f "ocamlopt flags" spec.specific.native default.specific.native
-      ; melange =
-          f "ocamlc flags" spec.specific.melange default.specific.melange
       }
   }
 

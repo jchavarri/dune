@@ -4,7 +4,6 @@ type t =
   | Cmi
   | Cmo
   | Cmx
-  | Cmj
 
 val compare : t -> t -> Ordering.t
 
@@ -23,7 +22,6 @@ module Dict : sig
     { cmi : 'a
     ; cmo : 'a
     ; cmx : 'a
-    ; cmj : 'a
     }
 
   val get : 'a t -> cm_kind -> 'a

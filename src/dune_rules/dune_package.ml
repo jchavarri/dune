@@ -127,7 +127,7 @@ module Lib = struct
        in
        let+ synopsis = field_o "synopsis" string
        and+ loc = loc
-       and+ modes = field_l "modes" Mode.decode
+       and+ modes = field_l "modes" Lib_mode.decode
        and+ kind = field "kind" Lib_kind.decode
        and+ archives = mode_paths "archives"
        and+ plugins = mode_paths "plugins"
