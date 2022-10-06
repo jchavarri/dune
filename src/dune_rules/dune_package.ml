@@ -36,8 +36,8 @@ module Lib = struct
     let no_loc f (_loc, x) = f x in
     let path = Dpath.Local.encode ~dir:package_root in
     let paths name f = field_l name path f in
-    let mode_paths name (xs : Path.t Mode.Dict.List.t) =
-      field_l name sexp (Mode.Dict.List.encode path xs)
+    let mode_paths name (xs : Path.t Lib_mode.Dict.List.t) =
+      field_l name sexp (Lib_mode.Dict.List.encode path xs)
     in
     let libs name = field_l name (no_loc Lib_name.encode) in
     let name = Lib_info.name info in
@@ -86,7 +86,7 @@ module Lib = struct
        ; field_o "default_implementation" (no_loc Lib_name.encode)
            default_implementation
        ; field_o "main_module_name" Module_name.encode main_module_name
-       ; field_l "modes" sexp (Mode.Dict.Set.encode modes)
+       ; field_l "modes" sexp (Lib_mode.Dict.Set.encode modes)
        ; field_l "obj_dir" sexp (Obj_dir.encode obj_dir)
        ; field_o "modules" Modules.encode modules
        ; field_o "special_builtin_support"
@@ -109,7 +109,8 @@ module Lib = struct
     let libs s = field_l s (located Lib_name.decode) in
     let paths s = field_l s path in
     let mode_paths name =
-      field ~default:Mode.Dict.List.empty name (Mode.Dict.List.decode path)
+      field ~default:Lib_mode.Dict.List.empty name
+        (Lib_mode.Dict.List.decode path)
     in
     fields
       (let* main_module_name = field_o "main_module_name" Module_name.decode in
@@ -127,7 +128,7 @@ module Lib = struct
        in
        let+ synopsis = field_o "synopsis" string
        and+ loc = loc
-       and+ modes = field_l "modes" Mode.decode
+       and+ modes = field_l "modes" Lib_mode.decode
        and+ kind = field "kind" Lib_kind.decode
        and+ archives = mode_paths "archives"
        and+ plugins = mode_paths "plugins"
@@ -136,7 +137,7 @@ module Lib = struct
          if lang.version >= (2, 0) then paths "foreign_archives"
          else
            let+ m = mode_paths "foreign_archives" in
-           m.byte
+           m.ocaml.byte
        and+ native_archives = paths "native_archives"
        and+ jsoo_runtime = paths "jsoo_runtime"
        and+ requires = field_l "requires" (Lib_dep.decode ~allow_re_export:true)
@@ -154,7 +155,7 @@ module Lib = struct
        and+ instrumentation_backend =
          field_o "instrumentation.backend" (located Lib_name.decode)
        in
-       let modes = Mode.Dict.Set.of_list modes in
+       let modes = Lib_mode.Dict.Set.of_list modes in
        let entry_modules =
          Modules.entry_modules modules |> List.map ~f:Module.name
        in

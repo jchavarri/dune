@@ -29,8 +29,6 @@ module Dict : sig
 
   val equal : ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
 
-  (* val for_all : 'a t -> f:('a -> bool) -> bool
-*)
   val to_dyn : ('a -> Dyn.t) -> 'a t -> Dyn.t
 
   module List : sig
@@ -54,11 +52,6 @@ module Dict : sig
 
   val map : 'a t -> f:('a -> 'b) -> 'b t
 
-  (*
-     val mapi : 'a t -> f:(mode -> 'a -> 'b) -> 'b t
-
-     val iteri : 'a t -> f:(mode -> 'a -> unit) -> unit
-*)
   val make_all : 'a -> 'a t
 
   val make : byte:'a -> native:'a -> 'a t
@@ -76,11 +69,7 @@ module Dict : sig
 
     val is_empty : t -> bool
 
-    (*     val to_list : t -> mode list *)
-
     val of_list : mode list -> t
-
-    (* val iter_concurrently : t -> f:(mode -> unit Memo.t) -> unit Memo.t *)
   end
 end
 with type mode := t

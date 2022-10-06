@@ -71,11 +71,11 @@ let default_flags ~dune_version ~profile =
 
 type 'a t' =
   { common : 'a
-  ; specific : 'a Mode.Dict.t
+  ; specific : 'a Lib_mode.Dict.t
   }
 
 let equal f { common; specific } t =
-  f common t.common && Mode.Dict.equal f specific t.specific
+  f common t.common && Lib_mode.Dict.equal f specific t.specific
 
 module Spec = struct
   type t = Ordered_set_lang.Unexpanded.t t'
@@ -84,7 +84,7 @@ module Spec = struct
 
   let standard =
     { common = Ordered_set_lang.Unexpanded.standard
-    ; specific = Mode.Dict.make_both Ordered_set_lang.Unexpanded.standard
+    ; specific = Lib_mode.Dict.make_all Ordered_set_lang.Unexpanded.standard
     }
 
   let decode =
@@ -93,7 +93,7 @@ module Spec = struct
     let+ common = field_oslu "flags"
     and+ byte = field_oslu "ocamlc_flags"
     and+ native = field_oslu "ocamlopt_flags" in
-    let specific = Mode.Dict.make ~native ~byte in
+    let specific = Lib_mode.Dict.make ~native ~byte in
     { common; specific }
 end
 
@@ -101,15 +101,17 @@ type t = string list Action_builder.t t'
 
 let empty =
   let build = Action_builder.return [] in
-  { common = build; specific = Mode.Dict.make_both build }
+  { common = build; specific = Lib_mode.Dict.make_all build }
 
 let of_list l = { empty with common = Action_builder.return l }
 
 let default ~dune_version ~profile =
   { common = Action_builder.return (default_flags ~dune_version ~profile)
   ; specific =
-      { byte = Action_builder.return default_ocamlc_flags
-      ; native = Action_builder.return default_ocamlopt_flags
+      { ocaml =
+          { byte = Action_builder.return default_ocamlc_flags
+          ; native = Action_builder.return default_ocamlopt_flags
+          }
       }
   }
 
@@ -120,14 +122,20 @@ let make ~spec ~default ~eval =
   in
   { common = f "common flags" spec.common default.common
   ; specific =
-      { byte = f "ocamlc flags" spec.specific.byte default.specific.byte
-      ; native = f "ocamlopt flags" spec.specific.native default.specific.native
+      { ocaml =
+          { byte =
+              f "ocamlc flags" spec.specific.ocaml.byte
+                default.specific.ocaml.byte
+          ; native =
+              f "ocamlopt flags" spec.specific.ocaml.native
+                default.specific.ocaml.native
+          }
       }
   }
 
 let get t mode =
   let+ common = t.common
-  and+ specific = Mode.Dict.get t.specific mode in
+  and+ specific = Lib_mode.Dict.get t.specific mode in
   common @ specific
 
 let map_common t ~f =
@@ -149,8 +157,8 @@ let common t = t.common
 
 let dump t =
   let+ common = t.common
-  and+ byte = t.specific.byte
-  and+ native = t.specific.native in
+  and+ byte = t.specific.ocaml.byte
+  and+ native = t.specific.ocaml.native in
   List.map
     ~f:Dune_lang.Encoder.(pair string (list string))
     [ ("flags", common); ("ocamlc_flags", byte); ("ocamlopt_flags", native) ]

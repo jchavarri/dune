@@ -69,13 +69,15 @@ end = struct
     in
     List.concat_map
       ~f:(List.map ~f:(fun f -> (Section.Lib, f)))
-      [ archives.byte
-      ; archives.native
+      [ archives.ocaml.byte
+      ; archives.ocaml.native
       ; foreign_archives
       ; Lib_info.eval_native_archives_exn lib ~modules
       ; Lib_info.jsoo_runtime lib
       ]
-    @ List.map ~f:(fun f -> (Section.Libexec, f)) (Lib_info.plugins lib).native
+    @ List.map
+        ~f:(fun f -> (Section.Libexec, f))
+        (Lib_info.plugins lib).ocaml.native
 
   let dll_files ~(modes : Mode.Dict.Set.t) ~dynlink ~(ctx : Context.t) lib =
     if_

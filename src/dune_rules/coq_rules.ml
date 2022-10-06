@@ -32,7 +32,7 @@ module Util = struct
     let plugins =
       let info = Lib.info lib in
       let plugins = Lib_info.plugins info in
-      Mode.Dict.get plugins Mode.Native
+      Lib_mode.Dict.get plugins (Ocaml Native)
     in
     let to_mlpack file =
       [ Path.set_extension file ~ext:".mlpack"
@@ -634,7 +634,7 @@ let coq_plugins_install_rules ~scope ~package ~dst_dir (s : Theory.t) =
     then
       let loc = Lib_info.loc info in
       let plugins = Lib_info.plugins info in
-      Mode.Dict.get plugins Mode.Native
+      Lib_mode.Dict.get plugins (Ocaml Native)
       |> List.map ~f:(fun plugin_file ->
              (* Safe because all coq libraries are local for now *)
              let plugin_file = Path.as_in_build_dir_exn plugin_file in

@@ -87,7 +87,7 @@ val loc : _ t -> Loc.t
     will always have zero or one element in the list (zero if they are not
     buildable in the corresponding mode). External libraries, however, can have
     more than one element in the list, because the format allows for that. *)
-val archives : 'path t -> 'path list Mode.Dict.t
+val archives : 'path t -> 'path list Lib_mode.Dict.t
 
 (* TODO: Rename [foreign_archives] to [foreign_lib_files] and [native_archives]
    to [native_lib_files] for consistent naming with [foreign_dll_files]. *)
@@ -118,7 +118,7 @@ val exit_module : _ t -> Module_name.t option
 
 val instrumentation_backend : _ t -> (Loc.t * Lib_name.t) option
 
-val plugins : 'path t -> 'path list Mode.Dict.t
+val plugins : 'path t -> 'path list Lib_mode.Dict.t
 
 val src_dir : 'path t -> 'path
 
@@ -146,7 +146,7 @@ val wrapped : _ t -> Wrapped.t Inherited.t option
 
 val special_builtin_support : _ t -> Special_builtin_support.t option
 
-val modes : _ t -> Mode.Dict.Set.t
+val modes : _ t -> Lib_mode.Dict.Set.t
 
 val implements : _ t -> (Loc.t * Lib_name.t) option
 
@@ -217,8 +217,8 @@ val create :
   -> sub_systems:Sub_system_info.t Sub_system_name.Map.t
   -> requires:Lib_dep.t list
   -> foreign_objects:'a list Source.t
-  -> plugins:'a list Mode.Dict.t
-  -> archives:'a list Mode.Dict.t
+  -> plugins:'a list Lib_mode.Dict.t
+  -> archives:'a list Lib_mode.Dict.t
   -> ppx_runtime_deps:(Loc.t * Lib_name.t) list
   -> foreign_archives:'a list
   -> native_archives:'a native_archives
@@ -233,7 +233,7 @@ val create :
   -> entry_modules:Module_name.t list Or_exn.t Source.t
   -> implements:(Loc.t * Lib_name.t) option
   -> default_implementation:(Loc.t * Lib_name.t) option
-  -> modes:Mode.Dict.Set.t
+  -> modes:Lib_mode.Dict.Set.t
   -> wrapped:Wrapped.t Inherited.t option
   -> special_builtin_support:Special_builtin_support.t option
   -> exit_module:Module_name.t option

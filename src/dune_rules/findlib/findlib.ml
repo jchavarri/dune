@@ -239,8 +239,8 @@ end = struct
       List.map (Vars.get_words t.vars var preds) ~f:(Path.relative t.dir)
 
     let make_archives t var preds =
-      Mode.Dict.of_func (fun ~mode ->
-          get_paths t var (Ps.add preds (Mode.variant mode)))
+      Lib_mode.Dict.of_func (fun ~mode ->
+          get_paths t var (Ps.add preds (Lib_mode.variant mode)))
 
     let version t = Vars.get t.vars "version" Ps.empty
 
@@ -266,7 +266,7 @@ end = struct
     let archives t = make_archives t "archive" preds
 
     let plugins t =
-      Mode.Dict.map2 ~f:( @ )
+      Lib_mode.Dict.map2 ~f:( @ )
         (make_archives t "archive" (Ps.add preds Variant.plugin))
         (make_archives t "plugin" preds)
 
@@ -294,8 +294,8 @@ end = struct
              To workaround this problem, for builtin packages we check that at
              least one of the archive is present. *)
           match archives t with
-          | { byte = []; native = [] } -> Memo.return true
-          | { byte; native } ->
+          | { ocaml = { byte = []; native = [] } } -> Memo.return true
+          | { ocaml = { byte; native } } ->
             Memo.List.exists (byte @ native) ~f:(fun p ->
                 Path.as_outside_build_dir_exn p |> Fs_memo.file_exists))
 
@@ -318,11 +318,11 @@ end = struct
           ];
       let archives = archives t in
       let obj_dir = Obj_dir.make_external_no_private ~dir:t.dir in
-      let modes : Mode.Dict.Set.t =
+      let modes : Lib_mode.Dict.Set.t =
         (* libraries without archives are compatible with all modes. mainly a
            hack for compiler-libs which doesn't have any archives *)
-        let discovered = Mode.Dict.map ~f:List.is_non_empty archives in
-        if Mode.Dict.Set.is_empty discovered then Mode.Dict.Set.all
+        let discovered = Lib_mode.Dict.map ~f:List.is_non_empty archives in
+        if Lib_mode.Dict.Set.is_empty discovered then Lib_mode.Dict.Set.all
         else discovered
       in
       let+ (info : Path.t Lib_info.t) =

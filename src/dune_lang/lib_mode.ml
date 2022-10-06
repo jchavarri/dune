@@ -55,12 +55,6 @@ module Dict = struct
 
   let map t ~f = { ocaml = Mode.Dict.map ~f t.ocaml }
 
-  (* let mapi t ~f = { byte = f Byte t.byte; native = f Native t.native }
-
-     let iteri t ~f =
-       f Byte t.byte;
-       f Native t.native *)
-
   let make_all x = { ocaml = { byte = x; native = x } }
 
   let make ~byte ~native = { ocaml = { byte; native } }
@@ -92,12 +86,6 @@ module Dict = struct
     let encode t = List.map ~f:encode (to_list t)
 
     let is_empty t = Mode.Dict.Set.is_empty t.ocaml
-
-    (* let iter_concurrently t ~f =
-       let open Memo.O in
-       let+ () = Memo.when_ t.byte (fun () -> f Byte)
-       and+ () = Memo.when_ t.native (fun () -> f Native) in
-       () *)
   end
 
   module List = struct

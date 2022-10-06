@@ -7,6 +7,6 @@ type t =
   | Native
   | Byte_with_stubs_statically_linked_in
 
-val mode : t -> Mode.t
+val mode : t -> Lib_mode.t
 
 val equal : t -> t -> bool

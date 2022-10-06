@@ -203,7 +203,7 @@ let expand_artifact ~source t a s =
           ~loc:(Dune_lang.Template.Pform.loc source)
           ~what:"Library" (Lib_name.to_string name)
       | Some lib ->
-        let archives = Mode.Dict.get (Lib_info.archives lib) mode in
+        let archives = Lib_mode.Dict.get (Lib_info.archives lib) mode in
         Action_builder.all
           (List.map archives ~f:(fun fn ->
                let fn = Path.build fn in

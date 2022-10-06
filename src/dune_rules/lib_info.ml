@@ -298,8 +298,8 @@ type 'path t =
   ; obj_dir : 'path Obj_dir.t
   ; version : string option
   ; synopsis : string option
-  ; archives : 'path list Mode.Dict.t
-  ; plugins : 'path list Mode.Dict.t
+  ; archives : 'path list Lib_mode.Dict.t
+  ; plugins : 'path list Lib_mode.Dict.t
   ; foreign_objects : 'path list Source.t
   ; foreign_archives : 'path list
   ; native_archives : 'path native_archives
@@ -319,7 +319,7 @@ type 'path t =
   ; default_implementation : (Loc.t * Lib_name.t) option
   ; wrapped : Wrapped.t Inherited.t option
   ; main_module_name : Main_module_name.t
-  ; modes : Mode.Dict.Set.t
+  ; modes : Lib_mode.Dict.Set.t
   ; special_builtin_support : Special_builtin_support.t option
   ; exit_module : Module_name.t option
   ; instrumentation_backend : (Loc.t * Lib_name.t) option
@@ -376,8 +376,8 @@ let equal (type a) (t : a t)
   && Obj_dir.equal obj_dir t.obj_dir
   && Option.equal String.equal version t.version
   && Option.equal String.equal synopsis t.synopsis
-  && Mode.Dict.equal (List.equal path_equal) archives t.archives
-  && Mode.Dict.equal (List.equal path_equal) plugins t.plugins
+  && Lib_mode.Dict.equal (List.equal path_equal) archives t.archives
+  && Lib_mode.Dict.equal (List.equal path_equal) plugins t.plugins
   && Source.equal (List.equal path_equal) foreign_objects t.foreign_objects
   && List.equal path_equal foreign_archives t.foreign_archives
   && equal_native_archives path_equal native_archives t.native_archives
@@ -409,7 +409,7 @@ let equal (type a) (t : a t)
        default_implementation t.default_implementation
   && Option.equal (Inherited.equal Wrapped.equal) wrapped t.wrapped
   && Main_module_name.equal main_module_name t.main_module_name
-  && Mode.Dict.Set.equal modes t.modes
+  && Lib_mode.Dict.Set.equal modes t.modes
   && Option.equal Special_builtin_support.equal special_builtin_support
        t.special_builtin_support
   && Option.equal Module_name.equal exit_module t.exit_module
@@ -581,7 +581,7 @@ type local = Path.Build.t t
 let map t ~path_kind ~f_path ~f_obj_dir =
   let f = f_path in
   let list = List.map ~f in
-  let mode_list = Mode.Dict.map ~f:list in
+  let mode_list = Lib_mode.Dict.map ~f:list in
   let native_archives =
     match t.native_archives with
     | Needs_module_info t -> Needs_module_info (f t)
@@ -660,8 +660,8 @@ let to_dyn path
     ; ("obj_dir", Obj_dir.to_dyn obj_dir)
     ; ("version", option string version)
     ; ("synopsis", option string synopsis)
-    ; ("archives", Mode.Dict.to_dyn (list path) archives)
-    ; ("plugins", Mode.Dict.to_dyn (list path) plugins)
+    ; ("archives", Lib_mode.Dict.to_dyn (list path) archives)
+    ; ("plugins", Lib_mode.Dict.to_dyn (list path) plugins)
     ; ("foreign_objects", Source.to_dyn (list path) foreign_objects)
     ; ("foreign_archives", list path foreign_archives)
     ; ("native_archives", dyn_of_native_archives path native_archives)
@@ -682,7 +682,7 @@ let to_dyn path
       , option (snd Lib_name.to_dyn) default_implementation )
     ; ("wrapped", option (Inherited.to_dyn Wrapped.to_dyn) wrapped)
     ; ("main_module_name", Main_module_name.to_dyn main_module_name)
-    ; ("modes", Mode.Dict.Set.to_dyn modes)
+    ; ("modes", Lib_mode.Dict.Set.to_dyn modes)
     ; ( "special_builtin_support"
       , option Special_builtin_support.to_dyn special_builtin_support )
     ; ("exit_module", option Module_name.to_dyn exit_module)

@@ -106,28 +106,28 @@ module Artifact = struct
 
   type t =
     | Mod of Cm_kind.t
-    | Lib of Mode.t
+    | Lib of Lib_mode.t
 
   let compare x y =
     match (x, y) with
     | Mod x, Mod y -> Cm_kind.compare x y
     | Mod _, _ -> Lt
     | _, Mod _ -> Gt
-    | Lib x, Lib y -> Mode.compare x y
+    | Lib x, Lib y -> Lib_mode.compare x y
 
   let ext = function
     | Mod cm_kind -> Cm_kind.ext cm_kind
-    | Lib mode -> Mode.compiled_lib_ext mode
+    | Lib mode -> Lib_mode.compiled_lib_ext mode
 
   let all =
     List.map ~f:(fun kind -> Mod kind) Cm_kind.all
-    @ List.map ~f:(fun mode -> Lib mode) Mode.all
+    @ List.map ~f:(fun mode -> Lib mode) Lib_mode.all
 
   let to_dyn a =
     let open Dyn in
     match a with
     | Mod cm_kind -> variant "Mod" [ Cm_kind.to_dyn cm_kind ]
-    | Lib mode -> variant "Lib" [ Mode.to_dyn mode ]
+    | Lib mode -> variant "Lib" [ Lib_mode.to_dyn mode ]
 end
 
 module Macro = struct

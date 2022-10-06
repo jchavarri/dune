@@ -6,11 +6,11 @@ type t =
   | Native
   | Byte_with_stubs_statically_linked_in
 
-let mode : t -> Mode.t = function
-  | Byte -> Byte
-  | Byte_for_jsoo -> Byte
-  | Native -> Native
-  | Byte_with_stubs_statically_linked_in -> Byte
+let mode : t -> Lib_mode.t = function
+  | Byte -> Ocaml Byte
+  | Byte_for_jsoo -> Ocaml Byte
+  | Native -> Ocaml Native
+  | Byte_with_stubs_statically_linked_in -> Ocaml Byte
 
 let equal x y =
   match (x, y) with

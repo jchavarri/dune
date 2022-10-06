@@ -55,7 +55,7 @@ end
 module Artifact : sig
   type t =
     | Mod of Ocaml.Cm_kind.t
-    | Lib of Ocaml.Mode.t
+    | Lib of Lib_mode.t
 
   val compare : t -> t -> Ordering.t
 
