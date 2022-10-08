@@ -133,7 +133,7 @@ end = struct
     in
     let { Lib_config.has_native; ext_obj; _ } = lib_config in
     let modes = Dune_file.Mode_conf.Set.eval lib.modes ~has_native in
-    let { Lib_mode.Dict.ocaml = { byte; native } as modes } = modes in
+    let { Mode.Dict.byte; native } = modes in
     let module_files =
       let inside_subdir f =
         match lib_subdir with

@@ -84,7 +84,7 @@ val package : t -> Package.t option
 
 val vimpl : t -> Vimpl.t option
 
-val modes : t -> Mode.Dict.Set.t
+val ocaml_modes : t -> Mode.Dict.Set.t
 
 val for_wrapped_compat : t -> t
 

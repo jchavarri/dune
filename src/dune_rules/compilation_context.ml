@@ -117,7 +117,7 @@ let package t = t.package
 
 let vimpl t = t.vimpl
 
-let modes t = t.modes
+let ocaml_modes t = t.modes
 
 let bin_annot t = t.bin_annot
 

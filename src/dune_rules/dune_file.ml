@@ -512,10 +512,10 @@ module Mode_conf = struct
       let open Details in
       let byte = get Byte ||| validate best ~if_:(best_mode = Byte) in
       let native = get Native ||| validate best ~if_:(best_mode = Native) in
-      { Lib_mode.Dict.ocaml = { byte; native } }
+      { Mode.Dict.byte; native }
 
     let eval t ~has_native =
-      eval_detailed t ~has_native |> Lib_mode.Dict.map ~f:Option.is_some
+      eval_detailed t ~has_native |> Mode.Dict.map ~f:Option.is_some
   end
 end
 
@@ -841,7 +841,7 @@ module Library = struct
     let foreign_archives = foreign_lib_files conf ~dir ~ext_lib in
     let native_archives =
       let archive = archive ext_lib in
-      if virtual_library || not modes.ocaml.native then Lib_info.Files []
+      if virtual_library || not modes.native then Lib_info.Files []
       else if
         Option.is_some conf.implements
         || Lib_config.linker_can_create_empty_archives lib_config
@@ -855,8 +855,7 @@ module Library = struct
     let jsoo_archive =
       (* XXX we shouldn't access the directory of the obj_dir directly. We
          should use something like [Obj_dir.Archive.obj] instead *)
-      if modes.ocaml.byte then
-        Some (archive ~dir:(Obj_dir.obj_dir obj_dir) ".cma.js")
+      if modes.byte then Some (archive ~dir:(Obj_dir.obj_dir obj_dir) ".cma.js")
       else None
     in
     let virtual_ =
@@ -864,23 +863,20 @@ module Library = struct
     in
     let foreign_objects = Lib_info.Source.Local in
     let archives, plugins =
-      if virtual_library then
-        (Lib_mode.Dict.make_all [], Lib_mode.Dict.make_all [])
+      if virtual_library then (Mode.Dict.make_both [], Mode.Dict.make_both [])
       else
         let plugins =
           let archive_file ~mode =
             archive_for_mode ~f_ext:Mode.plugin_ext ~mode |> Option.to_list
           in
-          { Lib_mode.Dict.ocaml =
-              { native =
-                  (if Dynlink_supported.get conf.dynlink natdynlink_supported
-                  then archive_file ~mode:(Ocaml Native)
-                  else [])
-              ; byte = archive_file ~mode:(Ocaml Byte)
-              }
+          { Mode.Dict.native =
+              (if Dynlink_supported.get conf.dynlink natdynlink_supported then
+               archive_file ~mode:Native
+              else [])
+          ; byte = archive_file ~mode:Byte
           }
         in
-        (archives_for_mode ~f_ext:Lib_mode.compiled_lib_ext, plugins)
+        (archives_for_mode ~f_ext:Mode.compiled_lib_ext, plugins)
     in
     let main_module_name = main_module_name conf in
     let name = best_name conf in
@@ -918,6 +914,7 @@ module Library = struct
     let special_builtin_support = conf.special_builtin_support in
     let instrumentation_backend = conf.instrumentation_backend in
     let entry_modules = Lib_info.Source.Local in
+    let modes = { Lib_mode.Dict.ocaml = modes } in
     Lib_info.create ~loc ~path_kind:Local ~name ~kind ~status ~src_dir
       ~orig_src_dir ~obj_dir ~version ~synopsis ~main_module_name ~sub_systems
       ~requires ~foreign_objects ~plugins ~archives ~ppx_runtime_deps
