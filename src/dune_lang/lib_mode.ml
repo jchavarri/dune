@@ -7,29 +7,16 @@ let equal x y =
   match (x, y) with
   | Ocaml a, Ocaml b -> Mode.equal a b
 
-let compare x y =
-  match (x, y) with
-  | Ocaml a, Ocaml b -> Mode.compare a b
-
-let all = List.map ~f:(fun m -> Ocaml m) Mode.all
-
 let choose ocaml = function
   | Ocaml m -> ocaml m
 
-let compiled_lib_ext = choose Mode.compiled_lib_ext
-
-let to_string = function
-  | Ocaml m -> Mode.to_string m
+let to_string = choose Mode.to_string
 
 let encode t = Dune_sexp.Encoder.string (to_string t)
-
-let to_dyn t = Dyn.variant (to_string t) []
 
 let decode =
   let open Dune_sexp.Decoder in
   enum [ ("byte", Ocaml Byte); ("native", Ocaml Native) ]
-
-let variant = choose Mode.variant
 
 let of_cm_kind : Cm_kind.t -> t = function
   | Cmi | Cmo -> Ocaml Byte
@@ -42,19 +29,7 @@ module Dict = struct
 
   let to_dyn to_dyn { ocaml } = Mode.Dict.to_dyn to_dyn ocaml
 
-  let get t = function
-    | Ocaml m -> Mode.Dict.get t.ocaml m
-
-  let of_func f =
-    { ocaml = Mode.Dict.of_func (fun ~mode -> f ~mode:(Ocaml mode)) }
-
-  let map2 a b ~f = { ocaml = Mode.Dict.map2 a.ocaml b.ocaml ~f }
-
   let map t ~f = { ocaml = Mode.Dict.map ~f t.ocaml }
-
-  let make_all x = { ocaml = { byte = x; native = x } }
-
-  let make ~byte ~native = { ocaml = { byte; native } }
 
   module Set = struct
     type nonrec t = bool t
@@ -70,12 +45,7 @@ module Dict = struct
       l
 
     let of_list l =
-      let ocaml =
-        List.filter_map
-          ~f:(function
-            | Ocaml o -> Some o)
-          l
-      in
+      let ocaml = List.filter_map ~f:(choose Option.some) l in
       { ocaml = Mode.Dict.Set.of_list ocaml }
 
     let encode t = List.map ~f:encode (to_list t)
@@ -85,8 +55,6 @@ module Dict = struct
 
   module List = struct
     type nonrec 'a t = 'a list t
-
-    let empty = { ocaml = Mode.Dict.List.empty }
 
     let encode f { ocaml } =
       let open Dune_sexp.Encoder in
