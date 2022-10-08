@@ -23,6 +23,12 @@ let choose byte native = function
   | Byte -> byte
   | Native -> native
 
+let to_string = choose "byte" "native"
+
+let encode t = Dune_sexp.Encoder.string (to_string t)
+
+let to_dyn t = Dyn.variant (to_string t) []
+
 let compiled_unit_ext = choose (Cm_kind.ext Cmo) (Cm_kind.ext Cmx)
 
 let compiled_lib_ext = choose ".cma" ".cmxa"
@@ -35,10 +41,6 @@ let cm_kind = choose Cm_kind.Cmo Cmx
 
 let exe_ext = choose ".bc" ".exe"
 
-let of_cm_kind : Cm_kind.t -> t = function
-  | Cmi | Cmo -> Byte
-  | Cmx -> Native
-
 module Dict = struct
   let mode_equal = equal
 
@@ -50,6 +52,10 @@ module Dict = struct
   let equal f { byte; native } t = f byte t.byte && f native t.native
 
   let for_all { byte; native } ~f = f byte && f native
+
+  let to_dyn to_dyn { byte; native } =
+    let open Dyn in
+    record [ ("byte", to_dyn byte); ("native", to_dyn native) ]
 
   let get t = function
     | Byte -> t.byte
@@ -76,6 +82,10 @@ module Dict = struct
 
     let equal = equal Bool.equal
 
+    let to_dyn { byte; native } =
+      let open Dyn in
+      record [ ("byte", bool byte); ("native", bool native) ]
+
     let all = { byte = true; native = true }
 
     let to_list t =
@@ -88,6 +98,8 @@ module Dict = struct
       { byte = List.mem l Byte ~equal:mode_equal
       ; native = List.mem l Native ~equal:mode_equal
       }
+
+    let encode t = List.map ~f:encode (to_list t)
 
     let is_empty t = not (t.byte || t.native)
 
@@ -102,5 +114,16 @@ module Dict = struct
     type nonrec 'a t = 'a list t
 
     let empty = { byte = []; native = [] }
+
+    let encode f { byte; native } =
+      let open Dune_sexp.Encoder in
+      record_fields [ field_l "byte" f byte; field_l "native" f native ]
+
+    let decode f =
+      let open Dune_sexp.Decoder in
+      fields
+        (let+ byte = field ~default:[] "byte" (repeat f)
+         and+ native = field ~default:[] "native" (repeat f) in
+         { byte; native })
   end
 end

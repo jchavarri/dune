@@ -69,15 +69,13 @@ end = struct
     in
     List.concat_map
       ~f:(List.map ~f:(fun f -> (Section.Lib, f)))
-      [ archives.ocaml.byte
-      ; archives.ocaml.native
+      [ archives.byte
+      ; archives.native
       ; foreign_archives
       ; Lib_info.eval_native_archives_exn lib ~modules
       ; Lib_info.jsoo_runtime lib
       ]
-    @ List.map
-        ~f:(fun f -> (Section.Libexec, f))
-        (Lib_info.plugins lib).ocaml.native
+    @ List.map ~f:(fun f -> (Section.Libexec, f)) (Lib_info.plugins lib).native
 
   let dll_files ~(modes : Mode.Dict.Set.t) ~dynlink ~(ctx : Context.t) lib =
     if_
@@ -135,7 +133,7 @@ end = struct
     in
     let { Lib_config.has_native; ext_obj; _ } = lib_config in
     let modes = Dune_file.Mode_conf.Set.eval lib.modes ~has_native in
-    let { Mode.Dict.byte; native } = modes in
+    let { Lib_mode.Dict.ocaml = { byte; native } as modes } = modes in
     let module_files =
       let inside_subdir f =
         match lib_subdir with

@@ -76,7 +76,7 @@ let jsoo_archives ~ctx lib =
   | Some a -> [ a ]
   | None ->
     let archives = Lib_info.archives info in
-    List.map archives.ocaml.byte ~f:(fun archive ->
+    List.map archives.byte ~f:(fun archive ->
         Path.build
           (in_build_dir ~ctx
              [ Lib_name.to_string (Lib.name lib)
@@ -144,7 +144,7 @@ let setup_separate_compilation_rules sctx components =
       let info = Lib.info pkg in
       let lib_name = Lib_name.to_string (Lib.name pkg) in
       let archives =
-        let archives = (Lib_info.archives info).ocaml.byte in
+        let archives = (Lib_info.archives info).byte in
         (* Special case for the stdlib because it is not referenced in the
            META *)
         match lib_name with

@@ -822,10 +822,10 @@ module Library = struct
     let archive ?(dir = dir) ext = archive conf ~dir ~ext in
     let modes = Mode_conf.Set.eval ~has_native conf.modes in
     let archive_for_mode ~f_ext ~mode =
-      if Lib_mode.Dict.get modes mode then Some (archive (f_ext mode)) else None
+      if Mode.Dict.get modes mode then Some (archive (f_ext mode)) else None
     in
     let archives_for_mode ~f_ext =
-      Lib_mode.Dict.of_func (fun ~mode ->
+      Mode.Dict.of_func (fun ~mode ->
           archive_for_mode ~f_ext ~mode |> Option.to_list)
     in
     let jsoo_runtime =
@@ -864,17 +864,20 @@ module Library = struct
     in
     let foreign_objects = Lib_info.Source.Local in
     let archives, plugins =
-      if virtual_library then (Mode.Dict.make_both [], Mode.Dict.make_both [])
+      if virtual_library then
+        (Lib_mode.Dict.make_all [], Lib_mode.Dict.make_all [])
       else
         let plugins =
           let archive_file ~mode =
-            archive_for_mode ~f_ext:Lib_mode.plugin_ext ~mode |> Option.to_list
+            archive_for_mode ~f_ext:Mode.plugin_ext ~mode |> Option.to_list
           in
-          { Mode.Dict.native =
-              (if Dynlink_supported.get conf.dynlink natdynlink_supported then
-               archive_file ~mode:(Ocaml Native)
-              else [])
-          ; byte = archive_file ~mode:(Ocaml Byte)
+          { Lib_mode.Dict.ocaml =
+              { native =
+                  (if Dynlink_supported.get conf.dynlink natdynlink_supported
+                  then archive_file ~mode:(Ocaml Native)
+                  else [])
+              ; byte = archive_file ~mode:(Ocaml Byte)
+              }
           }
         in
         (archives_for_mode ~f_ext:Lib_mode.compiled_lib_ext, plugins)

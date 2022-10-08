@@ -20,9 +20,11 @@ val plugin_ext : t -> string
 
 val cm_kind : t -> Cm_kind.t
 
-val of_cm_kind : Cm_kind.t -> t
-
 val variant : t -> Variant.t
+
+val to_string : t -> string
+
+val to_dyn : t -> Dyn.t
 
 module Dict : sig
   type mode = t
@@ -36,12 +38,18 @@ module Dict : sig
 
   val for_all : 'a t -> f:('a -> bool) -> bool
 
+  val to_dyn : ('a -> Dyn.t) -> 'a t -> Dyn.t
+
   module List : sig
     type 'a dict
 
     type 'a t = 'a list dict
 
     val empty : 'a t
+
+    val decode : 'a Dune_sexp.Decoder.t -> 'a t Dune_sexp.Decoder.t
+
+    val encode : 'a Dune_sexp.Encoder.t -> 'a t -> Dune_sexp.t list
   end
   with type 'a dict := 'a t
 
@@ -63,6 +71,10 @@ module Dict : sig
 
   module Set : sig
     type nonrec t = bool t
+
+    val to_dyn : t -> Dyn.t
+
+    val encode : t -> Dune_sexp.t list
 
     val equal : t -> t -> bool
 

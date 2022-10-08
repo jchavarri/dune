@@ -865,10 +865,14 @@ module DB = struct
     get context
 end
 
-let compiler t (mode : Mode.t) =
+let ocaml_compiler t (mode : Mode.t) =
   match mode with
   | Byte -> Ok t.ocamlc
   | Native -> t.ocamlopt
+
+let compiler t (mode : Lib_mode.t) =
+  match mode with
+  | Ocaml m -> ocaml_compiler t m
 
 let best_mode t : Mode.t =
   match t.ocamlopt with

@@ -141,16 +141,16 @@ let plugin p s = rule "plugin" [ Pos p ] Set s
 
 let exists_if s = rule "exists_if" [] Set s
 
-let archives ?(kind = [ Lib_mode.Ocaml Byte; Ocaml Native ]) name =
+let archives ?(kind = [ Mode.Byte; Mode.Native ]) name =
   List.filter_map
-    [ (Lib_mode.Ocaml Byte, archive, Lib_mode.compiled_lib_ext)
-    ; (Ocaml Native, archive, Lib_mode.compiled_lib_ext)
-    ; (Ocaml Byte, plugin, Lib_mode.compiled_lib_ext)
-    ; (Ocaml Native, plugin, Lib_mode.plugin_ext)
+    [ (Mode.Byte, archive, Mode.compiled_lib_ext)
+    ; (Mode.Native, archive, Mode.compiled_lib_ext)
+    ; (Mode.Byte, plugin, Mode.compiled_lib_ext)
+    ; (Mode.Native, plugin, Mode.plugin_ext)
     ]
     ~f:(fun (k, f, ext) ->
-      if List.mem kind k ~equal:Lib_mode.equal then
-        Some (f (Lib_mode.to_string k) (name ^ ext k))
+      if List.mem kind k ~equal:Mode.equal then
+        Some (f (Mode.to_string k) (name ^ ext k))
       else None)
 
 (* fake entry we use to pass down the list of toplevel modules for
@@ -215,10 +215,10 @@ let pre_ocaml_5_builtins ~stdlib_dir ~version:ocaml_version =
         ; sub "common" []
         ; sub "bytecomp" [ "compiler-libs.common" ]
         ; sub "optcomp" [ "compiler-libs.common" ]
-        ; sub "toplevel" [ "compiler-libs.bytecomp" ] ~kind:[ Ocaml Byte ]
+        ; sub "toplevel" [ "compiler-libs.bytecomp" ] ~kind:[ Byte ]
         ; sub "native-toplevel"
             [ "compiler-libs.optcomp"; "dynlink" ]
-            ~kind:[ Ocaml Native ]
+            ~kind:[ Native ]
             ~exists_if_ext:(Mode.compiled_lib_ext Native)
         ]
     }

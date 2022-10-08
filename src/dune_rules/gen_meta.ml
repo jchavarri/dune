@@ -58,10 +58,10 @@ let archives ?(preds = []) lib =
   let archives = Lib_info.archives info in
   let plugins = Lib_info.plugins info in
   let make ps = String.concat ~sep:" " (List.map ps ~f:Path.basename) in
-  [ archive (preds @ [ Pos "byte" ]) (make archives.ocaml.byte)
-  ; archive (preds @ [ Pos "native" ]) (make archives.ocaml.native)
-  ; plugin (preds @ [ Pos "byte" ]) (make plugins.ocaml.byte)
-  ; plugin (preds @ [ Pos "native" ]) (make plugins.ocaml.native)
+  [ archive (preds @ [ Pos "byte" ]) (make archives.byte)
+  ; archive (preds @ [ Pos "native" ]) (make archives.native)
+  ; plugin (preds @ [ Pos "byte" ]) (make plugins.byte)
+  ; plugin (preds @ [ Pos "native" ]) (make plugins.native)
   ]
 
 let gen_lib pub_name lib ~path ~version =

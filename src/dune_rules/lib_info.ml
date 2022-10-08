@@ -298,8 +298,8 @@ type 'path t =
   ; obj_dir : 'path Obj_dir.t
   ; version : string option
   ; synopsis : string option
-  ; archives : 'path list Lib_mode.Dict.t
-  ; plugins : 'path list Lib_mode.Dict.t
+  ; archives : 'path list Mode.Dict.t
+  ; plugins : 'path list Mode.Dict.t
   ; foreign_objects : 'path list Source.t
   ; foreign_archives : 'path list
   ; native_archives : 'path native_archives
@@ -376,8 +376,8 @@ let equal (type a) (t : a t)
   && Obj_dir.equal obj_dir t.obj_dir
   && Option.equal String.equal version t.version
   && Option.equal String.equal synopsis t.synopsis
-  && Lib_mode.Dict.equal (List.equal path_equal) archives t.archives
-  && Lib_mode.Dict.equal (List.equal path_equal) plugins t.plugins
+  && Mode.Dict.equal (List.equal path_equal) archives t.archives
+  && Mode.Dict.equal (List.equal path_equal) plugins t.plugins
   && Source.equal (List.equal path_equal) foreign_objects t.foreign_objects
   && List.equal path_equal foreign_archives t.foreign_archives
   && equal_native_archives path_equal native_archives t.native_archives
@@ -581,7 +581,7 @@ type local = Path.Build.t t
 let map t ~path_kind ~f_path ~f_obj_dir =
   let f = f_path in
   let list = List.map ~f in
-  let mode_list = Lib_mode.Dict.map ~f:list in
+  let mode_list = Mode.Dict.map ~f:list in
   let native_archives =
     match t.native_archives with
     | Needs_module_info t -> Needs_module_info (f t)
@@ -660,8 +660,8 @@ let to_dyn path
     ; ("obj_dir", Obj_dir.to_dyn obj_dir)
     ; ("version", option string version)
     ; ("synopsis", option string synopsis)
-    ; ("archives", Lib_mode.Dict.to_dyn (list path) archives)
-    ; ("plugins", Lib_mode.Dict.to_dyn (list path) plugins)
+    ; ("archives", Mode.Dict.to_dyn (list path) archives)
+    ; ("plugins", Mode.Dict.to_dyn (list path) plugins)
     ; ("foreign_objects", Source.to_dyn (list path) foreign_objects)
     ; ("foreign_archives", list path foreign_archives)
     ; ("native_archives", dyn_of_native_archives path native_archives)

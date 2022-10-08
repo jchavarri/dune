@@ -87,7 +87,7 @@ val loc : _ t -> Loc.t
     will always have zero or one element in the list (zero if they are not
     buildable in the corresponding mode). External libraries, however, can have
     more than one element in the list, because the format allows for that. *)
-val archives : 'path t -> 'path list Lib_mode.Dict.t
+val archives : 'path t -> 'path list Mode.Dict.t
 
 (* TODO: Rename [foreign_archives] to [foreign_lib_files] and [native_archives]
    to [native_lib_files] for consistent naming with [foreign_dll_files]. *)
@@ -118,7 +118,7 @@ val exit_module : _ t -> Module_name.t option
 
 val instrumentation_backend : _ t -> (Loc.t * Lib_name.t) option
 
-val plugins : 'path t -> 'path list Lib_mode.Dict.t
+val plugins : 'path t -> 'path list Mode.Dict.t
 
 val src_dir : 'path t -> 'path
 
@@ -217,8 +217,8 @@ val create :
   -> sub_systems:Sub_system_info.t Sub_system_name.Map.t
   -> requires:Lib_dep.t list
   -> foreign_objects:'a list Source.t
-  -> plugins:'a list Lib_mode.Dict.t
-  -> archives:'a list Lib_mode.Dict.t
+  -> plugins:'a list Mode.Dict.t
+  -> archives:'a list Mode.Dict.t
   -> ppx_runtime_deps:(Loc.t * Lib_name.t) list
   -> foreign_archives:'a list
   -> native_archives:'a native_archives

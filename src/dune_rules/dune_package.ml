@@ -36,8 +36,8 @@ module Lib = struct
     let no_loc f (_loc, x) = f x in
     let path = Dpath.Local.encode ~dir:package_root in
     let paths name f = field_l name path f in
-    let mode_paths name (xs : Path.t Lib_mode.Dict.List.t) =
-      field_l name sexp (Lib_mode.Dict.List.encode path xs)
+    let mode_paths name (xs : Path.t Mode.Dict.List.t) =
+      field_l name sexp (Mode.Dict.List.encode path xs)
     in
     let libs name = field_l name (no_loc Lib_name.encode) in
     let name = Lib_info.name info in
@@ -109,8 +109,7 @@ module Lib = struct
     let libs s = field_l s (located Lib_name.decode) in
     let paths s = field_l s path in
     let mode_paths name =
-      field ~default:Lib_mode.Dict.List.empty name
-        (Lib_mode.Dict.List.decode path)
+      field ~default:Mode.Dict.List.empty name (Mode.Dict.List.decode path)
     in
     fields
       (let* main_module_name = field_o "main_module_name" Module_name.decode in
@@ -137,7 +136,7 @@ module Lib = struct
          if lang.version >= (2, 0) then paths "foreign_archives"
          else
            let+ m = mode_paths "foreign_archives" in
-           m.ocaml.byte
+           m.byte
        and+ native_archives = paths "native_archives"
        and+ jsoo_runtime = paths "jsoo_runtime"
        and+ requires = field_l "requires" (Lib_dep.decode ~allow_re_export:true)

@@ -18,9 +18,7 @@ module Link_params = struct
     and dll_files = Lib_info.foreign_dll_files info in
     (* OCaml library archives [*.cma] and [*.cmxa] are directly listed in the
        command line. *)
-    let deps =
-      Lib_mode.Dict.get (Lib_info.archives info) (Link_mode.mode mode)
-    in
+    let deps = Mode.Dict.get (Lib_info.archives info) (Link_mode.mode mode) in
     (* Foreign archives [lib*.a] and [dll*.so] and native archives [lib*.a] are
        declared as hidden dependencies, and appropriate [-I] flags are provided
        separately to help the linker locate them. *)
@@ -175,7 +173,7 @@ module Lib_and_module = struct
                    (Command.Args.S
                       (Dep
                          (Obj_dir.Module.cm_file_exn obj_dir m
-                            ~kind:(Lib_mode.cm_kind (Link_mode.mode mode)))
+                            ~kind:(Mode.cm_kind (Link_mode.mode mode)))
                       ::
                       (match mode with
                       | Native ->

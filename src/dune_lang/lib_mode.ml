@@ -18,11 +18,8 @@ let choose ocaml = function
 
 let compiled_lib_ext = choose Mode.compiled_lib_ext
 
-let plugin_ext = choose Mode.plugin_ext
-
 let to_string = function
-  | Ocaml Byte -> "byte"
-  | Ocaml Native -> "native"
+  | Ocaml m -> Mode.to_string m
 
 let encode t = Dune_sexp.Encoder.string (to_string t)
 
@@ -34,16 +31,16 @@ let decode =
 
 let variant = choose Mode.variant
 
-let cm_kind = choose Mode.cm_kind
+let of_cm_kind : Cm_kind.t -> t = function
+  | Cmi | Cmo -> Ocaml Byte
+  | Cmx -> Ocaml Native
 
 module Dict = struct
   type 'a t = { ocaml : 'a Mode.Dict.t }
 
   let equal f { ocaml } t : bool = Mode.Dict.equal f ocaml t.ocaml
 
-  let to_dyn to_dyn { ocaml } =
-    let open Dyn in
-    record [ ("byte", to_dyn ocaml.byte); ("native", to_dyn ocaml.native) ]
+  let to_dyn to_dyn { ocaml } = Mode.Dict.to_dyn to_dyn ocaml
 
   let get t = function
     | Ocaml m -> Mode.Dict.get t.ocaml m
@@ -64,9 +61,7 @@ module Dict = struct
 
     let equal = equal Bool.equal
 
-    let to_dyn { ocaml } =
-      let open Dyn in
-      record [ ("byte", bool ocaml.byte); ("native", bool ocaml.native) ]
+    let to_dyn { ocaml } = Mode.Dict.Set.to_dyn ocaml
 
     let all = { ocaml = Mode.Dict.Set.all }
 

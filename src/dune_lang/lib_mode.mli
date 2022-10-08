@@ -10,10 +10,6 @@ val all : t list
 
 val compiled_lib_ext : t -> string
 
-val plugin_ext : t -> string
-
-val cm_kind : t -> Cm_kind.t
-
 val decode : t Dune_sexp.Decoder.t
 
 val variant : t -> Variant.t
@@ -21,6 +17,8 @@ val variant : t -> Variant.t
 val to_string : t -> string
 
 val to_dyn : t -> Dyn.t
+
+val of_cm_kind : Cm_kind.t -> t
 
 module Dict : sig
   type mode = t
