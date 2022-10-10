@@ -403,6 +403,7 @@ module Mode_conf = struct
       | Byte
       | Native
       | Best
+      | Melange
 
     let compare x y =
       match (x, y) with
@@ -413,16 +414,26 @@ module Mode_conf = struct
       | Native, _ -> Lt
       | _, Native -> Gt
       | Best, Best -> Eq
+      | Best, _ -> Lt
+      | _, Best -> Gt
+      | Melange, Melange -> Eq
   end
 
   include T
 
-  let decode = enum [ ("byte", Byte); ("native", Native); ("best", Best) ]
+  let decode =
+    enum
+      [ ("byte", Byte)
+      ; ("native", Native)
+      ; ("best", Best)
+      ; ("melange_experimental", Melange)
+      ]
 
   let to_string = function
     | Byte -> "byte"
     | Native -> "native"
     | Best -> "best"
+    | Melange -> "melange_experimental"
 
   let to_dyn t = Dyn.variant (to_string t) []
 
@@ -439,20 +450,23 @@ module Mode_conf = struct
       { byte : 'a
       ; native : 'a
       ; best : 'a
+      ; melange : 'a
       }
 
     let find t = function
       | Byte -> t.byte
       | Native -> t.native
       | Best -> t.best
+      | Melange -> t.melange
 
     let update t key ~f =
       match key with
       | Byte -> { t with byte = f t.byte }
       | Native -> { t with native = f t.native }
       | Best -> { t with best = f t.best }
+      | Melange -> { t with melange = f t.melange }
 
-    let make_one x = { byte = x; native = x; best = x }
+    let make_one x = { byte = x; native = x; best = x; melange = x }
   end
 
   module Set = struct
@@ -492,7 +506,7 @@ module Mode_conf = struct
 
     let eval_detailed t ~has_native =
       let exists = function
-        | Best | Byte -> true
+        | Best | Byte | Melange -> true
         | Native -> has_native
       in
       let get key : Details.t =
@@ -512,10 +526,11 @@ module Mode_conf = struct
       let open Details in
       let byte = get Byte ||| validate best ~if_:(best_mode = Byte) in
       let native = get Native ||| validate best ~if_:(best_mode = Native) in
-      { Mode.Dict.byte; native }
+      let melange = get Melange in
+      { Lib_mode.Dict.ocaml = { Mode.Dict.byte; native }; melange }
 
     let eval t ~has_native =
-      eval_detailed t ~has_native |> Mode.Dict.map ~f:Option.is_some
+      eval_detailed t ~has_native |> Lib_mode.Dict.map ~f:Option.is_some
   end
 end
 
@@ -822,7 +837,8 @@ module Library = struct
     let archive ?(dir = dir) ext = archive conf ~dir ~ext in
     let modes = Mode_conf.Set.eval ~has_native conf.modes in
     let archive_for_mode ~f_ext ~mode =
-      if Mode.Dict.get modes mode then Some (archive (f_ext mode)) else None
+      if Mode.Dict.get modes.ocaml mode then Some (archive (f_ext mode))
+      else None
     in
     let archives_for_mode ~f_ext =
       Mode.Dict.of_func (fun ~mode ->
@@ -841,7 +857,7 @@ module Library = struct
     let foreign_archives = foreign_lib_files conf ~dir ~ext_lib in
     let native_archives =
       let archive = archive ext_lib in
-      if virtual_library || not modes.native then Lib_info.Files []
+      if virtual_library || not modes.ocaml.native then Lib_info.Files []
       else if
         Option.is_some conf.implements
         || Lib_config.linker_can_create_empty_archives lib_config
@@ -855,7 +871,8 @@ module Library = struct
     let jsoo_archive =
       (* XXX we shouldn't access the directory of the obj_dir directly. We
          should use something like [Obj_dir.Archive.obj] instead *)
-      if modes.byte then Some (archive ~dir:(Obj_dir.obj_dir obj_dir) ".cma.js")
+      if modes.ocaml.byte then
+        Some (archive ~dir:(Obj_dir.obj_dir obj_dir) ".cma.js")
       else None
     in
     let virtual_ =
@@ -914,7 +931,7 @@ module Library = struct
     let special_builtin_support = conf.special_builtin_support in
     let instrumentation_backend = conf.instrumentation_backend in
     let entry_modules = Lib_info.Source.Local in
-    let modes = { Lib_mode.Dict.ocaml = modes } in
+    let modes = modes in
     Lib_info.create ~loc ~path_kind:Local ~name ~kind ~status ~src_dir
       ~orig_src_dir ~obj_dir ~version ~synopsis ~main_module_name ~sub_systems
       ~requires ~foreign_objects ~plugins ~archives ~ppx_runtime_deps
@@ -1242,30 +1259,32 @@ module Executables = struct
       match t with
       | Byte_complete -> ".bc.exe"
       | Other { mode; kind } -> (
-        let same_as_mode : Mode.t =
+        let same_as_mode : Lib_mode.t =
           match mode with
-          | Byte -> Byte
+          | Byte -> Ocaml Byte
           | Native | Best ->
             (* From the point of view of the extension, [native] and [best] are
                the same *)
-            Native
+            Ocaml Native
+          | Melange -> Melange
         in
         match (same_as_mode, kind) with
-        | Byte, C -> ".bc.c"
-        | Native, C ->
+        | Ocaml Byte, C -> ".bc.c"
+        | Ocaml Native, C ->
           User_error.raise ~loc
             [ Pp.text "C file generation only supports bytecode!" ]
-        | Byte, Exe -> ".bc"
-        | Native, Exe -> ".exe"
-        | Byte, Object -> ".bc" ^ ext_obj
-        | Native, Object -> ".exe" ^ ext_obj
-        | Byte, Shared_object -> ".bc" ^ ext_dll
-        | Native, Shared_object -> ext_dll
-        | mode, Plugin -> Mode.plugin_ext mode
-        | Byte, Js -> ".bc.js"
-        | Native, Js ->
+        | Ocaml Byte, Exe -> ".bc"
+        | Ocaml Native, Exe -> ".exe"
+        | Ocaml Byte, Object -> ".bc" ^ ext_obj
+        | Ocaml Native, Object -> ".exe" ^ ext_obj
+        | Ocaml Byte, Shared_object -> ".bc" ^ ext_dll
+        | Ocaml Native, Shared_object -> ext_dll
+        | Ocaml mode, Plugin -> Mode.plugin_ext mode
+        | Ocaml Byte, Js -> ".bc.js"
+        | Ocaml Native, Js ->
           User_error.raise ~loc
-            [ Pp.text "Javascript generation only supports bytecode!" ])
+            [ Pp.text "Javascript generation only supports bytecode!" ]
+        | Melange, _ -> ".bs.js")
 
     module O = Comparable.Make (T)
 
@@ -1413,6 +1432,7 @@ module Executables = struct
             match mode with
             | Byte_complete | Other { mode = Byte; _ } -> ".bc"
             | Other { mode = Native | Best; _ } -> ".exe"
+            | Other { mode = Melange; _ } -> ".bs.js"
           in
           Names.install_conf names ~ext ~enabled_if
       in

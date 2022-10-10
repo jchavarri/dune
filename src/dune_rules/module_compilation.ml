@@ -195,6 +195,7 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
 
 let build_module ?(precompiled_cmi = false) cctx m =
   let open Memo.O in
+  let modes = Compilation_context.modes cctx in
   let* () = build_cm cctx m ~precompiled_cmi ~cm_kind:Cmo ~phase:None
   and* () =
     let ctx = CC.context cctx in

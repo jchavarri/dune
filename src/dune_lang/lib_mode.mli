@@ -1,6 +1,8 @@
 open Ocaml
 
-type t = Ocaml of Mode.t
+type t =
+  | Ocaml of Mode.t
+  | Melange
 
 val equal : t -> t -> bool
 
@@ -13,7 +15,10 @@ val of_cm_kind : Cm_kind.t -> t
 module Dict : sig
   type mode = t
 
-  type 'a t = { ocaml : 'a Mode.Dict.t }
+  type 'a t =
+    { ocaml : 'a Mode.Dict.t
+    ; melange : 'a
+    }
 
   val to_dyn : ('a -> Dyn.t) -> 'a t -> Dyn.t
 
@@ -38,10 +43,6 @@ module Dict : sig
     val encode : t -> Dune_sexp.t list
 
     val equal : t -> t -> bool
-
-    val all : t
-
-    val is_empty : t -> bool
 
     val of_list : mode list -> t
   end

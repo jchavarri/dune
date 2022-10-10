@@ -321,12 +321,12 @@ end = struct
       let modes : Lib_mode.Dict.Set.t =
         (* libraries without archives are compatible with all modes. mainly a
            hack for compiler-libs which doesn't have any archives *)
-        let discovered =
-          Lib_mode.Dict.map ~f:List.is_non_empty
-            { Lib_mode.Dict.ocaml = archives }
+        let discovered = Mode.Dict.map ~f:List.is_non_empty archives in
+        let modes =
+          if Mode.Dict.Set.is_empty discovered then Mode.Dict.Set.all
+          else discovered
         in
-        if Lib_mode.Dict.Set.is_empty discovered then Lib_mode.Dict.Set.all
-        else discovered
+        { Lib_mode.Dict.ocaml = modes; melange = false }
       in
       let+ (info : Path.t Lib_info.t) =
         let kind = kind t in
