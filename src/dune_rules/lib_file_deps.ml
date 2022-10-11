@@ -14,7 +14,7 @@ module Group = struct
     | Melange of melange
     | Header
 
-  let all = [ Ocaml Cmi; Ocaml Cmx; Melange Cmi; Header ]
+  let all = [ Ocaml Cmi; Ocaml Cmx; Melange Cmi; Melange Cmj; Header ]
 
   let ext = function
     | Ocaml Cmi -> Cm_kind.ext Cmi

@@ -143,7 +143,7 @@ module Dict = struct
       record_fields
         [ field_l "byte" f ocaml.byte
         ; field_l "native" f ocaml.native
-        ; field_l "melange" f melange
+        ; field_l "melange_experimental" f melange
         ]
 
     let decode f =
@@ -151,7 +151,7 @@ module Dict = struct
       fields
         (let+ byte = field ~default:[] "byte" (repeat f)
          and+ native = field ~default:[] "native" (repeat f)
-         and+ melange = field ~default:[] "melange" (repeat f) in
+         and+ melange = field ~default:[] "melange_experimental" (repeat f) in
          { ocaml = { byte; native }; melange })
   end
 end

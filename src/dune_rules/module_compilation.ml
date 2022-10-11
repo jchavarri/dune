@@ -113,7 +113,12 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
       | Some Compile -> linear :: other_targets
       | Some Emit -> other_targets
       | Some All | None -> obj :: other_targets)
-    | Ocaml (Cmi | Cmo) | Melange (Cmi | Cmj) -> other_targets
+    | Ocaml (Cmi | Cmo) | Melange Cmi -> other_targets
+    | Melange Cmj ->
+      let melange_js =
+        Obj_dir.Module.obj_file obj_dir m ~kind:(Melange Cmj) ~ext:".js"
+      in
+      melange_js :: other_targets
   in
   let dep_graph = Ml_kind.Dict.get (CC.dep_graphs cctx) ml_kind in
   let opaque = CC.opaque cctx in
@@ -249,7 +254,11 @@ let build_module ?(precompiled_cmi = false) cctx m =
                  action_with_targets >>= Super_context.add_rule sctx ~dir))
   in
   Memo.when_ melange (fun () ->
-      build_cm cctx m ~precompiled_cmi ~cm_kind:(Melange Cmj) ~phase:None)
+      let* () =
+        build_cm cctx m ~precompiled_cmi ~cm_kind:(Melange Cmj) ~phase:None
+      in
+      Memo.when_ (not precompiled_cmi) (fun () ->
+          build_cm cctx m ~precompiled_cmi ~cm_kind:(Melange Cmi) ~phase:None))
 
 let ocamlc_i ?(flags = []) ~deps cctx (m : Module.t) ~output =
   let sctx = CC.super_context cctx in
