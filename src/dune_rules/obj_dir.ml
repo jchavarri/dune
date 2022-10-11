@@ -80,6 +80,8 @@ module External = struct
 
   let native_dir t = t.public_dir
 
+  let melange_dir t = t.public_dir
+
   let dir t = t.public_dir
 
   let obj_dir t = t.public_dir
@@ -158,14 +160,19 @@ module Local = struct
 
   let odoc_dir t = t.byte_dir
 
-  let all_obj_dirs t ~(mode : Mode.t) =
-    let dirs = [ t.byte_dir; public_cmi_dir t ] in
-    let dirs =
-      match mode with
-      | Byte -> dirs
-      | Native -> t.native_dir :: dirs
-    in
-    Path.Build.Set.of_list dirs |> Path.Build.Set.to_list
+  let all_obj_dirs t ~(mode : Lib_mode.t) =
+    match mode with
+    | Ocaml mode ->
+      let dirs = [ t.byte_dir; public_cmi_dir t ] in
+      let dirs =
+        match mode with
+        | Byte -> dirs
+        | Native -> t.native_dir :: dirs
+      in
+      Path.Build.Set.of_list dirs |> Path.Build.Set.to_list
+    | Melange ->
+      [ t.melange_dir; public_cmi_dir t ]
+      |> Path.Build.Set.of_list |> Path.Build.Set.to_list
 
   let make_lib ~dir ~has_private_modules ~private_lib lib_name =
     let obj_dir = Paths.library_object_directory ~dir lib_name in
@@ -251,6 +258,8 @@ let public_cmi_dir = get_path ~l:Local.public_cmi_dir ~e:External.public_cmi_dir
 let byte_dir = get_path ~l:Local.byte_dir ~e:External.byte_dir
 
 let native_dir = get_path ~l:Local.native_dir ~e:External.native_dir
+
+let melange_dir = get_path ~l:Local.melange_dir ~e:External.melange_dir
 
 let dir = get_path ~l:Local.dir ~e:External.dir
 

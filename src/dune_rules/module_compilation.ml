@@ -140,7 +140,13 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
   in
   let dir = ctx.build_dir in
   let flags, sandbox =
-    let flags = Ocaml_flags.get (CC.flags cctx) mode in
+    let flags =
+      match mode with
+      | Ocaml m -> Ocaml_flags.get (CC.flags cctx) m
+      | Melange ->
+        (* TODO: define Melange default flags somewhere, should melange rules read from [flags] stanza as well? *)
+        Ocaml_flags.get (CC.flags cctx) Byte
+    in
     match Module.pp_flags m with
     | None -> (flags, sandbox)
     | Some (pp, sandbox') ->
@@ -175,7 +181,8 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
           [ Command.Args.dyn flags
           ; cmt_args
           ; Command.Args.S obj_dirs
-          ; Command.Args.as_any (Cm_kind.Dict.get (CC.includes cctx) cm_kind)
+          ; Command.Args.as_any
+              (Lib_mode.Cm_kind.Dict.get (CC.includes cctx) cm_kind)
           ; As extra_args
           ; A "-no-alias-deps"
           ; opaque_arg
@@ -227,7 +234,7 @@ let build_module ?(precompiled_cmi = false) cctx m =
               build_cm cctx m ~precompiled_cmi ~cm_kind:(Ocaml Cmi) ~phase:None)
         in
         let obj_dir = CC.obj_dir cctx in
-        match Obj_dir.Module.cm_file obj_dir m ~kind:Cm_kind.Cmo with
+        match Obj_dir.Module.cm_file obj_dir m ~kind:(Ocaml Cmo) with
         | None -> Memo.return ()
         | Some src ->
           Compilation_context.js_of_ocaml cctx
@@ -256,7 +263,8 @@ let ocamlc_i ?(flags = []) ~deps cctx (m : Module.t) ~output =
       (let open Action_builder.O in
       let+ deps = Ml_kind.Dict.get deps Impl in
       List.concat_map deps ~f:(fun m ->
-          [ Path.build (Obj_dir.Module.cm_file_exn obj_dir m ~kind:Cmi) ]))
+          [ Path.build (Obj_dir.Module.cm_file_exn obj_dir m ~kind:(Ocaml Cmi))
+          ]))
   in
   let ocaml_flags = Ocaml_flags.get (CC.flags cctx) Mode.Byte in
   let modules = Compilation_context.modules cctx in
@@ -269,7 +277,8 @@ let ocamlc_i ?(flags = []) ~deps cctx (m : Module.t) ~output =
              [ Command.Args.dyn ocaml_flags
              ; A "-I"
              ; Path (Path.build (Obj_dir.byte_dir obj_dir))
-             ; Command.Args.as_any (Cm_kind.Dict.get (CC.includes cctx) Cmo)
+             ; Command.Args.as_any
+                 (Lib_mode.Cm_kind.Dict.get (CC.includes cctx) (Ocaml Cmo))
              ; opens modules m
              ; As flags
              ; A "-short-paths"

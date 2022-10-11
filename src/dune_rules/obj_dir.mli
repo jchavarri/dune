@@ -45,6 +45,9 @@ val native_dir : 'path t -> 'path
 (** The private compiled byte file directories, and all cmi *)
 val byte_dir : 'path t -> 'path
 
+(** The private compiled melange file directories, and all cmi *)
+val melange_dir : 'path t -> 'path
+
 val all_cmis : 'path t -> 'path list
 
 (** The public compiled cmi file directory *)
@@ -52,7 +55,7 @@ val public_cmi_dir : 'path t -> 'path
 
 val odoc_dir : 'path t -> 'path
 
-val all_obj_dirs : 'path t -> mode:Mode.t -> 'path list
+val all_obj_dirs : 'path t -> mode:Lib_mode.t -> 'path list
 
 (** Create the object directory for a library *)
 val make_lib :

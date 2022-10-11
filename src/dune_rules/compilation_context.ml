@@ -1,20 +1,21 @@
 open Import
 
 module Includes = struct
-  type t = Command.Args.without_targets Command.Args.t Cm_kind.Dict.t
+  type t = Command.Args.without_targets Command.Args.t Lib_mode.Cm_kind.Dict.t
 
-  let make ~project ~opaque ~requires : _ Cm_kind.Dict.t =
+  let make ~project ~opaque ~requires : _ Lib_mode.Cm_kind.Dict.t =
     let open Resolve.Memo.O in
     let iflags libs mode = Lib_flags.L.include_flags ~project libs mode in
-    let cmi_includes =
+    let make_includes_args groups =
       Command.Args.memo
         (Resolve.Memo.args
            (let+ libs = requires in
             Command.Args.S
               [ iflags libs Byte
-              ; Hidden_deps (Lib_file_deps.deps libs ~groups:[ Cmi ])
+              ; Hidden_deps (Lib_file_deps.deps libs ~groups)
               ]))
     in
+    let cmi_includes = make_includes_args [ Ocaml Cmi ] in
     let cmx_includes =
       Command.Args.memo
         (Resolve.Memo.args
@@ -25,17 +26,22 @@ module Includes = struct
                   (if opaque then
                    List.map libs ~f:(fun lib ->
                        ( lib
-                       , if Lib.is_local lib then [ Lib_file_deps.Group.Cmi ]
-                         else [ Cmi; Cmx ] ))
+                       , if Lib.is_local lib then
+                           [ Lib_file_deps.Group.Ocaml Cmi ]
+                         else [ Ocaml Cmi; Ocaml Cmx ] ))
                    |> Lib_file_deps.deps_with_exts
                   else
                     Lib_file_deps.deps libs
-                      ~groups:[ Lib_file_deps.Group.Cmi; Cmx ])
+                      ~groups:[ Lib_file_deps.Group.Ocaml Cmi; Ocaml Cmx ])
               ]))
     in
-    { cmi = cmi_includes; cmo = cmi_includes; cmx = cmx_includes }
+    let melange_cmi_includes = make_includes_args [ Melange Cmi ] in
+    let melange_cmj_includes = make_includes_args [ Melange Cmj ] in
+    { ocaml = { cmi = cmi_includes; cmo = cmi_includes; cmx = cmx_includes }
+    ; melange = { cmi = melange_cmi_includes; cmj = melange_cmj_includes }
+    }
 
-  let empty = Cm_kind.Dict.make_all Command.Args.empty
+  let empty = Lib_mode.Cm_kind.Dict.make_all Command.Args.empty
 end
 
 type opaque =

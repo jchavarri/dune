@@ -1,9 +1,17 @@
 open Import
 
 module Group : sig
-  type t =
+  type ocaml =
     | Cmi
     | Cmx
+
+  type melange =
+    | Cmi
+    | Cmj
+
+  type t =
+    | Ocaml of ocaml
+    | Melange of melange
     | Header
 end
 

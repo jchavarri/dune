@@ -20,6 +20,25 @@ module Cm_kind : sig
   val cmi : t -> t
 
   val to_dyn : t -> Dyn.t
+
+  module Dict : sig
+    type cm_kind = t
+
+    type 'a melange =
+      { cmi : 'a
+      ; cmj : 'a
+      }
+
+    type 'a t =
+      { ocaml : 'a Cm_kind.Dict.t
+      ; melange : 'a melange
+      }
+
+    val get : 'a t -> cm_kind -> 'a
+
+    val make_all : 'a -> 'a t
+  end
+  with type cm_kind := t
 end
 
 val equal : t -> t -> bool
