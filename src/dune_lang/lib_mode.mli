@@ -4,6 +4,24 @@ type t =
   | Ocaml of Mode.t
   | Melange
 
+module Cm_kind : sig
+  type melange =
+    | Cmi
+    | Cmj
+
+  type t =
+    | Ocaml of Cm_kind.t
+    | Melange of melange
+
+  val source : t -> Ml_kind.t
+
+  val ext : t -> string
+
+  val cmi : t -> t
+
+  val to_dyn : t -> Dyn.t
+end
+
 val equal : t -> t -> bool
 
 val decode : t Dune_sexp.Decoder.t

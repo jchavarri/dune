@@ -5,6 +5,46 @@ type t =
   | Ocaml of Mode.t
   | Melange
 
+module Cm_kind = struct
+  type melange =
+    | Cmi
+    | Cmj
+
+  type t =
+    | Ocaml of Cm_kind.t
+    | Melange of melange
+
+  let choose ocaml melange = function
+    | Ocaml k -> ocaml k
+    | Melange k -> melange k
+
+  let source =
+    choose Cm_kind.source (function
+      | Cmi -> Ml_kind.Intf
+      | Cmj -> Impl)
+
+  let ext =
+    choose Cm_kind.ext (function
+      | Cmi -> ".cmi"
+      | Cmj -> ".cmj")
+
+  let cmi = function
+    | Ocaml _ -> Ocaml Cmi
+    | Melange _ -> Melange Cmi
+
+  let melange_to_dyn =
+    let open Dyn in
+    function
+    | Cmi -> variant "cmi" []
+    | Cmj -> variant "cmj" []
+
+  let to_dyn =
+    let open Dyn in
+    function
+    | Ocaml k -> variant "ocaml" [ Cm_kind.to_dyn k ]
+    | Melange k -> variant "melange" [ melange_to_dyn k ]
+end
+
 let equal x y =
   match (x, y) with
   | Ocaml a, Ocaml b -> Mode.equal a b
@@ -28,8 +68,9 @@ let decode =
     ]
 
 let of_cm_kind : Cm_kind.t -> t = function
-  | Cmi | Cmo -> Ocaml Byte
-  | Cmx -> Ocaml Native
+  | Ocaml (Cmi | Cmo) -> Ocaml Byte
+  | Ocaml Cmx -> Ocaml Native
+  | Melange (Cmi | Cmj) -> Melange
 
 module Dict = struct
   let libmode_equal = equal

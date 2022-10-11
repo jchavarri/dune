@@ -35,7 +35,7 @@ val create :
   -> js_of_ocaml:Js_of_ocaml.In_context.t option
   -> package:Package.t option
   -> ?vimpl:Vimpl.t
-  -> ?modes:Dune_file.Mode_conf.Set.Details.t Mode.Dict.t
+  -> ?modes:Dune_file.Mode_conf.Set.Details.t Lib_mode.Dict.t
   -> ?bin_annot:bool
   -> ?loc:Loc.t
   -> unit
@@ -83,6 +83,8 @@ val set_sandbox : t -> Sandbox_config.t -> t
 val package : t -> Package.t option
 
 val vimpl : t -> Vimpl.t option
+
+val modes : t -> Lib_mode.Dict.Set.t
 
 val ocaml_modes : t -> Mode.Dict.Set.t
 

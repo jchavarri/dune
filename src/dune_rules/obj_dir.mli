@@ -72,7 +72,7 @@ val decode : dir:Path.t -> Path.t t Dune_lang.Decoder.t
 
 val convert_to_external : Path.Build.t t -> dir:Path.t -> Path.t t
 
-val cm_dir : 'path t -> Cm_kind.t -> Visibility.t -> 'path
+val cm_dir : 'path t -> Lib_mode.Cm_kind.t -> Visibility.t -> 'path
 
 val to_dyn : _ t -> Dyn.t
 
@@ -94,17 +94,23 @@ module Module : sig
       files produced from the compilation of a module (.cmi files, .cmx files,
       .o files, ...) *)
 
-  val cm_file : 'path t -> Module.t -> kind:Cm_kind.t -> 'path option
+  val cm_file : 'path t -> Module.t -> kind:Lib_mode.Cm_kind.t -> 'path option
 
   val cm_public_file : 'path t -> Module.t -> kind:Cm_kind.t -> 'path option
 
-  val cmt_file : 'path t -> Module.t -> ml_kind:Ml_kind.t -> 'path option
+  val cmt_file :
+       'path t
+    -> Module.t
+    -> ml_kind:Ml_kind.t
+    -> cm_kind:Lib_mode.Cm_kind.t
+    -> 'path option
 
-  val obj_file : 'path t -> Module.t -> kind:Cm_kind.t -> ext:string -> 'path
+  val obj_file :
+    'path t -> Module.t -> kind:Lib_mode.Cm_kind.t -> ext:string -> 'path
 
   (** Same as [cm_file] but raises if [cm_kind] is [Cmo] or [Cmx] and the module
       has no implementation.*)
-  val cm_file_exn : 'path t -> Module.t -> kind:Cm_kind.t -> 'path
+  val cm_file_exn : 'path t -> Module.t -> kind:Lib_mode.Cm_kind.t -> 'path
 
   val o_file : 'path t -> Module.t -> ext_obj:string -> 'path option
 
@@ -113,14 +119,15 @@ module Module : sig
   val cm_public_file_exn : 'path t -> Module.t -> kind:Cm_kind.t -> 'path
 
   (** Either the .cmti, or .cmt if the module has no interface *)
-  val cmti_file : 'path t -> Module.t -> 'path
+  val cmti_file : 'path t -> Module.t -> cm_kind:Lib_mode.Cm_kind.t -> 'path
 
   val odoc : 'path t -> Module.t -> 'path
 
   module L : sig
     val o_files : 'path t -> Module.t list -> ext_obj:string -> Path.t list
 
-    val cm_files : 'path t -> Module.t list -> kind:Cm_kind.t -> Path.t list
+    val cm_files :
+      'path t -> Module.t list -> kind:Lib_mode.Cm_kind.t -> Path.t list
   end
 
   module Dep : sig

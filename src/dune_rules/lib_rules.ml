@@ -333,7 +333,8 @@ let setup_build_archives (lib : Dune_file.Library.t) ~top_sorted_modules ~cctx
            ]
            |> Memo.parallel_iter ~f:(fun (kind, ext) ->
                   let src =
-                    Path.build (Obj_dir.Module.obj_file obj_dir m ~kind ~ext)
+                    Path.build
+                      (Obj_dir.Module.obj_file obj_dir m ~kind:(Ocaml kind) ~ext)
                   in
                   let obj_name = Module.obj_name m in
                   let fname =

@@ -81,7 +81,10 @@ module Linkage = struct
           | Native -> Native
           | Best ->
             if Result.is_ok ctx.ocamlopt then Native
-            else Byte_with_stubs_statically_linked_in)
+            else Byte_with_stubs_statically_linked_in
+          | Melange ->
+            User_error.raise
+              [ Pp.textf "Linking is not supported in melange mode" ])
       in
       let ext =
         Dune_file.Executables.Link_mode.extension m ~loc
@@ -214,7 +217,7 @@ let link_js ~name ~loc ~cm_files ~promote ~link_time_code_gen cctx =
       | Lib_flags.Lib_and_module.Lib lib -> `Lib lib
       | Module (obj_dir, m) ->
         let path =
-          Obj_dir.Module.cm_file_exn obj_dir m ~kind:(Mode.cm_kind Byte)
+          Obj_dir.Module.cm_file_exn obj_dir m ~kind:(Ocaml (Mode.cm_kind Byte))
         in
         `Mod path)
   in

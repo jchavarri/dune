@@ -9,6 +9,8 @@ val compare : t -> t -> Ordering.t
 
 val all : t list
 
+val choose : 'a -> 'a -> 'a -> t -> 'a
+
 val ext : t -> string
 
 val source : t -> Ml_kind.t

@@ -132,8 +132,9 @@ end = struct
               make_entry Lib source ?dst))
     in
     let { Lib_config.has_native; ext_obj; _ } = lib_config in
-    let modes = Dune_file.Mode_conf.Set.eval lib.modes ~has_native in
-    let { Mode.Dict.byte; native } = modes in
+    let { Lib_mode.Dict.ocaml = { byte; native } as modes; melange } =
+      Dune_file.Mode_conf.Set.eval lib.modes ~has_native
+    in
     let module_files =
       let inside_subdir f =
         match lib_subdir with
@@ -160,13 +161,15 @@ end = struct
               | Some f -> [ (cm_kind, f) ]
             else []
           in
-          let open Cm_kind in
-          [ if_ true (Cmi, cm_file Cmi)
-          ; if_ native (Cmx, cm_file Cmx)
-          ; if_ (byte && virtual_library) (Cmo, cm_file Cmo)
+          let open Lib_mode.Cm_kind in
+          [ if_ (byte || native) (Ocaml Cmi, cm_file (Ocaml Cmi))
+          ; if_ melange (Melange Cmi, cm_file (Melange Cmi))
+          ; if_ native (Ocaml Cmx, cm_file (Ocaml Cmx))
+          ; if_ (byte && virtual_library) (Ocaml Cmo, cm_file (Ocaml Cmo))
           ; if_
               (native && virtual_library)
-              (Cmx, Obj_dir.Module.o_file obj_dir m ~ext_obj)
+              (Ocaml Cmx, Obj_dir.Module.o_file obj_dir m ~ext_obj)
+          ; if_ (melange && virtual_library) (Melange Cmj, cm_file (Melange Cmj))
           ]
           |> List.concat
         in
@@ -174,12 +177,16 @@ end = struct
           List.map ~f:(fun (cm_kind, p) -> (cm_dir m cm_kind, p))
         in
         let modules_impl =
+          let make_cmt ~cm_kind m ml_kind =
+            let open Option.O in
+            let+ cmt = Obj_dir.Module.cmt_file obj_dir m ~ml_kind ~cm_kind in
+            (cm_kind, cmt)
+          in
           List.concat_map installable_modules.impl ~f:(fun m ->
               common m
-              @ List.filter_map Ml_kind.all ~f:(fun ml_kind ->
-                    let open Option.O in
-                    let+ cmt = Obj_dir.Module.cmt_file obj_dir m ~ml_kind in
-                    (Cm_kind.Cmi, cmt))
+              @ List.filter_map Ml_kind.all ~f:(make_cmt ~cm_kind:(Ocaml Cmi) m)
+              @ List.filter_map Ml_kind.all
+                  ~f:(make_cmt ~cm_kind:(Melange Cmi) m)
               |> set_dir m)
         in
         let modules_vlib =

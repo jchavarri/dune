@@ -173,7 +173,7 @@ module Lib_and_module = struct
                    (Command.Args.S
                       (Dep
                          (Obj_dir.Module.cm_file_exn obj_dir m
-                            ~kind:(Mode.cm_kind (Link_mode.mode mode)))
+                            ~kind:(Ocaml (Mode.cm_kind (Link_mode.mode mode))))
                       ::
                       (match mode with
                       | Native ->

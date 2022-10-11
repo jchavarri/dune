@@ -73,7 +73,7 @@ type t =
   ; sandbox : Sandbox_config.t
   ; package : Package.t option
   ; vimpl : Vimpl.t option
-  ; modes : Mode.Dict.Set.t
+  ; modes : Lib_mode.Dict.Set.t
   ; bin_annot : bool
   ; ocamldep_modules_data : Ocamldep.Modules_data.t
   ; loc : Loc.t option
@@ -117,7 +117,9 @@ let package t = t.package
 
 let vimpl t = t.vimpl
 
-let ocaml_modes t = t.modes
+let modes t = t.modes
+
+let ocaml_modes t = t.modes.ocaml
 
 let bin_annot t = t.bin_annot
 
@@ -147,9 +149,12 @@ let create ~super_context ~scope ~expander ~obj_dir ~modules ~flags
   in
   let modes =
     let default =
-      Mode.Dict.make_both (Some Dune_file.Mode_conf.Kind.Inherited)
+      { Lib_mode.Dict.ocaml =
+          Mode.Dict.make_both (Some Dune_file.Mode_conf.Kind.Inherited)
+      ; melange = None
+      }
     in
-    Option.value ~default modes |> Mode.Dict.map ~f:Option.is_some
+    Option.value ~default modes |> Lib_mode.Dict.map ~f:Option.is_some
   in
   let opaque = eval_opaque (Super_context.context super_context) opaque in
   let ocamldep_modules_data : Ocamldep.Modules_data.t =

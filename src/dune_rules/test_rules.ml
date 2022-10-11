@@ -27,7 +27,10 @@ let rules (t : Dune_file.Tests.t) ~sctx ~dir ~scope ~expander ~dir_contents =
              | Other { kind = Js; _ } -> Some `js
              | Other { kind = C | Object | Shared_object | Plugin; _ } ->
                (* We don't know how to run tests in theses cases *)
-               None)
+               None
+             | Other { kind = _; mode = Melange } ->
+               User_error.raise
+                 [ Pp.textf "Linking is not supported in melange mode" ])
       |> List.sort_uniq ~compare:Poly.compare
   in
   let* () =
