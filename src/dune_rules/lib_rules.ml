@@ -346,7 +346,7 @@ let setup_build_archives (lib : Dune_file.Library.t) ~top_sorted_modules ~cctx
                   Super_context.add_rule sctx ~dir ~loc:lib.buildable.loc
                     (Action_builder.copy ~src ~dst)))
   in
-  let modes = Compilation_context.ocaml_modes cctx in
+  let modes = Compilation_context.modes cctx in
   (* The [dir] below is used as an object directory without going through
      [Obj_dir]. That's fragile and will break if the layout of the object
      directory changes *)
@@ -368,12 +368,23 @@ let setup_build_archives (lib : Dune_file.Library.t) ~top_sorted_modules ~cctx
       ~top_sorted_modules ()
   in
   let* () =
-    Mode.Dict.Set.iter_concurrently modes ~f:(fun mode ->
+    Mode.Dict.Set.iter_concurrently modes.ocaml ~f:(fun mode ->
         build_lib lib ~native_archives ~dir ~sctx ~expander ~flags ~mode ~scope
           ~cm_files)
   and* () =
+    Memo.when_ modes.melange (fun () ->
+        (* Create empty library target, so that melange libraries modules rules get added to build implicitly *)
+        let target = Library.archive lib ~dir ~ext:".cma" in
+        let obj_deps =
+          Action_builder.paths (Cm_files.melange_objects_and_cms cm_files)
+        in
+        Super_context.add_rule ~dir sctx ~loc:lib.buildable.loc
+          (let open Action_builder.With_targets.O in
+          Action_builder.with_no_targets obj_deps
+          >>> Action_builder.write_file target ""))
+  and* () =
     (* Build *.cma.js *)
-    Memo.when_ modes.byte (fun () ->
+    Memo.when_ modes.ocaml.byte (fun () ->
         let action_with_targets =
           let src =
             Library.archive lib ~dir ~ext:(Mode.compiled_lib_ext Mode.Byte)
@@ -389,7 +400,7 @@ let setup_build_archives (lib : Dune_file.Library.t) ~top_sorted_modules ~cctx
         >>= Super_context.add_rule sctx ~dir ~loc:lib.buildable.loc)
   in
   Memo.when_
-    (Dynlink_supported.By_the_os.get natdynlink_supported && modes.native)
+    (Dynlink_supported.By_the_os.get natdynlink_supported && modes.ocaml.native)
     (fun () -> build_shared ~native_archives ~sctx lib ~dir ~flags)
 
 let cctx (lib : Library.t) ~sctx ~source_modules ~dir ~expander ~scope

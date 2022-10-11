@@ -33,6 +33,11 @@ let objects_and_cms t ~mode modules =
 
 let unsorted_objects_and_cms t ~mode = objects_and_cms t ~mode t.modules
 
+let melange_objects_and_cms t =
+  let modules = filter_excluded_modules t t.modules in
+  Obj_dir.Module.L.cm_files t.obj_dir modules
+    ~kind:(Lib_mode.Cm_kind.Melange Cmj)
+
 let top_sorted_cms t ~mode =
   let kind = Mode.cm_kind mode in
   Action_builder.map t.top_sorted_modules ~f:(fun modules ->
