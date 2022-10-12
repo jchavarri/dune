@@ -8,7 +8,11 @@ module CC = Compilation_context
    extension is not .ml or when the .ml and .mli are in different directories.
    This flags makes the compiler think there is a .mli file and will the read
    the cmi file rather than create it. *)
-let force_read_cmi source_file = [ "-intf-suffix"; Path.extension source_file ]
+let force_read_cmi ~cm_kind source_file =
+  let args = [ "-intf-suffix"; Path.extension source_file ] in
+  match cm_kind with
+  | Lib_mode.Cm_kind.Melange Cmj -> "-bs-read-cmi" :: args
+  | Ocaml (Cmo | Cmx | Cmi) | Melange Cmi -> args
 
 (* Build the cm* if the corresponding source is present, in the case of cmi if
    the mli is not present it is added as additional target to the .cmo
@@ -30,6 +34,9 @@ let other_cm_files ~opaque ~cm_kind ~dep_graph ~obj_dir m =
       if Module.has m ~ml_kind:Impl && cm_kind = Ocaml Cmx && not opaque then
         let cmx = Obj_dir.Module.cm_file_exn obj_dir m ~kind:(Ocaml Cmx) in
         Path.build cmx :: deps
+      else if Module.has m ~ml_kind:Impl && cm_kind = Melange Cmj then
+        let cmj = Obj_dir.Module.cm_file_exn obj_dir m ~kind:(Melange Cmj) in
+        Path.build cmj :: deps
       else deps)
 
 let copy_interface ~sctx ~dir ~obj_dir ~cm_kind m =
@@ -79,7 +86,7 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
   in
   let open Memo.O in
   let* extra_args, extra_deps, other_targets =
-    if precompiled_cmi then Memo.return (force_read_cmi src, [], [])
+    if precompiled_cmi then Memo.return (force_read_cmi ~cm_kind src, [], [])
     else
       (* If we're compiling an implementation, then the cmi is present *)
       let public_vlib_module = Module.kind m = Impl_vmodule in
@@ -98,7 +105,7 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
         | (Ocaml (Cmo | Cmx) | Melange Cmj), _, _ ->
           let cmi_kind = Lib_mode.Cm_kind.cmi cm_kind in
           Memo.return
-            ( force_read_cmi src
+            ( force_read_cmi ~cm_kind src
             , [ Path.build (Obj_dir.Module.cm_file_exn obj_dir m ~kind:cmi_kind)
               ]
             , [] )
