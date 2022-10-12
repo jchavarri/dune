@@ -6,22 +6,22 @@ module Includes = struct
   let make ~project ~opaque ~requires : _ Lib_mode.Cm_kind.Dict.t =
     let open Resolve.Memo.O in
     let iflags libs mode = Lib_flags.L.include_flags ~project libs mode in
-    let make_includes_args groups =
+    let make_includes_args ~mode groups =
       Command.Args.memo
         (Resolve.Memo.args
            (let+ libs = requires in
             Command.Args.S
-              [ iflags libs Byte
+              [ iflags libs mode
               ; Hidden_deps (Lib_file_deps.deps libs ~groups)
               ]))
     in
-    let cmi_includes = make_includes_args [ Ocaml Cmi ] in
+    let cmi_includes = make_includes_args ~mode:(Ocaml Byte) [ Ocaml Cmi ] in
     let cmx_includes =
       Command.Args.memo
         (Resolve.Memo.args
            (let+ libs = requires in
             Command.Args.S
-              [ iflags libs Native
+              [ iflags libs (Ocaml Native)
               ; Hidden_deps
                   (if opaque then
                    List.map libs ~f:(fun lib ->
@@ -35,9 +35,11 @@ module Includes = struct
                       ~groups:[ Lib_file_deps.Group.Ocaml Cmi; Ocaml Cmx ])
               ]))
     in
-    let melange_cmi_includes = make_includes_args [ Melange Cmi ] in
+    let melange_cmi_includes =
+      make_includes_args ~mode:Melange [ Melange Cmi ]
+    in
     let melange_cmj_includes =
-      make_includes_args [ Melange Cmi; Melange Cmj ]
+      make_includes_args ~mode:Melange [ Melange Cmi; Melange Cmj ]
     in
     { ocaml = { cmi = cmi_includes; cmo = cmi_includes; cmx = cmx_includes }
     ; melange = { cmi = melange_cmi_includes; cmj = melange_cmj_includes }
