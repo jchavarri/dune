@@ -36,7 +36,9 @@ module Includes = struct
               ]))
     in
     let melange_cmi_includes = make_includes_args [ Melange Cmi ] in
-    let melange_cmj_includes = make_includes_args [ Melange Cmj ] in
+    let melange_cmj_includes =
+      make_includes_args [ Melange Cmi; Melange Cmj ]
+    in
     { ocaml = { cmi = cmi_includes; cmo = cmi_includes; cmx = cmx_includes }
     ; melange = { cmi = melange_cmi_includes; cmj = melange_cmj_includes }
     }
