@@ -35,8 +35,8 @@ let setup_copy_rules_for_impl ~sctx ~dir vimpl =
     add_rule ~loc:(Loc.of_pos __POS__) (Action_builder.symlink ~src ~dst)
   in
   let { Lib_config.has_native; ext_obj; _ } = ctx.lib_config in
-  let { Lib_mode.Dict.ocaml = { byte; native }; melange = _ } =
-    Dune_file.Mode_conf.Set.eval impl.modes ~has_native
+  let { Mode.Dict.byte; native } =
+    Dune_file.Mode_conf.Set.eval impl.modes.ocaml ~has_native
   in
   let copy_obj_file m kind =
     let src = Obj_dir.Module.cm_file_exn vlib_obj_dir m ~kind in

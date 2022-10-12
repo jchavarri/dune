@@ -132,8 +132,8 @@ end = struct
               make_entry Lib source ?dst))
     in
     let { Lib_config.has_native; ext_obj; _ } = lib_config in
-    let { Lib_mode.Dict.ocaml = { byte; native } as modes; melange } =
-      Dune_file.Mode_conf.Set.eval lib.modes ~has_native
+    let ({ Mode.Dict.byte; native } as modes) =
+      Dune_file.Mode_conf.Set.eval lib.modes.ocaml ~has_native
     in
     let module_files =
       let inside_subdir f =
@@ -163,13 +163,11 @@ end = struct
           in
           let open Lib_mode.Cm_kind in
           [ if_ (byte || native) (Ocaml Cmi, cm_file (Ocaml Cmi))
-          ; if_ melange (Melange Cmi, cm_file (Melange Cmi))
           ; if_ native (Ocaml Cmx, cm_file (Ocaml Cmx))
           ; if_ (byte && virtual_library) (Ocaml Cmo, cm_file (Ocaml Cmo))
           ; if_
               (native && virtual_library)
               (Ocaml Cmx, Obj_dir.Module.o_file obj_dir m ~ext_obj)
-          ; if_ (melange && virtual_library) (Melange Cmj, cm_file (Melange Cmj))
           ]
           |> List.concat
         in

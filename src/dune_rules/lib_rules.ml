@@ -420,7 +420,7 @@ let cctx (lib : Library.t) ~sctx ~source_modules ~dir ~expander ~scope
   let requires_link = Lib.Compile.requires_link compile_info in
   let modes =
     let { Lib_config.has_native; _ } = ctx.lib_config in
-    Dune_file.Mode_conf.Set.eval_detailed lib.modes ~has_native
+    Dune_file.Mode_conf.Lib.Set.eval_detailed lib.modes ~has_native
   in
   let package = Dune_file.Library.package lib in
   let js_of_ocaml =

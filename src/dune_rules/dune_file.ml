@@ -403,7 +403,6 @@ module Mode_conf = struct
       | Byte
       | Native
       | Best
-      | Melange
 
     let compare x y =
       match (x, y) with
@@ -414,26 +413,16 @@ module Mode_conf = struct
       | Native, _ -> Lt
       | _, Native -> Gt
       | Best, Best -> Eq
-      | Best, _ -> Lt
-      | _, Best -> Gt
-      | Melange, Melange -> Eq
   end
 
   include T
 
-  let decode =
-    enum
-      [ ("byte", Byte)
-      ; ("native", Native)
-      ; ("best", Best)
-      ; ("melange_experimental", Melange)
-      ]
+  let decode = enum [ ("byte", Byte); ("native", Native); ("best", Best) ]
 
   let to_string = function
     | Byte -> "byte"
     | Native -> "native"
     | Best -> "best"
-    | Melange -> "melange_experimental"
 
   let to_dyn t = Dyn.variant (to_string t) []
 
@@ -450,23 +439,20 @@ module Mode_conf = struct
       { byte : 'a
       ; native : 'a
       ; best : 'a
-      ; melange : 'a
       }
 
     let find t = function
       | Byte -> t.byte
       | Native -> t.native
       | Best -> t.best
-      | Melange -> t.melange
 
     let update t key ~f =
       match key with
       | Byte -> { t with byte = f t.byte }
       | Native -> { t with native = f t.native }
       | Best -> { t with best = f t.best }
-      | Melange -> { t with melange = f t.melange }
 
-    let make_one x = { byte = x; native = x; best = x; melange = x }
+    let make_one x = { byte = x; native = x; best = x }
   end
 
   module Set = struct
@@ -506,7 +492,7 @@ module Mode_conf = struct
 
     let eval_detailed t ~has_native =
       let exists = function
-        | Best | Byte | Melange -> true
+        | Best | Byte -> true
         | Native -> has_native
       in
       let get key : Details.t =
@@ -526,11 +512,91 @@ module Mode_conf = struct
       let open Details in
       let byte = get Byte ||| validate best ~if_:(best_mode = Byte) in
       let native = get Native ||| validate best ~if_:(best_mode = Native) in
-      let melange = get Melange in
-      { Lib_mode.Dict.ocaml = { Mode.Dict.byte; native }; melange }
+      { Mode.Dict.byte; native }
 
     let eval t ~has_native =
-      eval_detailed t ~has_native |> Lib_mode.Dict.map ~f:Option.is_some
+      eval_detailed t ~has_native |> Mode.Dict.map ~f:Option.is_some
+  end
+
+  module Lib = struct
+    type mode_conf = t
+
+    type t =
+      | Ocaml of mode_conf
+      | Melange
+
+    let decode =
+      enum
+        [ ("byte", Ocaml Byte)
+        ; ("native", Ocaml Native)
+        ; ("best", Ocaml Best)
+        ; ("melange_experimental", Melange)
+        ]
+
+    let to_string = function
+      | Ocaml Byte -> "byte"
+      | Ocaml Native -> "native"
+      | Ocaml Best -> "best"
+      | Melange -> "melange_experimental"
+
+    let to_dyn t = Dyn.variant (to_string t) []
+
+    module Map = struct
+      type nonrec 'a t =
+        { ocaml : 'a Map.t
+        ; melange : 'a
+        }
+
+      let find t = function
+        | Ocaml a -> Map.find t.ocaml a
+        | Melange -> t.melange
+
+      let update t key ~f =
+        match key with
+        | Ocaml key -> { t with ocaml = Map.update t.ocaml key ~f }
+        | Melange -> { t with melange = f t.melange }
+
+      let make_one x = { ocaml = Map.make_one x; melange = x }
+    end
+
+    module Set = struct
+      type mode_conf = t
+
+      type nonrec t = Kind.t option Map.t
+
+      let empty : t = Map.make_one None
+
+      let of_list (input : (mode_conf * Kind.t) list) : t =
+        List.fold_left ~init:empty input ~f:(fun acc (key, kind) ->
+            Map.update acc key ~f:(function
+              | None -> Some kind
+              | Some (Kind.Requested loc) ->
+                User_error.raise ~loc [ Pp.textf "already configured" ]
+              | Some Inherited ->
+                (* this doesn't happen as inherited can't be manually specified *)
+                assert false))
+
+      let decode =
+        let decode =
+          let+ loc, t = located decode in
+          (t, Kind.Requested loc)
+        in
+        repeat decode >>| of_list
+
+      let default loc : t = { empty with ocaml = Set.default loc }
+
+      module Details = struct
+        type t = Kind.t option
+      end
+
+      let eval_detailed t ~has_native =
+        let get key : Details.t = Map.find t key in
+        let melange = get Melange in
+        { Lib_mode.Dict.ocaml = Set.eval_detailed t.ocaml ~has_native; melange }
+
+      let eval t ~has_native =
+        eval_detailed t ~has_native |> Lib_mode.Dict.map ~f:Option.is_some
+    end
   end
 end
 
@@ -574,7 +640,7 @@ module Library = struct
     ; synopsis : string option
     ; install_c_headers : string list
     ; ppx_runtime_libraries : (Loc.t * Lib_name.t) list
-    ; modes : Mode_conf.Set.t
+    ; modes : Mode_conf.Lib.Set.t
     ; kind : Lib_kind.t
     ; library_flags : Ordered_set_lang.Unexpanded.t
     ; c_library_flags : Ordered_set_lang.Unexpanded.t
@@ -618,8 +684,8 @@ module Library = struct
        and+ virtual_deps =
          field "virtual_deps" (repeat (located Lib_name.decode)) ~default:[]
        and+ modes =
-         field "modes" Mode_conf.Set.decode
-           ~default:(Mode_conf.Set.default stanza_loc)
+         field "modes" Mode_conf.Lib.Set.decode
+           ~default:(Mode_conf.Lib.Set.default stanza_loc)
        and+ kind = field "kind" Lib_kind.decode ~default:Lib_kind.Normal
        and+ optional = field_b "optional"
        and+ no_dynlink = field_b "no_dynlink"
@@ -835,7 +901,7 @@ module Library = struct
     let open Memo.O in
     let obj_dir = obj_dir ~dir conf in
     let archive ?(dir = dir) ext = archive conf ~dir ~ext in
-    let modes = Mode_conf.Set.eval ~has_native conf.modes in
+    let modes = Mode_conf.Lib.Set.eval ~has_native conf.modes in
     let archive_for_mode ~f_ext ~mode =
       if Mode.Dict.get modes.ocaml mode then Some (archive (f_ext mode))
       else None
@@ -1258,32 +1324,30 @@ module Executables = struct
       match t with
       | Byte_complete -> ".bc.exe"
       | Other { mode; kind } -> (
-        let same_as_mode : Lib_mode.t =
+        let same_as_mode : Mode.t =
           match mode with
-          | Byte -> Ocaml Byte
+          | Byte -> Byte
           | Native | Best ->
             (* From the point of view of the extension, [native] and [best] are
                the same *)
-            Ocaml Native
-          | Melange -> Melange
+            Native
         in
         match (same_as_mode, kind) with
-        | Ocaml Byte, C -> ".bc.c"
-        | Ocaml Native, C ->
+        | Byte, C -> ".bc.c"
+        | Native, C ->
           User_error.raise ~loc
             [ Pp.text "C file generation only supports bytecode!" ]
-        | Ocaml Byte, Exe -> ".bc"
-        | Ocaml Native, Exe -> ".exe"
-        | Ocaml Byte, Object -> ".bc" ^ ext_obj
-        | Ocaml Native, Object -> ".exe" ^ ext_obj
-        | Ocaml Byte, Shared_object -> ".bc" ^ ext_dll
-        | Ocaml Native, Shared_object -> ext_dll
-        | Ocaml mode, Plugin -> Mode.plugin_ext mode
-        | Ocaml Byte, Js -> ".bc.js"
-        | Ocaml Native, Js ->
+        | Byte, Exe -> ".bc"
+        | Native, Exe -> ".exe"
+        | Byte, Object -> ".bc" ^ ext_obj
+        | Native, Object -> ".exe" ^ ext_obj
+        | Byte, Shared_object -> ".bc" ^ ext_dll
+        | Native, Shared_object -> ext_dll
+        | mode, Plugin -> Mode.plugin_ext mode
+        | Byte, Js -> ".bc.js"
+        | Native, Js ->
           User_error.raise ~loc
-            [ Pp.text "Javascript generation only supports bytecode!" ]
-        | Melange, _ -> ".bs.js")
+            [ Pp.text "Javascript generation only supports bytecode!" ])
 
     module O = Comparable.Make (T)
 
@@ -1431,7 +1495,6 @@ module Executables = struct
             match mode with
             | Byte_complete | Other { mode = Byte; _ } -> ".bc"
             | Other { mode = Native | Best; _ } -> ".exe"
-            | Other { mode = Melange; _ } -> ".bs.js"
           in
           Names.install_conf names ~ext ~enabled_if
       in

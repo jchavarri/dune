@@ -81,10 +81,7 @@ module Linkage = struct
           | Native -> Native
           | Best ->
             if Result.is_ok ctx.ocamlopt then Native
-            else Byte_with_stubs_statically_linked_in
-          | Melange ->
-            User_error.raise
-              [ Pp.textf "Linking is not supported in melange mode" ])
+            else Byte_with_stubs_statically_linked_in)
       in
       let ext =
         Dune_file.Executables.Link_mode.extension m ~loc

@@ -79,7 +79,6 @@ module Mode_conf : sig
     | Byte
     | Native
     | Best  (** [Native] if available and [Byte] if not *)
-    | Melange
 
   val decode : t Dune_lang.Decoder.t
 
@@ -98,7 +97,6 @@ module Mode_conf : sig
       { byte : 'a
       ; native : 'a
       ; best : 'a
-      ; melange : 'a
       }
   end
 
@@ -115,9 +113,46 @@ module Mode_conf : sig
       type t = Kind.t option
     end
 
-    val eval_detailed : t -> has_native:bool -> Details.t Lib_mode.Dict.t
+    val eval_detailed : t -> has_native:bool -> Details.t Mode.Dict.t
 
-    val eval : t -> has_native:bool -> Lib_mode.Dict.Set.t
+    val eval : t -> has_native:bool -> Mode.Dict.Set.t
+  end
+
+  module Lib : sig
+    type mode_conf = t
+
+    type t =
+      | Ocaml of mode_conf
+      | Melange
+
+    val decode : t Dune_lang.Decoder.t
+
+    val to_dyn : t -> Dyn.t
+
+    module Map : sig
+      type nonrec 'a t =
+        { ocaml : 'a Map.t
+        ; melange : 'a
+        }
+    end
+
+    module Set : sig
+      type mode_conf = t
+
+      type nonrec t = Kind.t option Map.t
+
+      val of_list : (mode_conf * Kind.t) list -> t
+
+      val decode : t Dune_lang.Decoder.t
+
+      module Details : sig
+        type t = Kind.t option
+      end
+
+      val eval_detailed : t -> has_native:bool -> Details.t Lib_mode.Dict.t
+
+      val eval : t -> has_native:bool -> Lib_mode.Dict.Set.t
+    end
   end
 end
 
@@ -132,7 +167,7 @@ module Library : sig
     ; synopsis : string option
     ; install_c_headers : string list
     ; ppx_runtime_libraries : (Loc.t * Lib_name.t) list
-    ; modes : Mode_conf.Set.t
+    ; modes : Mode_conf.Lib.Set.t
     ; kind : Lib_kind.t
           (* TODO: It may be worth remaming [c_library_flags] to
              [link_time_flags_for_c_compiler] and [library_flags] to
