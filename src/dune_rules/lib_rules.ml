@@ -248,9 +248,9 @@ let build_stubs lib ~cctx ~dir ~expander ~requires ~dir_contents
     let ctx = Super_context.context sctx in
     let lib_name = Lib_name.Local.to_string (snd lib.name) in
     let archive_name = Foreign.Archive.Name.stubs lib_name in
-    let modes = Compilation_context.ocaml_modes cctx in
+    let modes = Compilation_context.modes cctx in
     let build_targets_together =
-      modes.native && modes.byte
+      modes.ocaml.native && modes.ocaml.byte
       && Dynlink_supported.get lib.dynlink ctx.supports_shared_libraries
     in
     let* standard =

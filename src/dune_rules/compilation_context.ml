@@ -129,8 +129,6 @@ let vimpl t = t.vimpl
 
 let modes t = t.modes
 
-let ocaml_modes t = t.modes.ocaml
-
 let bin_annot t = t.bin_annot
 
 let context t = Super_context.context t.super_context
