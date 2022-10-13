@@ -372,17 +372,6 @@ let setup_build_archives (lib : Dune_file.Library.t) ~top_sorted_modules ~cctx
         build_lib lib ~native_archives ~dir ~sctx ~expander ~flags ~mode ~scope
           ~cm_files)
   and* () =
-    Memo.when_ modes.melange (fun () ->
-        (* Create empty library target, so that melange libraries modules rules get added to build implicitly *)
-        let target = Library.archive lib ~dir ~ext:".cma" in
-        let obj_deps =
-          Action_builder.paths (Cm_files.melange_objects_and_cms cm_files)
-        in
-        Super_context.add_rule ~dir sctx ~loc:lib.buildable.loc
-          (let open Action_builder.With_targets.O in
-          Action_builder.with_no_targets obj_deps
-          >>> Action_builder.write_file target ""))
-  and* () =
     (* Build *.cma.js *)
     Memo.when_ modes.ocaml.byte (fun () ->
         let action_with_targets =
