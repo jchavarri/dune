@@ -55,15 +55,11 @@ let choose ocaml melange = function
   | Ocaml m -> ocaml m
   | Melange -> melange
 
-let to_string = choose Ocaml.Mode.to_string "melange_experimental"
+let to_string = choose Ocaml.Mode.to_string "melange"
 
 let decode =
   let open Dune_sexp.Decoder in
-  enum
-    [ ("byte", Ocaml Byte)
-    ; ("native", Ocaml Native)
-    ; ("melange_experimental", Melange)
-    ]
+  enum [ ("byte", Ocaml Byte); ("native", Ocaml Native); ("melange", Melange) ]
 
 let of_cm_kind : Cm_kind.t -> t = function
   | Ocaml (Cmi | Cmo) -> Ocaml Byte
@@ -110,7 +106,7 @@ module Dict = struct
       record_fields
         [ field_l "byte" f ocaml.byte
         ; field_l "native" f ocaml.native
-        ; field_l "melange_experimental" f melange
+        ; field_l "melange" f melange
         ]
 
     let decode f =
@@ -118,7 +114,10 @@ module Dict = struct
       fields
         (let+ byte = field ~default:[] "byte" (repeat f)
          and+ native = field ~default:[] "native" (repeat f)
-         and+ melange = field ~default:[] "melange_experimental" (repeat f) in
+         and+ melange =
+           field ~default:[] "melange"
+             (Dune_lang.Syntax.since Melange.melange_syntax (0, 1) >>> repeat f)
+         in
          { ocaml = { byte; native }; melange })
   end
 end

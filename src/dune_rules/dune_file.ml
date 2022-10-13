@@ -525,19 +525,11 @@ module Mode_conf = struct
       | Ocaml of mode_conf
       | Melange
 
-    let decode =
-      enum
-        [ ("byte", Ocaml Byte)
-        ; ("native", Ocaml Native)
-        ; ("best", Ocaml Best)
-        ; ("melange_experimental", Melange)
-        ]
-
     let to_string = function
       | Ocaml Byte -> "byte"
       | Ocaml Native -> "native"
       | Ocaml Best -> "best"
-      | Melange -> "melange_experimental"
+      | Melange -> "melange"
 
     let to_dyn t = Dyn.variant (to_string t) []
 
@@ -575,13 +567,6 @@ module Mode_conf = struct
               | Some Inherited ->
                 (* this doesn't happen as inherited can't be manually specified *)
                 assert false))
-
-      let decode =
-        let decode =
-          let+ loc, t = located decode in
-          (t, Kind.Requested loc)
-        in
-        repeat decode >>| of_list
 
       let default loc : t = { empty with ocaml = Set.default loc }
 

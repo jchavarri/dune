@@ -1,3 +1,5 @@
+val melange_syntax : Dune_lang.Syntax.t
+
 module Cm_kind : sig
   type t =
     | Cmi

@@ -1,3 +1,7 @@
+let melange_syntax =
+  Dune_lang.Syntax.create ~name:"melange" ~desc:"support for Melange compiler"
+    [ ((0, 1), `Since (3, 5)) ]
+
 module Cm_kind = struct
   type t =
     | Cmi
