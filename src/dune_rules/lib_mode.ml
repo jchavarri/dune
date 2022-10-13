@@ -1,75 +1,53 @@
-open! Stdune
-open Ocaml
-
 type t =
-  | Ocaml of Mode.t
+  | Ocaml of Ocaml.Mode.t
   | Melange
 
 module Cm_kind = struct
-  type melange =
-    | Cmi
-    | Cmj
-
   type t =
-    | Ocaml of Cm_kind.t
-    | Melange of melange
+    | Ocaml of Ocaml.Cm_kind.t
+    | Melange of Melange.Cm_kind.t
 
   let choose ocaml melange = function
     | Ocaml k -> ocaml k
     | Melange k -> melange k
 
-  let source =
-    choose Cm_kind.source (function
-      | Cmi -> Ml_kind.Intf
-      | Cmj -> Impl)
+  let source = choose Ocaml.Cm_kind.source Melange.Cm_kind.source
 
-  let ext =
-    choose Cm_kind.ext (function
-      | Cmi -> ".cmi"
-      | Cmj -> ".cmj")
+  let ext = choose Ocaml.Cm_kind.ext Melange.Cm_kind.ext
 
   let cmi = function
     | Ocaml _ -> Ocaml Cmi
     | Melange _ -> Melange Cmi
 
-  let melange_to_dyn =
-    let open Dyn in
-    function
-    | Cmi -> variant "cmi" []
-    | Cmj -> variant "cmj" []
-
   let to_dyn =
     let open Dyn in
     function
-    | Ocaml k -> variant "ocaml" [ Cm_kind.to_dyn k ]
-    | Melange k -> variant "melange" [ melange_to_dyn k ]
+    | Ocaml k -> variant "ocaml" [ Ocaml.Cm_kind.to_dyn k ]
+    | Melange k -> variant "melange" [ Melange.Cm_kind.to_dyn k ]
 
   module Dict = struct
-    type 'a melange =
-      { cmi : 'a
-      ; cmj : 'a
-      }
-
     type 'a t =
-      { ocaml : 'a Cm_kind.Dict.t
-      ; melange : 'a melange
+      { ocaml : 'a Ocaml.Cm_kind.Dict.t
+      ; melange : 'a Melange.Cm_kind.Dict.t
       }
 
     let get t = function
-      | Ocaml k -> Cm_kind.Dict.get t.ocaml k
+      | Ocaml k -> Ocaml.Cm_kind.Dict.get t.ocaml k
       | Melange k -> (
         match k with
         | Cmi -> t.melange.cmi
         | Cmj -> t.melange.cmj)
 
     let make_all x =
-      { ocaml = Cm_kind.Dict.make_all x; melange = { cmi = x; cmj = x } }
+      { ocaml = Ocaml.Cm_kind.Dict.make_all x
+      ; melange = Melange.Cm_kind.Dict.make_all x
+      }
   end
 end
 
 let equal x y =
   match (x, y) with
-  | Ocaml a, Ocaml b -> Mode.equal a b
+  | Ocaml a, Ocaml b -> Ocaml.Mode.equal a b
   | Melange, Melange -> true
   | Ocaml _, Melange | Melange, Ocaml _ -> false
 
@@ -77,9 +55,7 @@ let choose ocaml melange = function
   | Ocaml m -> ocaml m
   | Melange -> melange
 
-let to_string = choose Mode.to_string "melange_experimental"
-
-let encode t = Dune_sexp.Encoder.string (to_string t)
+let to_string = choose Ocaml.Mode.to_string "melange_experimental"
 
 let decode =
   let open Dune_sexp.Decoder in
@@ -95,22 +71,23 @@ let of_cm_kind : Cm_kind.t -> t = function
   | Melange (Cmi | Cmj) -> Melange
 
 module Dict = struct
-  let libmode_equal = equal
-
   type 'a t =
-    { ocaml : 'a Mode.Dict.t
+    { ocaml : 'a Ocaml.Mode.Dict.t
     ; melange : 'a
     }
 
   let equal f { ocaml; melange } t : bool =
-    Mode.Dict.equal f ocaml t.ocaml && f melange t.melange
+    Ocaml.Mode.Dict.equal f ocaml t.ocaml && f melange t.melange
 
   let to_dyn to_dyn { ocaml; melange } =
     let open Dyn in
     record
-      [ ("ocaml", Mode.Dict.to_dyn to_dyn ocaml); ("melange", to_dyn melange) ]
+      [ ("ocaml", Ocaml.Mode.Dict.to_dyn to_dyn ocaml)
+      ; ("melange", to_dyn melange)
+      ]
 
-  let map t ~f = { ocaml = Mode.Dict.map ~f t.ocaml; melange = f t.melange }
+  let map t ~f =
+    { ocaml = Ocaml.Mode.Dict.map ~f t.ocaml; melange = f t.melange }
 
   module Set = struct
     type nonrec t = bool t
@@ -120,19 +97,9 @@ module Dict = struct
     let to_dyn { ocaml; melange } =
       let open Dyn in
       record
-        [ ("ocaml", Mode.Dict.Set.to_dyn ocaml); ("melange", bool melange) ]
-
-    let to_list t =
-      let l = List.map ~f:(fun m -> Ocaml m) (Mode.Dict.Set.to_list t.ocaml) in
-      l
-
-    let of_list l =
-      let ocaml = List.filter_map ~f:(choose Option.some None) l in
-      { ocaml = Mode.Dict.Set.of_list ocaml
-      ; melange = List.mem l Melange ~equal:libmode_equal
-      }
-
-    let encode t = List.map ~f:encode (to_list t)
+        [ ("ocaml", Ocaml.Mode.Dict.Set.to_dyn ocaml)
+        ; ("melange", bool melange)
+        ]
   end
 
   module List = struct

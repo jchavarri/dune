@@ -18,7 +18,6 @@ module String_with_vars = Dune_lang.String_with_vars
 module Pform = Dune_lang.Pform
 module Glob = Dune_lang.Glob
 module Diff = Dune_lang.Action.Diff
-module Lib_mode = Dune_lang.Lib_mode
 module Outputs = Dune_lang.Action.Outputs
 module Syntax = Dune_sexp.Syntax
 include Dune_engine.No_io

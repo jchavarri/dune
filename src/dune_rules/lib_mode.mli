@@ -1,19 +1,13 @@
-open Ocaml
-
 type t =
-  | Ocaml of Mode.t
+  | Ocaml of Ocaml.Mode.t
   | Melange
 
 module Cm_kind : sig
-  type melange =
-    | Cmi
-    | Cmj
-
   type t =
-    | Ocaml of Cm_kind.t
-    | Melange of melange
+    | Ocaml of Ocaml.Cm_kind.t
+    | Melange of Melange.Cm_kind.t
 
-  val source : t -> Ml_kind.t
+  val source : t -> Ocaml.Ml_kind.t
 
   val ext : t -> string
 
@@ -24,14 +18,9 @@ module Cm_kind : sig
   module Dict : sig
     type cm_kind = t
 
-    type 'a melange =
-      { cmi : 'a
-      ; cmj : 'a
-      }
-
     type 'a t =
-      { ocaml : 'a Cm_kind.Dict.t
-      ; melange : 'a melange
+      { ocaml : 'a Ocaml.Cm_kind.Dict.t
+      ; melange : 'a Melange.Cm_kind.Dict.t
       }
 
     val get : 'a t -> cm_kind -> 'a
@@ -53,7 +42,7 @@ module Dict : sig
   type mode = t
 
   type 'a t =
-    { ocaml : 'a Mode.Dict.t
+    { ocaml : 'a Ocaml.Mode.Dict.t
     ; melange : 'a
     }
 
@@ -77,11 +66,7 @@ module Dict : sig
 
     val to_dyn : t -> Dyn.t
 
-    val encode : t -> Dune_sexp.t list
-
     val equal : t -> t -> bool
-
-    val of_list : mode list -> t
   end
 end
 with type mode := t
