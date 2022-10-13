@@ -19,6 +19,10 @@ let compare x y =
 
 let all = [ Byte; Native ]
 
+let decode =
+  let open Dune_sexp.Decoder in
+  enum [ ("byte", Byte); ("native", Native) ]
+
 let choose byte native = function
   | Byte -> byte
   | Native -> native

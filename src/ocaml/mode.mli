@@ -8,6 +8,8 @@ val equal : t -> t -> bool
 
 val compare : t -> t -> Ordering.t
 
+val decode : t Dune_sexp.Decoder.t
+
 val all : t list
 
 val compiled_unit_ext : t -> string
