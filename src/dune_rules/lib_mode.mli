@@ -20,7 +20,7 @@ module Cm_kind : sig
 
     type 'a t =
       { ocaml : 'a Ocaml.Cm_kind.Dict.t
-      ; melange : 'a Melange.Cm_kind.Dict.t
+      ; melange : 'a Melange.Cm_kind.Map.t
       }
 
     val get : 'a t -> cm_kind -> 'a

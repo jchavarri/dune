@@ -21,7 +21,7 @@ module Cm_kind = struct
     | Cmi -> variant "cmi" []
     | Cmj -> variant "cmj" []
 
-  module Dict = struct
+  module Map = struct
     type 'a t =
       { cmi : 'a
       ; cmj : 'a

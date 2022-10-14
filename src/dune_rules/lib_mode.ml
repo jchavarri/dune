@@ -28,7 +28,7 @@ module Cm_kind = struct
   module Dict = struct
     type 'a t =
       { ocaml : 'a Ocaml.Cm_kind.Dict.t
-      ; melange : 'a Melange.Cm_kind.Dict.t
+      ; melange : 'a Melange.Cm_kind.Map.t
       }
 
     let get t = function
@@ -40,7 +40,7 @@ module Cm_kind = struct
 
     let make_all x =
       { ocaml = Ocaml.Cm_kind.Dict.make_all x
-      ; melange = Melange.Cm_kind.Dict.make_all x
+      ; melange = Melange.Cm_kind.Map.make_all x
       }
   end
 end

@@ -11,7 +11,7 @@ module Cm_kind : sig
 
   val to_dyn : t -> Dyn.t
 
-  module Dict : sig
+  module Map : sig
     type 'a t =
       { cmi : 'a
       ; cmj : 'a
