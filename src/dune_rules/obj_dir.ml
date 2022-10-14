@@ -171,8 +171,7 @@ module Local = struct
       in
       Path.Build.Set.of_list dirs |> Path.Build.Set.to_list
     | Melange ->
-      [ t.melange_dir; public_cmi_dir t ]
-      |> Path.Build.Set.of_list |> Path.Build.Set.to_list
+      [ t.melange_dir ] |> Path.Build.Set.of_list |> Path.Build.Set.to_list
 
   let make_lib ~dir ~has_private_modules ~private_lib lib_name =
     let obj_dir = Paths.library_object_directory ~dir lib_name in
