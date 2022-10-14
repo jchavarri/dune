@@ -101,7 +101,7 @@ module Mode_conf : sig
   end
 
   module Set : sig
-    type mode_conf = t
+    type mode_conf := t
 
     type nonrec t = Kind.t option Map.t
 
@@ -119,13 +119,13 @@ module Mode_conf : sig
   end
 
   module Lib : sig
-    type mode_conf = t
+    type mode_conf := t
 
     type t =
       | Ocaml of mode_conf
       | Melange
 
-    val decode : t Dune_lang.Decoder.t
+    val decode : enable_melange:bool -> t Dune_lang.Decoder.t
 
     val to_dyn : t -> Dyn.t
 
@@ -137,7 +137,7 @@ module Mode_conf : sig
     end
 
     module Set : sig
-      type mode_conf = t
+      type mode_conf := t
 
       type nonrec t = Kind.t option Map.t
 
@@ -149,9 +149,9 @@ module Mode_conf : sig
         type t = Kind.t option
       end
 
-      val eval_detailed : t -> has_native:bool -> Details.t Lib_mode.Dict.t
+      val eval_detailed : t -> has_native:bool -> Details.t Lib_mode.Map.t
 
-      val eval : t -> has_native:bool -> Lib_mode.Dict.Set.t
+      val eval : t -> has_native:bool -> Lib_mode.Map.Set.t
     end
   end
 end

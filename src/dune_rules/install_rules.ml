@@ -132,9 +132,8 @@ end = struct
               make_entry Lib source ?dst))
     in
     let { Lib_config.has_native; ext_obj; _ } = lib_config in
-    let ({ Mode.Dict.byte; native } as modes) =
-      Dune_file.Mode_conf.Set.eval lib.modes.ocaml ~has_native
-    in
+    let modes = Dune_file.Mode_conf.Set.eval lib.modes.ocaml ~has_native in
+    let { Mode.Dict.byte; native } = modes in
     let module_files =
       let inside_subdir f =
         match lib_subdir with
@@ -177,17 +176,15 @@ end = struct
           List.map ~f:(fun (cm_kind, p) -> (cm_dir m cm_kind, p))
         in
         let modules_impl =
-          let make_cmt ~cm_kind m ml_kind =
-            let open Option.O in
-            let+ cmt =
-              Obj_dir.Module.cmt_file obj_dir m ~ml_kind
-                ~cm_kind:(Ocaml cm_kind)
-            in
-            (cm_kind, cmt)
-          in
           List.concat_map installable_modules.impl ~f:(fun m ->
               common m
-              @ List.filter_map Ml_kind.all ~f:(make_cmt ~cm_kind:Cmi m)
+              @ List.filter_map Ml_kind.all ~f:(fun ml_kind ->
+                    let open Option.O in
+                    let+ cmt =
+                      Obj_dir.Module.cmt_file obj_dir m ~ml_kind
+                        ~cm_kind:(Ocaml Cmi)
+                    in
+                    (Cm_kind.Cmi, cmt))
               |> set_dir m)
         in
         let modules_vlib =

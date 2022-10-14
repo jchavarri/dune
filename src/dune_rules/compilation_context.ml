@@ -1,9 +1,9 @@
 open Import
 
 module Includes = struct
-  type t = Command.Args.without_targets Command.Args.t Lib_mode.Cm_kind.Dict.t
+  type t = Command.Args.without_targets Command.Args.t Lib_mode.Cm_kind.Map.t
 
-  let make ~project ~opaque ~requires : _ Lib_mode.Cm_kind.Dict.t =
+  let make ~project ~opaque ~requires : _ Lib_mode.Cm_kind.Map.t =
     let open Resolve.Memo.O in
     let iflags libs mode = Lib_flags.L.include_flags ~project libs mode in
     let make_includes_args ~mode groups =
@@ -45,7 +45,7 @@ module Includes = struct
     ; melange = { cmi = melange_cmi_includes; cmj = melange_cmj_includes }
     }
 
-  let empty = Lib_mode.Cm_kind.Dict.make_all Command.Args.empty
+  let empty = Lib_mode.Cm_kind.Map.make_all Command.Args.empty
 end
 
 type opaque =
@@ -83,7 +83,7 @@ type t =
   ; sandbox : Sandbox_config.t
   ; package : Package.t option
   ; vimpl : Vimpl.t option
-  ; modes : Lib_mode.Dict.Set.t
+  ; modes : Lib_mode.Map.Set.t
   ; bin_annot : bool
   ; ocamldep_modules_data : Ocamldep.Modules_data.t
   ; loc : Loc.t option
@@ -157,12 +157,12 @@ let create ~super_context ~scope ~expander ~obj_dir ~modules ~flags
   in
   let modes =
     let default =
-      { Lib_mode.Dict.ocaml =
+      { Lib_mode.Map.ocaml =
           Mode.Dict.make_both (Some Dune_file.Mode_conf.Kind.Inherited)
       ; melange = None
       }
     in
-    Option.value ~default modes |> Lib_mode.Dict.map ~f:Option.is_some
+    Option.value ~default modes |> Lib_mode.Map.map ~f:Option.is_some
   in
   let opaque = eval_opaque (Super_context.context super_context) opaque in
   let ocamldep_modules_data : Ocamldep.Modules_data.t =

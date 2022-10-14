@@ -17,7 +17,7 @@ let msvc_hack_cclibs =
 let build_lib (lib : Library.t) ~native_archives ~sctx ~expander ~flags ~dir
     ~mode ~cm_files ~scope =
   let ctx = Super_context.context sctx in
-  Memo.Result.iter (Context.ocaml_compiler ctx mode) ~f:(fun compiler ->
+  Memo.Result.iter (Context.compiler ctx (Ocaml mode)) ~f:(fun compiler ->
       let target = Library.archive lib ~dir ~ext:(Mode.compiled_lib_ext mode) in
       let stubs_flags =
         List.concat_map (Library.foreign_archives lib) ~f:(fun archive ->
@@ -371,17 +371,6 @@ let setup_build_archives (lib : Dune_file.Library.t) ~top_sorted_modules ~cctx
     Mode.Dict.Set.iter_concurrently modes.ocaml ~f:(fun mode ->
         build_lib lib ~native_archives ~dir ~sctx ~expander ~flags ~mode ~scope
           ~cm_files)
-  and* () =
-    Memo.when_ modes.melange (fun () ->
-        (* Create empty library target, so that melange libraries modules rules get added to build implicitly *)
-        let target = Library.archive lib ~dir ~ext:".cma" in
-        let obj_deps =
-          Action_builder.paths (Cm_files.melange_objects_and_cms cm_files)
-        in
-        Super_context.add_rule ~dir sctx ~loc:lib.buildable.loc
-          (let open Action_builder.With_targets.O in
-          Action_builder.with_no_targets obj_deps
-          >>> Action_builder.write_file target ""))
   and* () =
     (* Build *.cma.js *)
     Memo.when_ modes.ocaml.byte (fun () ->

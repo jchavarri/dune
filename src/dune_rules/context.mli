@@ -106,9 +106,6 @@ val to_dyn_concise : t -> Dyn.t
 (** Compare the context names *)
 val compare : t -> t -> Ordering.t
 
-(** Return the OCaml compiler needed for the OCaml compilation mode *)
-val ocaml_compiler : t -> Mode.t -> Action.Prog.t
-
 (** Return the compiler needed for this compilation mode *)
 val compiler : t -> Lib_mode.t -> Action.Prog.t
 

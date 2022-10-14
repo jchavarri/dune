@@ -525,13 +525,13 @@ module Mode_conf = struct
       | Ocaml of mode_conf
       | Melange
 
-    let decode =
+    let decode ~enable_melange =
       enum
-        [ ("byte", Ocaml Byte)
-        ; ("native", Ocaml Native)
-        ; ("best", Ocaml Best)
-        ; ("melange", Melange)
-        ]
+        ([ ("byte", Ocaml Byte)
+         ; ("native", Ocaml Native)
+         ; ("best", Ocaml Best)
+         ]
+        @ if enable_melange then [ ("melange", Melange) ] else [])
 
     let to_string = function
       | Ocaml Byte -> "byte"
@@ -577,8 +577,12 @@ module Mode_conf = struct
                 assert false))
 
       let decode =
+        let* project = Dune_project.get_exn () in
+        let enable_melange =
+          Dune_project.is_extension_set project Melange.extension_key
+        in
         let decode =
-          let+ loc, t = located decode in
+          let+ loc, t = located (decode ~enable_melange) in
           (t, Kind.Requested loc)
         in
         repeat decode >>| of_list
@@ -592,10 +596,10 @@ module Mode_conf = struct
       let eval_detailed t ~has_native =
         let get key : Details.t = Map.find t key in
         let melange = get Melange in
-        { Lib_mode.Dict.ocaml = Set.eval_detailed t.ocaml ~has_native; melange }
+        { Lib_mode.Map.ocaml = Set.eval_detailed t.ocaml ~has_native; melange }
 
       let eval t ~has_native =
-        eval_detailed t ~has_native |> Lib_mode.Dict.map ~f:Option.is_some
+        eval_detailed t ~has_native |> Lib_mode.Map.map ~f:Option.is_some
     end
   end
 end

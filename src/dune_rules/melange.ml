@@ -1,6 +1,12 @@
+open Import
+open Dune_lang.Decoder
+
 let melange_syntax =
   Dune_lang.Syntax.create ~name:"melange" ~desc:"support for Melange compiler"
     [ ((0, 1), `Since (3, 5)) ]
+
+let extension_key =
+  Dune_project.Extension.register melange_syntax (return ((), [])) Unit.to_dyn
 
 module Cm_kind = struct
   type t =
@@ -21,7 +27,7 @@ module Cm_kind = struct
     | Cmi -> variant "cmi" []
     | Cmj -> variant "cmj" []
 
-  module Dict = struct
+  module Map = struct
     type 'a t =
       { cmi : 'a
       ; cmj : 'a

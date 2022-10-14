@@ -1,4 +1,4 @@
-val melange_syntax : Dune_lang.Syntax.t
+val extension_key : unit Dune_engine.Dune_project.Extension.t
 
 module Cm_kind : sig
   type t =
@@ -11,7 +11,7 @@ module Cm_kind : sig
 
   val to_dyn : t -> Dyn.t
 
-  module Dict : sig
+  module Map : sig
     type 'a t =
       { cmi : 'a
       ; cmj : 'a
