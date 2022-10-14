@@ -25,7 +25,7 @@ module Cm_kind = struct
     | Ocaml k -> variant "ocaml" [ Ocaml.Cm_kind.to_dyn k ]
     | Melange k -> variant "melange" [ Melange.Cm_kind.to_dyn k ]
 
-  module Dict = struct
+  module Map = struct
     type 'a t =
       { ocaml : 'a Ocaml.Cm_kind.Dict.t
       ; melange : 'a Melange.Cm_kind.Map.t
@@ -50,7 +50,7 @@ let of_cm_kind : Cm_kind.t -> t = function
   | Ocaml Cmx -> Ocaml Native
   | Melange (Cmi | Cmj) -> Melange
 
-module Dict = struct
+module Map = struct
   type 'a t =
     { ocaml : 'a Ocaml.Mode.Dict.t
     ; melange : 'a

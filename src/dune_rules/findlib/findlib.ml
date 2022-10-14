@@ -318,7 +318,7 @@ end = struct
           ];
       let archives = archives t in
       let obj_dir = Obj_dir.make_external_no_private ~dir:t.dir in
-      let modes : Lib_mode.Dict.Set.t =
+      let modes : Lib_mode.Map.Set.t =
         (* libraries without archives are compatible with all modes. mainly a
            hack for compiler-libs which doesn't have any archives *)
         let discovered = Mode.Dict.map ~f:List.is_non_empty archives in
@@ -326,7 +326,7 @@ end = struct
           if Mode.Dict.Set.is_empty discovered then Mode.Dict.Set.all
           else discovered
         in
-        { Lib_mode.Dict.ocaml = modes; melange = false }
+        { Lib_mode.Map.ocaml = modes; melange = false }
       in
       let+ (info : Path.t Lib_info.t) =
         let kind = kind t in

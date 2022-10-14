@@ -194,7 +194,7 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
           ; cmt_args
           ; Command.Args.S obj_dirs
           ; Command.Args.as_any
-              (Lib_mode.Cm_kind.Dict.get (CC.includes cctx) cm_kind)
+              (Lib_mode.Cm_kind.Map.get (CC.includes cctx) cm_kind)
           ; As extra_args
           ; A "-no-alias-deps"
           ; opaque_arg
@@ -218,7 +218,7 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
 
 let build_module ?(precompiled_cmi = false) cctx m =
   let open Memo.O in
-  let { Lib_mode.Dict.ocaml; melange } = Compilation_context.modes cctx in
+  let { Lib_mode.Map.ocaml; melange } = Compilation_context.modes cctx in
   let* () =
     Memo.when_ (ocaml.byte || ocaml.native) (fun () ->
         let* () =
@@ -294,7 +294,7 @@ let ocamlc_i ?(flags = []) ~deps cctx (m : Module.t) ~output =
              ; A "-I"
              ; Path (Path.build (Obj_dir.byte_dir obj_dir))
              ; Command.Args.as_any
-                 (Lib_mode.Cm_kind.Dict.get (CC.includes cctx) (Ocaml Cmo))
+                 (Lib_mode.Cm_kind.Map.get (CC.includes cctx) (Ocaml Cmo))
              ; opens modules m
              ; As flags
              ; A "-short-paths"

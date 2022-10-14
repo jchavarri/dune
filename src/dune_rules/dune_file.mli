@@ -149,9 +149,9 @@ module Mode_conf : sig
         type t = Kind.t option
       end
 
-      val eval_detailed : t -> has_native:bool -> Details.t Lib_mode.Dict.t
+      val eval_detailed : t -> has_native:bool -> Details.t Lib_mode.Map.t
 
-      val eval : t -> has_native:bool -> Lib_mode.Dict.Set.t
+      val eval : t -> has_native:bool -> Lib_mode.Map.Set.t
     end
   end
 end

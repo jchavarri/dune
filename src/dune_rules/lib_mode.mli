@@ -15,7 +15,7 @@ module Cm_kind : sig
 
   val to_dyn : t -> Dyn.t
 
-  module Dict : sig
+  module Map : sig
     type cm_kind = t
 
     type 'a t =
@@ -32,7 +32,7 @@ end
 
 val of_cm_kind : Cm_kind.t -> t
 
-module Dict : sig
+module Map : sig
   type mode = t
 
   type 'a t =

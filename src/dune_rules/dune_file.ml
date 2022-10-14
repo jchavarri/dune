@@ -596,10 +596,10 @@ module Mode_conf = struct
       let eval_detailed t ~has_native =
         let get key : Details.t = Map.find t key in
         let melange = get Melange in
-        { Lib_mode.Dict.ocaml = Set.eval_detailed t.ocaml ~has_native; melange }
+        { Lib_mode.Map.ocaml = Set.eval_detailed t.ocaml ~has_native; melange }
 
       let eval t ~has_native =
-        eval_detailed t ~has_native |> Lib_mode.Dict.map ~f:Option.is_some
+        eval_detailed t ~has_native |> Lib_mode.Map.map ~f:Option.is_some
     end
   end
 end

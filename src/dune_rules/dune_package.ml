@@ -180,7 +180,7 @@ module Lib = struct
            Some (Lib_info.Inherited.This (Modules.wrapped modules))
          in
          let entry_modules = Lib_info.Source.External (Ok entry_modules) in
-         let modes = { Lib_mode.Dict.ocaml = modes; melange = false } in
+         let modes = { Lib_mode.Map.ocaml = modes; melange = false } in
          Lib_info.create ~path_kind:External ~loc ~name ~kind ~status ~src_dir
            ~orig_src_dir ~obj_dir ~version ~synopsis ~main_module_name
            ~sub_systems ~requires ~foreign_objects ~plugins ~archives
