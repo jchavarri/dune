@@ -1,12 +1,12 @@
 open Import
 open Dune_lang.Decoder
 
-let melange_syntax =
+let syntax =
   Dune_lang.Syntax.create ~name:"melange" ~desc:"support for Melange compiler"
     [ ((0, 1), `Since (3, 5)) ]
 
 let extension_key =
-  Dune_project.Extension.register melange_syntax (return ((), [])) Unit.to_dyn
+  Dune_project.Extension.register syntax (return ((), [])) Unit.to_dyn
 
 module Cm_kind = struct
   type t =
