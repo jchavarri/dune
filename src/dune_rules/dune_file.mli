@@ -101,7 +101,7 @@ module Mode_conf : sig
   end
 
   module Set : sig
-    type mode_conf = t
+    type mode_conf := t
 
     type nonrec t = Kind.t option Map.t
 
@@ -119,7 +119,7 @@ module Mode_conf : sig
   end
 
   module Lib : sig
-    type mode_conf = t
+    type mode_conf := t
 
     type t =
       | Ocaml of mode_conf
@@ -137,7 +137,7 @@ module Mode_conf : sig
     end
 
     module Set : sig
-      type mode_conf = t
+      type mode_conf := t
 
       type nonrec t = Kind.t option Map.t
 
