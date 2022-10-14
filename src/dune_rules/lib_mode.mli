@@ -30,12 +30,6 @@ module Cm_kind : sig
   with type cm_kind := t
 end
 
-val equal : t -> t -> bool
-
-val decode : t Dune_sexp.Decoder.t
-
-val to_string : t -> string
-
 val of_cm_kind : Cm_kind.t -> t
 
 module Dict : sig
@@ -47,17 +41,6 @@ module Dict : sig
     }
 
   val to_dyn : ('a -> Dyn.t) -> 'a t -> Dyn.t
-
-  module List : sig
-    type 'a dict
-
-    type 'a t = 'a list dict
-
-    val decode : 'a Dune_sexp.Decoder.t -> 'a t Dune_sexp.Decoder.t
-
-    val encode : 'a Dune_sexp.Encoder.t -> 'a t -> Dune_sexp.t list
-  end
-  with type 'a dict := 'a t
 
   val map : 'a t -> f:('a -> 'b) -> 'b t
 

@@ -1,4 +1,4 @@
-val melange_syntax : Dune_lang.Syntax.t
+val extension_key : unit Dune_engine.Dune_project.Extension.t
 
 module Cm_kind : sig
   type t =

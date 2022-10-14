@@ -45,22 +45,6 @@ module Cm_kind = struct
   end
 end
 
-let equal x y =
-  match (x, y) with
-  | Ocaml a, Ocaml b -> Ocaml.Mode.equal a b
-  | Melange, Melange -> true
-  | Ocaml _, Melange | Melange, Ocaml _ -> false
-
-let choose ocaml melange = function
-  | Ocaml m -> ocaml m
-  | Melange -> melange
-
-let to_string = choose Ocaml.Mode.to_string "melange"
-
-let decode =
-  let open Dune_sexp.Decoder in
-  enum [ ("byte", Ocaml Byte); ("native", Ocaml Native); ("melange", Melange) ]
-
 let of_cm_kind : Cm_kind.t -> t = function
   | Ocaml (Cmi | Cmo) -> Ocaml Byte
   | Ocaml Cmx -> Ocaml Native
@@ -96,28 +80,5 @@ module Dict = struct
         [ ("ocaml", Ocaml.Mode.Dict.Set.to_dyn ocaml)
         ; ("melange", bool melange)
         ]
-  end
-
-  module List = struct
-    type nonrec 'a t = 'a list t
-
-    let encode f { ocaml; melange } =
-      let open Dune_sexp.Encoder in
-      record_fields
-        [ field_l "byte" f ocaml.byte
-        ; field_l "native" f ocaml.native
-        ; field_l "melange" f melange
-        ]
-
-    let decode f =
-      let open Dune_sexp.Decoder in
-      fields
-        (let+ byte = field ~default:[] "byte" (repeat f)
-         and+ native = field ~default:[] "native" (repeat f)
-         and+ melange =
-           field ~default:[] "melange"
-             (Dune_lang.Syntax.since Melange.melange_syntax (0, 1) >>> repeat f)
-         in
-         { ocaml = { byte; native }; melange })
   end
 end
