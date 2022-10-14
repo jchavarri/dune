@@ -5,11 +5,9 @@ module Group : sig
     | Cmi
     | Cmx
 
-  type melange = Melange.Cm_kind.t
-
   type t =
     | Ocaml of ocaml
-    | Melange of melange
+    | Melange of Melange.Cm_kind.t
     | Header
 end
 
