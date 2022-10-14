@@ -17,7 +17,7 @@ let msvc_hack_cclibs =
 let build_lib (lib : Library.t) ~native_archives ~sctx ~expander ~flags ~dir
     ~mode ~cm_files ~scope =
   let ctx = Super_context.context sctx in
-  Memo.Result.iter (Context.ocaml_compiler ctx mode) ~f:(fun compiler ->
+  Memo.Result.iter (Context.compiler ctx (Ocaml mode)) ~f:(fun compiler ->
       let target = Library.archive lib ~dir ~ext:(Mode.compiled_lib_ext mode) in
       let stubs_flags =
         List.concat_map (Library.foreign_archives lib) ~f:(fun archive ->
