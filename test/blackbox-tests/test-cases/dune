@@ -31,6 +31,7 @@
 (subdir
  melange
  (cram
+  (deps %{bin:node})
   (alias runtest-melange)))
 
 (cram
