@@ -120,12 +120,7 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
       | Some Compile -> linear :: other_targets
       | Some Emit -> other_targets
       | Some All | None -> obj :: other_targets)
-    | Ocaml (Cmi | Cmo) | Melange Cmi -> other_targets
-    | Melange Cmj ->
-      let melange_js =
-        Obj_dir.Module.obj_file obj_dir m ~kind:(Melange Cmj) ~ext:".js"
-      in
-      melange_js :: other_targets
+    | Ocaml (Cmi | Cmo) | Melange (Cmi | Cmj) -> other_targets
   in
   let dep_graph = Ml_kind.Dict.get (CC.dep_graphs cctx) ml_kind in
   let opaque = CC.opaque cctx in
@@ -187,6 +182,11 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
     |> List.concat_map ~f:(fun p ->
            [ Command.Args.A "-I"; Path (Path.build p) ])
   in
+  let melange_args =
+    match cm_kind with
+    | Melange Cmj -> [ "-bs-stop-after-cmj" ]
+    | Ocaml (Cmi | Cmo | Cmx) | Melange Cmi -> []
+  in
   Super_context.add_rule sctx ~dir ?loc:(CC.loc cctx)
     (let open Action_builder.With_targets.O in
     Action_builder.with_no_targets (Action_builder.paths extra_deps)
@@ -198,6 +198,7 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
           ; Command.Args.as_any
               (Lib_mode.Cm_kind.Map.get (CC.includes cctx) cm_kind)
           ; As extra_args
+          ; As melange_args
           ; A "-no-alias-deps"
           ; opaque_arg
           ; As (Fdo.phase_flags phase)
@@ -216,6 +217,50 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
           ; Hidden_targets other_targets
           ]
     >>| Action.Full.add_sandbox sandbox))
+  |> Memo.Option.iter ~f:Fun.id
+
+let build_melange_js ~cctx m =
+  let cm_kind = Lib_mode.Cm_kind.Melange Cmj in
+  let sctx = CC.super_context cctx in
+  let dir = CC.dir cctx in
+  let obj_dir = CC.obj_dir cctx in
+  let ctx = Super_context.context sctx in
+  let mode = Lib_mode.of_cm_kind cm_kind in
+  let ml_kind = Lib_mode.Cm_kind.source cm_kind in
+  (let open Option.O in
+  let+ compiler = Result.to_option (Context.compiler ctx mode) in
+  let src = Obj_dir.Module.cm_file_exn obj_dir m ~kind:cm_kind in
+  let output =
+    Obj_dir.Module.obj_file obj_dir m ~kind:cm_kind ~ext:Melange.js_ext
+  in
+  let obj_dirs =
+    Obj_dir.all_obj_dirs obj_dir ~mode
+    |> List.concat_map ~f:(fun p ->
+           [ Command.Args.A "-I"; Path (Path.build p) ])
+  in
+  let dep_graph = Ml_kind.Dict.get (CC.dep_graphs cctx) ml_kind in
+  let cmj_deps =
+    Action_builder.dyn_paths_unit
+      (let open Action_builder.O in
+      let+ deps = Dep_graph.deps_of dep_graph m in
+      List.concat_map deps ~f:(fun m ->
+          if Module.has m ~ml_kind:Impl && cm_kind = Melange Cmj then
+            [ Path.build
+                (Obj_dir.Module.obj_file obj_dir m ~kind:cm_kind
+                   ~ext:Melange.js_ext)
+            ]
+          else []))
+  in
+  Super_context.add_rule sctx ~dir ?loc:(CC.loc cctx)
+    (let open Action_builder.With_targets.O in
+    Action_builder.with_no_targets cmj_deps
+    >>> Command.run ~dir:(Path.build dir) (Ok compiler)
+          [ Command.Args.S obj_dirs
+          ; Command.Args.as_any (CC.melange_js_includes cctx)
+          ; A "-o"
+          ; Target output
+          ; Dep (Path.build src)
+          ]))
   |> Memo.Option.iter ~f:Fun.id
 
 let build_module ?(precompiled_cmi = false) cctx m =
@@ -265,7 +310,7 @@ let build_module ?(precompiled_cmi = false) cctx m =
   Memo.when_ melange (fun () ->
       let* () =
         build_cm cctx m ~precompiled_cmi ~cm_kind:(Melange Cmj) ~phase:None
-      in
+      and* () = build_melange_js ~cctx m in
       Memo.when_ (not precompiled_cmi) (fun () ->
           build_cm cctx m ~precompiled_cmi ~cm_kind:(Melange Cmi) ~phase:None))
 

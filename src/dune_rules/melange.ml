@@ -8,6 +8,8 @@ let syntax =
 let extension_key =
   Dune_project.Extension.register syntax (return ((), [])) Unit.to_dyn
 
+let js_ext = ".js"
+
 module Cm_kind = struct
   type t =
     | Cmi
