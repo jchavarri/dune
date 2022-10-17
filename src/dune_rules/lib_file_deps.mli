@@ -5,9 +5,14 @@ module Group : sig
     | Cmi
     | Cmx
 
+  type melange =
+    | Cmi
+    | Cmj
+    | Js
+
   type t =
     | Ocaml of ocaml
-    | Melange of Melange.Cm_kind.t
+    | Melange of melange
     | Header
 end
 

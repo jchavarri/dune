@@ -1,5 +1,7 @@
 val extension_key : unit Dune_engine.Dune_project.Extension.t
 
+val js_ext : string
+
 module Cm_kind : sig
   type t =
     | Cmi

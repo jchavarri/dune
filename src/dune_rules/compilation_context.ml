@@ -76,6 +76,7 @@ type t =
   ; requires_compile : Lib.t list Resolve.Memo.t
   ; requires_link : Lib.t list Resolve.t Memo.Lazy.t
   ; includes : Includes.t
+  ; melange_js_includes : Command.Args.without_targets Command.Args.t
   ; preprocessing : Pp_spec.t
   ; opaque : bool
   ; stdlib : Ocaml_stdlib.t option
@@ -110,6 +111,8 @@ let requires_compile t = t.requires_compile
 let requires_link t = Memo.Lazy.force t.requires_link
 
 let includes t = t.includes
+
+let melange_js_includes t = t.melange_js_includes
 
 let preprocessing t = t.preprocessing
 
@@ -175,6 +178,16 @@ let create ~super_context ~scope ~expander ~obj_dir ~modules ~flags
     ; stdlib
     }
   in
+  let melange_js_includes =
+    let open Resolve.Memo.O in
+    Command.Args.memo
+      (Resolve.Memo.args
+         (let+ libs = requires_compile in
+          Command.Args.S
+            [ Lib_flags.L.include_flags ~project libs Melange
+            ; Hidden_deps (Lib_file_deps.deps libs ~groups:[ Melange Js ])
+            ]))
+  in
   let+ dep_graphs = Dep_rules.rules ocamldep_modules_data in
   { super_context
   ; scope
@@ -185,6 +198,7 @@ let create ~super_context ~scope ~expander ~obj_dir ~modules ~flags
   ; requires_compile
   ; requires_link
   ; includes = Includes.make ~project ~opaque ~requires:requires_compile
+  ; melange_js_includes
   ; preprocessing
   ; opaque
   ; stdlib

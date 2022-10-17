@@ -69,6 +69,8 @@ val requires_compile : t -> Lib.t list Resolve.Memo.t
 val includes :
   t -> Command.Args.without_targets Command.Args.t Lib_mode.Cm_kind.Map.t
 
+val melange_js_includes : t -> Command.Args.without_targets Command.Args.t
+
 val preprocessing : t -> Pp_spec.t
 
 val opaque : t -> bool
