@@ -52,6 +52,14 @@ let copy_interface ~sctx ~dir ~obj_dir ~cm_kind m =
              (Path.build (Obj_dir.Module.cm_file_exn obj_dir m ~kind:cmi_kind))
            ~dst:(Obj_dir.Module.cm_public_file_exn obj_dir m ~kind:Cmi)))
 
+let melange_package_args ~cctx =
+  let pkg_name =
+    match Compilation_context.package cctx with
+    | Some p -> Package.Name.to_string (Package.name p)
+    | None -> "__uninstalled_package__"
+  in
+  [ "--bs-package-name"; pkg_name; "--bs-package-output"; "es6:.:.js" ]
+
 let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
     ~(phase : Fdo.phase option) =
   let sctx = CC.super_context cctx in
@@ -184,7 +192,7 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
   in
   let melange_args =
     match cm_kind with
-    | Melange Cmj -> [ "-bs-stop-after-cmj" ]
+    | Melange Cmj -> "-bs-stop-after-cmj" :: melange_package_args ~cctx
     | Ocaml (Cmi | Cmo | Cmx) | Melange Cmi -> []
   in
   Super_context.add_rule sctx ~dir ?loc:(CC.loc cctx)
@@ -257,10 +265,7 @@ let build_melange_js ~cctx m =
     >>> Command.run ~dir:(Path.build dir) (Ok compiler)
           [ Command.Args.S obj_dirs
           ; Command.Args.as_any (CC.melange_js_includes cctx)
-          ; A "--bs-package-name"
-          ; A "this"
-          ; A "--bs-package-output"
-          ; A "es6:.:.mjs"
+          ; As (melange_package_args ~cctx)
           ; A "-o"
           ; Target output
           ; Dep (Path.build src)
