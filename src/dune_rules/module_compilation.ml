@@ -257,6 +257,10 @@ let build_melange_js ~cctx m =
     >>> Command.run ~dir:(Path.build dir) (Ok compiler)
           [ Command.Args.S obj_dirs
           ; Command.Args.as_any (CC.melange_js_includes cctx)
+          ; A "--bs-package-name"
+          ; A "this"
+          ; A "--bs-package-output"
+          ; A "es6:.:.mjs"
           ; A "-o"
           ; Target output
           ; Dep (Path.build src)
