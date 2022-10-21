@@ -611,7 +611,7 @@ let create ~(kind : Kind.t) ~path ~env ~env_nodes ~name ~merlin ~targets
             | None -> Memo.Lazy.force make)
     in
     let* melc =
-      let program = "melc" in
+      let program = "/home/javier.chavarri/code/melange/_esy/default/store/i/melange-05b8149a/bin/melc" in
       which program >>| function
       | Some s -> Ok s
       | None ->

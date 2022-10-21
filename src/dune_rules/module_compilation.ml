@@ -230,17 +230,23 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
 let build_melange_js ~cctx m =
   let cm_kind = Lib_mode.Cm_kind.Melange Cmj in
   let sctx = CC.super_context cctx in
-  let dir = CC.dir cctx in
   let obj_dir = CC.obj_dir cctx in
   let ctx = Super_context.context sctx in
+  let dir = ctx.build_dir in
   let mode = Lib_mode.of_cm_kind cm_kind in
   let ml_kind = Lib_mode.Cm_kind.source cm_kind in
   (let open Option.O in
   let+ compiler = Result.to_option (Context.compiler ctx mode) in
   let src = Obj_dir.Module.cm_file_exn obj_dir m ~kind:cm_kind in
   let output =
-    Obj_dir.Module.obj_file obj_dir m ~kind:cm_kind ~ext:Melange.js_ext
+    let name =
+      Module_name.Unique.artifact_filename (Module.obj_name m)
+        ~ext:Melange.js_ext
+    in
+    Path.Build.relative (Path.Build.relative dir "es6") name
   in
+  print_endline ("DIR: " ^ Path.Build.to_string dir);
+  print_endline ("PATH: " ^ Path.Build.to_string output);
   let obj_dirs =
     Obj_dir.all_obj_dirs obj_dir ~mode
     |> List.concat_map ~f:(fun p ->
