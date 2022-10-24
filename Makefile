@@ -72,7 +72,7 @@ dev-depext:
 	opam depext -y $(TEST_DEPS)
 
 melange:
-	opam pin add melange https://github.com/melange-re/melange.git#e0d1290f57427ebe662851fdf107150d2dd9a428
+	opam pin add melange https://github.com/melange-re/melange.git#775d40040e12bb6531c1fd4677cffdbec85b5980
 
 dev-deps: melange
 	opam install -y $(TEST_DEPS)
@@ -171,8 +171,3 @@ dune-release:
 	DUNE_RELEASE_DELEGATE=github-dune-release-delegate dune-release publish distrib --verbose
 	dune-release opam pkg
 	dune-release opam submit
-
-# see nix/default.nix for details
-.PHONY: nix/opam-selection.nix
-nix/opam-selection.nix: Makefile
-	nix-shell -A resolve ./
