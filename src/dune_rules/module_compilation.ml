@@ -60,6 +60,18 @@ let melange_package_args ~cctx =
   in
   [ "--bs-package-name"; pkg_name; "--bs-package-output"; "es6:.:.js" ]
 
+let compiler ~ctx ~sctx ~dir mode =
+  let open Memo.O in
+  let+ compiler =
+    match mode with
+    | Lib_mode.Ocaml mode -> Memo.return @@ Context.compiler ctx mode
+    | Melange ->
+      (* TODO loc should come from the mode field in the dune file *)
+      Super_context.resolve_program sctx ~loc:None ~dir
+        ~hint:"opam install melange" "melc"
+  in
+  Result.to_option compiler
+
 let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
     ~(phase : Fdo.phase option) =
   let sctx = CC.super_context cctx in
@@ -78,17 +90,7 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
     | _ -> default
   in
   let open Memo.O in
-  let* compiler =
-    let+ compiler =
-      match mode with
-      | Ocaml mode -> Memo.return @@ Context.compiler ctx mode
-      | Melange ->
-        (* TODO loc should come from the mode field in the dune file *)
-        Super_context.resolve_program sctx ~loc:None ~dir
-          ~hint:"opam install melange" "melc"
-    in
-    Result.to_option compiler
-  in
+  let* compiler = compiler ~ctx ~sctx ~dir mode in
   (let open Option.O in
   let* compiler = compiler in
   let ml_kind = Lib_mode.Cm_kind.source cm_kind in
@@ -247,8 +249,10 @@ let build_melange_js ~cctx m =
   let dir = ctx.build_dir in
   let mode = Lib_mode.of_cm_kind cm_kind in
   let ml_kind = Lib_mode.Cm_kind.source cm_kind in
+  let open Memo.O in
+  let* compiler = compiler ~ctx ~sctx ~dir mode in
   (let open Option.O in
-  let+ compiler = Result.to_option (Context.compiler ctx mode) in
+  let+ compiler = compiler in
   let src = Obj_dir.Module.cm_file_exn obj_dir m ~kind:cm_kind in
   let output =
     let name =
@@ -257,8 +261,6 @@ let build_melange_js ~cctx m =
     in
     Path.Build.relative (Path.Build.relative dir "es6") name
   in
-  print_endline ("DIR: " ^ Path.Build.to_string dir);
-  print_endline ("PATH: " ^ Path.Build.to_string output);
   let obj_dirs =
     Obj_dir.all_obj_dirs obj_dir ~mode
     |> List.concat_map ~f:(fun p ->
