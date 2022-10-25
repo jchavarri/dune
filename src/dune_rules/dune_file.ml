@@ -2233,6 +2233,29 @@ module Generate_sites_module = struct
        { loc; module_; sourceroot; relocatable; sites; plugins })
 end
 
+module Melange = struct
+  type spec =
+    | Es6
+    | CommonJs
+
+  type t =
+    { loc : Loc.t
+    ; target : string
+    ; spec : spec
+    ; libraries : Lib_dep.t list
+    }
+
+  let decode =
+    fields
+      (let+ loc = loc
+       and+ target = field "target" string
+       and+ spec = field "spec" (enum [ ("es6", Es6); ("commonjs", CommonJs) ])
+       and+ libraries =
+         field "libraries" (Lib_deps.decode Executable) ~default:[]
+       in
+       { loc; target; spec; libraries })
+end
+
 type Stanza.t +=
   | Library of Library.t
   | Foreign_library of Foreign.Library.t
@@ -2250,6 +2273,7 @@ type Stanza.t +=
   | Cram of Cram_stanza.t
   | Generate_sites_module of Generate_sites_module.t
   | Plugin of Plugin.t
+  | Melange of Melange.t
 
 module Stanzas = struct
   type t = Stanza.t list
@@ -2366,6 +2390,10 @@ module Stanzas = struct
       , let+ () = Dune_lang.Syntax.since Section.dune_site_syntax (0, 1)
         and+ t = Plugin.decode in
         [ Plugin t ] )
+    ; ( "melange"
+      , let+ () = Dune_lang.Syntax.since Stanza.syntax (3, 6)
+        and+ t = Melange.decode in
+        [ Melange t ] )
     ]
 
   let () = Dune_project.Lang.register Stanza.syntax stanzas

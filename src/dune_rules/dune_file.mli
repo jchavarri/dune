@@ -473,6 +473,17 @@ module Generate_sites_module : sig
     }
 end
 
+(** Stanza to produce JavaScript targets from Melange libraries *)
+module Melange : sig
+  type spec
+  type t = {
+    loc : Loc.t;
+    target : string;
+    spec : spec;
+    libraries : Lib_dep.t list;
+  }
+end
+
 type Stanza.t +=
   | Library of Library.t
   | Foreign_library of Foreign.Library.t
@@ -490,6 +501,7 @@ type Stanza.t +=
   | Cram of Cram_stanza.t
   | Generate_sites_module of Generate_sites_module.t
   | Plugin of Plugin.t
+  | Melange of Melange.t
 
 val stanza_package : Stanza.t -> Package.t option
 
