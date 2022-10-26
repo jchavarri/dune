@@ -182,11 +182,15 @@ end = struct
             in
             let lib = Lib.Local.of_lib_exn lib in
             let info = Lib.Local.info lib in
-            let src_dir = Lib_info.src_dir info in
+            let lib_dir = Lib_info.src_dir info in
             let obj_dir = Lib_info.obj_dir info in
-            let dst_dir = Path.Build.relative dir mel.target in
+            let dst_dir =
+              Path.Build.relative
+                (Path.Build.relative dir mel.target)
+                (Path.reach (Path.build lib_dir) ~from:(Path.build dir))
+            in
             let modules =
-              Dir_contents.get sctx ~dir:src_dir
+              Dir_contents.get sctx ~dir:lib_dir
               >>= Dir_contents.ocaml
               >>| Ml_sources.modules ~for_:(Library lib_name)
             in
