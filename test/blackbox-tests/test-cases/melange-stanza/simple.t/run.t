@@ -1,8 +1,9 @@
 Compilation using melange
-  $ dune describe
-  $ dune rules es6/x.js
-  $ dune build --verbose es6/x.js
-  $ ls -la ./_build/default/es6/
-  $ cat ./_build/default/es6/x.js
-  $ node ./_build/default/es6/x.js
-  buy it
+  $ dune rules inside/output/x.js
+
+$ dune build --verbose inside/lib/x.js
+$ ls -la ./_build/default/inside/
+$ ls -la ./_build/default/inside/lib
+$ cat ./_build/default/es6/x.js
+$ node ./_build/default/es6/x.js
+buy it

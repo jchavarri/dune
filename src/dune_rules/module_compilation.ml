@@ -241,7 +241,7 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
     >>| Action.Full.add_sandbox sandbox))
   |> Memo.Option.iter ~f:Fun.id
 
-let build_melange_js ~cctx m =
+let build_melange_js ~dst_dir ~cctx m =
   let cm_kind = Lib_mode.Cm_kind.Melange Cmj in
   let sctx = CC.super_context cctx in
   let obj_dir = CC.obj_dir cctx in
@@ -254,13 +254,16 @@ let build_melange_js ~cctx m =
   (let open Option.O in
   let+ compiler = compiler in
   let src = Obj_dir.Module.cm_file_exn obj_dir m ~kind:cm_kind in
+  let in_dir = Path.Build.relative dst_dir in
   let output =
     let name =
       Module_name.Unique.artifact_filename (Module.obj_name m)
         ~ext:Melange.js_ext
     in
-    Path.Build.relative (Path.Build.relative dir "es6") name
+    in_dir name
   in
+  print_endline "(Path.Build.to_string output)";
+  print_endline (Path.Build.to_string output);
   let obj_dirs =
     Obj_dir.all_obj_dirs obj_dir ~mode
     |> List.concat_map ~f:(fun p ->
@@ -277,9 +280,7 @@ let build_melange_js ~cctx m =
               Module_name.Unique.artifact_filename (Module.obj_name m)
                 ~ext:Melange.js_ext
             in
-            [ Path.build
-                (Path.Build.relative (Path.Build.relative dir "es6") name)
-            ]
+            [ Path.build (in_dir name) ]
           else []))
   in
   Super_context.add_rule sctx ~dir ?loc:(CC.loc cctx)
