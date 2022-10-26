@@ -1,1 +1,1 @@
-(melange (target output) (libraries x) (spec es6))
+(melange.emit (target output) (libraries x) (spec es6))
