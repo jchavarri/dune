@@ -394,7 +394,7 @@ let mdx_prog_gen t ~sctx ~dir ~scope ~expander ~mdx_prog =
     and requires_link = Lib.Compile.requires_link compile_info in
     Compilation_context.create ~super_context:sctx ~scope ~expander ~obj_dir
       ~modules ~flags ~requires_compile ~requires_link ~opaque:(Explicit false)
-      ~js_of_ocaml:None ~package:None ()
+      ~js_of_ocaml:None ~melange:None ~package:None ()
   in
   let+ (_ : Exe.dep_graphs) =
     Exe.build_and_link cctx

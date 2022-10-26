@@ -52,13 +52,13 @@ let copy_interface ~sctx ~dir ~obj_dir ~cm_kind m =
              (Path.build (Obj_dir.Module.cm_file_exn obj_dir m ~kind:cmi_kind))
            ~dst:(Obj_dir.Module.cm_public_file_exn obj_dir m ~kind:Cmi)))
 
-let melange_package_args ~cctx =
-  let pkg_name =
-    match Compilation_context.package cctx with
-    | Some p -> Package.Name.to_string (Package.name p)
-    | None -> "__uninstalled_package__"
-  in
-  [ "--bs-package-name"; pkg_name; "--bs-package-output"; "es6:.:.js" ]
+let melange_package_args ~pkg_name ~js_modules ~rel_path =
+  let js_modules_str = Melange.Spec.to_string js_modules in
+  [ "--bs-package-name"
+  ; pkg_name
+  ; "--bs-package-output"
+  ; js_modules_str ^ ":" ^ rel_path ^ ":.js"
+  ]
 
 let compiler ~ctx ~sctx ~dir mode =
   let open Memo.O in
@@ -205,8 +205,16 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
            [ Command.Args.A "-I"; Path (Path.build p) ])
   in
   let melange_args =
+    let mel = CC.melange cctx in
+    let pkg_args =
+      match mel with
+      | Some mel ->
+        melange_package_args ~pkg_name:mel.pkg_name ~js_modules:mel.spec
+          ~rel_path:mel.lib_rel_path
+      | None -> []
+    in
     match cm_kind with
-    | Melange Cmj -> "-bs-stop-after-cmj" :: melange_package_args ~cctx
+    | Melange Cmj -> "-bs-stop-after-cmj" :: pkg_args
     | Ocaml (Cmi | Cmo | Cmx) | Melange Cmi -> []
   in
   Super_context.add_rule sctx ~dir ?loc:(CC.loc cctx)
@@ -241,7 +249,7 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
     >>| Action.Full.add_sandbox sandbox))
   |> Memo.Option.iter ~f:Fun.id
 
-let build_melange_js ~dst_dir ~cctx m =
+let build_melange_js ~pkg_name ~js_modules ~rel_path ~dst_dir ~cctx m =
   let cm_kind = Lib_mode.Cm_kind.Melange Cmj in
   let sctx = CC.super_context cctx in
   let obj_dir = CC.obj_dir cctx in
@@ -287,7 +295,7 @@ let build_melange_js ~dst_dir ~cctx m =
     >>> Command.run ~dir:(Path.build dir) (Ok compiler)
           [ Command.Args.S obj_dirs
           ; Command.Args.as_any (CC.melange_js_includes cctx)
-          ; As (melange_package_args ~cctx)
+          ; As (melange_package_args ~pkg_name ~js_modules ~rel_path)
           ; A "-o"
           ; Target output
           ; Dep (Path.build src)

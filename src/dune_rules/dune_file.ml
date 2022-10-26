@@ -2233,15 +2233,11 @@ module Generate_sites_module = struct
        { loc; module_; sourceroot; relocatable; sites; plugins })
 end
 
-module Melange = struct
-  type spec =
-    | Es6
-    | CommonJs
-
+module Melange_stanza = struct
   type t =
     { loc : Loc.t
     ; target : string
-    ; spec : spec
+    ; spec : Melange.Spec.t
     ; libraries : Lib_dep.t list
     }
 
@@ -2249,7 +2245,9 @@ module Melange = struct
     fields
       (let+ loc = loc
        and+ target = field "target" string
-       and+ spec = field "spec" (enum [ ("es6", Es6); ("commonjs", CommonJs) ])
+       and+ spec =
+         field "spec"
+           (enum [ ("es6", Melange.Spec.Es6); ("commonjs", CommonJs) ])
        and+ libraries =
          field "libraries" (Lib_deps.decode Executable) ~default:[]
        in
@@ -2273,7 +2271,7 @@ type Stanza.t +=
   | Cram of Cram_stanza.t
   | Generate_sites_module of Generate_sites_module.t
   | Plugin of Plugin.t
-  | Melange of Melange.t
+  | Melange of Melange_stanza.t
 
 module Stanzas = struct
   type t = Stanza.t list
@@ -2392,7 +2390,7 @@ module Stanzas = struct
         [ Plugin t ] )
     ; ( "melange.emit"
       , let+ () = Dune_lang.Syntax.since Stanza.syntax (3, 6)
-        and+ t = Melange.decode in
+        and+ t = Melange_stanza.decode in
         [ Melange t ] )
     ]
 

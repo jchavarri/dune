@@ -172,7 +172,8 @@ module Stanza = struct
     let* cctx =
       Compilation_context.create () ~super_context:sctx ~scope ~obj_dir
         ~expander ~modules ~opaque:(Explicit false) ~requires_compile
-        ~requires_link ~flags ~js_of_ocaml:None ~package:None ~preprocessing
+        ~requires_link ~flags ~js_of_ocaml:None ~melange:None ~package:None
+        ~preprocessing
     in
     let resolved = make ~cctx ~source ~preprocess:toplevel.pps in
     let* exe = setup_rules_and_return_exe_path resolved in

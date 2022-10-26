@@ -81,6 +81,7 @@ type t =
   ; opaque : bool
   ; stdlib : Ocaml_stdlib.t option
   ; js_of_ocaml : Js_of_ocaml.In_context.t option
+  ; melange : Melange.In_context.t option
   ; sandbox : Sandbox_config.t
   ; package : Package.t option
   ; vimpl : Vimpl.t option
@@ -122,6 +123,8 @@ let stdlib t = t.stdlib
 
 let js_of_ocaml t = t.js_of_ocaml
 
+let melange t = t.melange
+
 let sandbox t = t.sandbox
 
 let set_sandbox t sandbox = { t with sandbox }
@@ -142,7 +145,8 @@ let dep_graphs t = t.modules.dep_graphs
 
 let create ~super_context ~scope ~expander ~obj_dir ~modules ~flags
     ~requires_compile ~requires_link ?(preprocessing = Pp_spec.dummy) ~opaque
-    ?stdlib ~js_of_ocaml ~package ?vimpl ?modes ?(bin_annot = true) ?loc () =
+    ?stdlib ~js_of_ocaml ~melange ~package ?vimpl ?modes ?(bin_annot = true)
+    ?loc () =
   let open Memo.O in
   let project = Scope.project scope in
   let requires_compile =
@@ -199,6 +203,7 @@ let create ~super_context ~scope ~expander ~obj_dir ~modules ~flags
   ; requires_link
   ; includes = Includes.make ~project ~opaque ~requires:requires_compile
   ; melange_js_includes
+  ; melange
   ; preprocessing
   ; opaque
   ; stdlib

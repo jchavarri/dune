@@ -10,6 +10,26 @@ let extension_key =
 
 let js_ext = ".js"
 
+module Spec = struct
+  type t =
+    | Es6
+    | CommonJs
+
+  let to_string = function
+    | Es6 -> "es6"
+    | CommonJs -> "commonjs"
+end
+
+module In_context = struct
+  type t =
+    { lib_rel_path : string
+    ; pkg_name : string
+    ; spec : Spec.t
+    }
+
+  let make ~lib_rel_path ~pkg_name ~spec = { lib_rel_path; pkg_name; spec }
+end
+
 module Cm_kind = struct
   type t =
     | Cmi

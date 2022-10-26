@@ -129,7 +129,7 @@ let gen_rules sctx t ~dir ~scope =
     Compilation_context.create () ~super_context:sctx ~expander ~scope ~obj_dir
       ~modules ~opaque:(Explicit false) ~requires_compile ~requires_link
       ~flags:(Ocaml_flags.of_list [ "-w"; "-24" ])
-      ~js_of_ocaml:None ~package:None
+      ~js_of_ocaml:None ~melange:None ~package:None
   in
   let* (_ : Exe.dep_graphs) =
     Exe.build_and_link cctx

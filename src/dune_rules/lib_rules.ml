@@ -466,7 +466,7 @@ let cctx (lib : Library.t) ~sctx ~source_modules ~dir ~expander ~scope
   in
   Compilation_context.create () ~super_context:sctx ~expander ~scope ~obj_dir
     ~modules ~flags ~requires_compile ~requires_link ~preprocessing:pp
-    ~opaque:Inherit_from_settings ~js_of_ocaml:(Some js_of_ocaml)
+    ~opaque:Inherit_from_settings ~js_of_ocaml:(Some js_of_ocaml) ~melange:None
     ?stdlib:lib.stdlib ~package ?vimpl ~modes
 
 let library_rules (lib : Library.t) ~local_lib ~cctx ~source_modules
