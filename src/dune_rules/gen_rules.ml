@@ -146,7 +146,76 @@ end = struct
       | true ->
         let+ () = Mdx.gen_rules ~sctx ~dir ~scope ~expander mdx in
         empty_none)
-    | Melange _mel -> Memo.return empty_none
+    | Melange mel ->
+      let compile_info ~scope (mel : Melange.t) =
+        let dune_version = Scope.project scope |> Dune_project.dune_version in
+        let pps = [] in
+        Lib.DB.resolve_user_written_deps_for_exes (Scope.libs scope)
+          [ (mel.loc, mel.target) ]
+          mel.libraries ~pps ~dune_version
+      in
+      let lib_cctx ~sctx ~obj_dir ~modules ~expander ~scope ~compile_info =
+        let flags = Ocaml_flags.empty in
+        let vimpl =
+          (* original impl in Lib_rules uses Virtual_rules.impl, will this break with virtual libs? *)
+          None
+        in
+        let modules = Vimpl.impl_modules vimpl modules in
+        let requires_compile = Lib.Compile.direct_requires compile_info in
+        let requires_link = Lib.Compile.requires_link compile_info in
+        let package = None in
+        let js_of_ocaml = None in
+        (* modes and pp are not passed, not sure if this will cause issues *)
+        Compilation_context.create () ~super_context:sctx ~expander ~scope
+          ~obj_dir ~modules ~flags ~requires_compile ~requires_link
+          ~opaque:Inherit_from_settings ~js_of_ocaml ~package ?vimpl
+      in
+      let rules mel ~sctx ~dir ~scope ~expander =
+        let compile_info = compile_info ~scope mel in
+        let f () =
+          let open Memo.O in
+          let* libs = Lib.Compile.direct_requires compile_info in
+          let* libs = Resolve.read_memo libs in
+          let* () =
+            Memo.List.iter libs ~f:(fun lib ->
+                let lib = Lib.Local.of_lib_exn lib in
+                let info = Lib.Local.info lib in
+                let dir = Lib_info.src_dir info in
+                let obj_dir = Lib_info.obj_dir info in
+                let name = Lib.name (Lib.Local.to_lib lib) in
+                let modules =
+                  Dir_contents.get sctx ~dir >>= Dir_contents.ocaml
+                  >>| Ml_sources.modules ~for_:(Library name)
+                in
+                let* source_modules = modules >>| Modules.entry_modules in
+                let* modules = modules in
+                let* cctx =
+                  lib_cctx ~sctx ~obj_dir ~modules ~expander ~scope
+                    ~compile_info
+                in
+                Memo.parallel_iter source_modules
+                  ~f:(Module_compilation.build_melange_js ~cctx))
+          in
+          Memo.return ()
+          (* How to get each lib modules in order to produce rules for each of them?? *)
+          (* executables_rules exes ~sctx ~dir ~dir_contents ~scope ~expander
+             ~compile_info
+             ~embed_in_plugin_libraries:exes.embed_in_plugin_libraries *)
+        in
+        Buildable_rules.with_lib_deps
+          (Super_context.context sctx)
+          compile_info ~dir ~f
+      in
+      let* () = rules mel ~sctx ~dir ~scope ~expander in
+      (* let+ cctx, merlin =
+           rules mel ~sctx ~dir ~scope ~expander ~dir_contents
+         in
+         { merlin = Some merlin
+         ; cctx = Some (mel.loc, cctx)
+         ; js = None
+         ; source_dirs = None
+         } *)
+      Memo.return empty_none
     | _ -> Memo.return empty_none
 
   let of_stanzas stanzas ~cctxs ~sctx ~src_dir ~ctx_dir ~scope ~dir_contents

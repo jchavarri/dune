@@ -254,6 +254,7 @@ let build_melange_js ~cctx m =
   (let open Option.O in
   let+ compiler = compiler in
   let src = Obj_dir.Module.cm_file_exn obj_dir m ~kind:cm_kind in
+  print_endline "HERE";
   let output =
     let name =
       Module_name.Unique.artifact_filename (Module.obj_name m)
@@ -339,7 +340,7 @@ let build_module ?(precompiled_cmi = false) cctx m =
   Memo.when_ melange (fun () ->
       let* () =
         build_cm cctx m ~precompiled_cmi ~cm_kind:(Melange Cmj) ~phase:None
-      and* () = build_melange_js ~cctx m in
+      in
       Memo.when_ (not precompiled_cmi) (fun () ->
           build_cm cctx m ~precompiled_cmi ~cm_kind:(Melange Cmi) ~phase:None))
 

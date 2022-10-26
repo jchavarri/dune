@@ -99,7 +99,7 @@ test-coq: $(BIN)
 	DUNE_COQ_TEST=enable $(BIN) build @runtest-coq
 
 test-melange: $(BIN)
-	$(BIN) build @runtest-melange
+	$(BIN) build @runtest-melange-stanza
 
 test-all: $(BIN)
 	$(BIN) build @runtest @runtest-js @runtest-coq @runtest-melange
