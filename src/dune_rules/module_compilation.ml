@@ -261,7 +261,6 @@ let build_melange_js ~cctx m =
     in
     Path.Build.relative (Path.Build.relative dir "es6") name
   in
-  print_endline (Path.Build.to_string output);
   let obj_dirs =
     Obj_dir.all_obj_dirs obj_dir ~mode
     |> List.concat_map ~f:(fun p ->

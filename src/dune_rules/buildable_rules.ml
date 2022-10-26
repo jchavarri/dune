@@ -16,9 +16,9 @@ let gen_select_rules t ~dir compile_info =
                let+ () = Action_builder.path src in
                Action.Full.make (Copy_line_directive.action src dst))))
 
-let with_lib_deps (_t : Context.t) compile_info ~dir ~f =
+let with_lib_deps (t : Context.t) compile_info ~dir ~f =
   let prefix =
-    if false then
+    if t.merlin then
       Lib.Compile.merlin_ident compile_info
       |> Merlin_ident.merlin_file_path dir
       |> Path.build |> Action_builder.path |> Action_builder.goal
