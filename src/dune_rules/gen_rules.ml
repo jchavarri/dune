@@ -147,7 +147,7 @@ end = struct
         let+ () = Mdx.gen_rules ~sctx ~dir ~scope ~expander mdx in
         empty_none)
     | Melange mel ->
-      let compile_info ~scope (mel : Melange.t) =
+      let all_libs_compile_info ~scope (mel : Melange.t) =
         let dune_version = Scope.project scope |> Dune_project.dune_version in
         let pps = [] in
         Lib.DB.resolve_user_written_deps_for_exes (Scope.libs scope)
@@ -171,27 +171,30 @@ end = struct
           ~opaque:Inherit_from_settings ~js_of_ocaml ~package ?vimpl
       in
       let rules mel ~sctx ~dir ~scope ~expander =
-        let compile_info = compile_info ~scope mel in
+        let all_libs_compile_info = all_libs_compile_info ~scope mel in
         let f () =
           let open Memo.O in
-          let* libs = Lib.Compile.direct_requires compile_info in
+          let* libs = Lib.Compile.direct_requires all_libs_compile_info in
           let* libs = Resolve.read_memo libs in
           let* () =
             Memo.List.iter libs ~f:(fun lib ->
+                let lib_name = Lib.name lib in
+                let* lib, lib_compile_info =
+                  Lib.DB.get_compile_info (Scope.libs scope) lib_name
+                in
                 let lib = Lib.Local.of_lib_exn lib in
                 let info = Lib.Local.info lib in
                 let dir = Lib_info.src_dir info in
                 let obj_dir = Lib_info.obj_dir info in
-                let name = Lib.name (Lib.Local.to_lib lib) in
                 let modules =
                   Dir_contents.get sctx ~dir >>= Dir_contents.ocaml
-                  >>| Ml_sources.modules ~for_:(Library name)
+                  >>| Ml_sources.modules ~for_:(Library lib_name)
                 in
-                let* source_modules = modules >>| Modules.entry_modules in
+                let* source_modules = modules >>| Modules.impl_only in
                 let* modules = modules in
                 let* cctx =
                   lib_cctx ~sctx ~obj_dir ~modules ~expander ~scope
-                    ~compile_info
+                    ~compile_info:lib_compile_info
                 in
                 Memo.parallel_iter source_modules
                   ~f:(Module_compilation.build_melange_js ~cctx))
@@ -204,7 +207,7 @@ end = struct
         in
         Buildable_rules.with_lib_deps
           (Super_context.context sctx)
-          compile_info ~dir ~f
+          all_libs_compile_info ~dir ~f
       in
       let* () = rules mel ~sctx ~dir ~scope ~expander in
       (* let+ cctx, merlin =

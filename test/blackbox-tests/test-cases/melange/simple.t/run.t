@@ -1,6 +1,6 @@
 Compilation using melange
   $ dune rules lib/.x.objs/melange/x.js
-  $ build lib/x.js
+  $ dune build lib/x.js
   $ node ./_build/default/lib/x.js
   buy it
 

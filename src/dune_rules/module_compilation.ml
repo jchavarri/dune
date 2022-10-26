@@ -254,7 +254,6 @@ let build_melange_js ~cctx m =
   (let open Option.O in
   let+ compiler = compiler in
   let src = Obj_dir.Module.cm_file_exn obj_dir m ~kind:cm_kind in
-  print_endline "HERE";
   let output =
     let name =
       Module_name.Unique.artifact_filename (Module.obj_name m)
@@ -262,6 +261,7 @@ let build_melange_js ~cctx m =
     in
     Path.Build.relative (Path.Build.relative dir "es6") name
   in
+  print_endline (Path.Build.to_string output);
   let obj_dirs =
     Obj_dir.all_obj_dirs obj_dir ~mode
     |> List.concat_map ~f:(fun p ->
@@ -274,9 +274,12 @@ let build_melange_js ~cctx m =
       let+ deps = Dep_graph.deps_of dep_graph m in
       List.concat_map deps ~f:(fun m ->
           if Module.has m ~ml_kind:Impl && cm_kind = Melange Cmj then
+            let name =
+              Module_name.Unique.artifact_filename (Module.obj_name m)
+                ~ext:Melange.js_ext
+            in
             [ Path.build
-                (Obj_dir.Module.obj_file obj_dir m ~kind:cm_kind
-                   ~ext:Melange.js_ext)
+                (Path.Build.relative (Path.Build.relative dir "es6") name)
             ]
           else []))
   in
