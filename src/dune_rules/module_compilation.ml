@@ -52,14 +52,6 @@ let copy_interface ~sctx ~dir ~obj_dir ~cm_kind m =
              (Path.build (Obj_dir.Module.cm_file_exn obj_dir m ~kind:cmi_kind))
            ~dst:(Obj_dir.Module.cm_public_file_exn obj_dir m ~kind:Cmi)))
 
-let melange_package_args ~pkg_name ~js_modules ~rel_path =
-  let js_modules_str = Melange.Spec.to_string js_modules in
-  [ "--bs-package-name"
-  ; pkg_name
-  ; "--bs-package-output"
-  ; js_modules_str ^ ":" ^ rel_path ^ ":.js"
-  ]
-
 let compiler ~ctx ~sctx ~dir mode =
   let open Memo.O in
   let+ compiler =
@@ -208,7 +200,11 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
     (* TODO: get pkg name optionally from opam *)
     let pkg_args = [] in
     match cm_kind with
-    | Melange Cmj -> "-bs-stop-after-cmj" :: pkg_args
+    | Melange Cmj ->
+      "-bs-stop-after-cmj" :: "-bs-package-output"
+      :: (* This should prob be Path.t or Path.Source.t *)
+         Path.Build.to_string (CC.dir cctx)
+      :: pkg_args
     | Ocaml (Cmi | Cmo | Cmx) | Melange Cmi -> []
   in
   Super_context.add_rule sctx ~dir ?loc:(CC.loc cctx)
@@ -243,7 +239,8 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
     >>| Action.Full.add_sandbox sandbox))
   |> Memo.Option.iter ~f:Fun.id
 
-let build_melange_js ~pkg_name ~js_modules ~rel_path ~dst_dir ~cctx m =
+let build_melange_js ~melange_stanza_dir ~target_dir ~js_modules ~dst_dir ~cctx
+    m =
   let cm_kind = Lib_mode.Cm_kind.Melange Cmj in
   let sctx = CC.super_context cctx in
   let obj_dir = CC.obj_dir cctx in
@@ -269,10 +266,6 @@ let build_melange_js ~pkg_name ~js_modules ~rel_path ~dst_dir ~cctx m =
     |> List.concat_map ~f:(fun p ->
            [ Command.Args.A "-I"; Path (Path.build p) ])
   in
-  let js_dir =
-    (* TODO: conditionally add based on lib package availability *)
-    [ Command.Args.A "-I"; Path (Path.build dst_dir) ]
-  in
   let dep_graph = Ml_kind.Dict.get (CC.dep_graphs cctx) ml_kind in
   let cmj_deps =
     Action_builder.dyn_paths_unit
@@ -297,17 +290,9 @@ let build_melange_js ~pkg_name ~js_modules ~rel_path ~dst_dir ~cctx m =
             let lib = Lib.Local.of_lib_exn lib in
             let info = Lib.Local.info lib in
             let lib_dir = Lib_info.src_dir info in
-            let _rel_path =
-              Path.reach (Path.build lib_dir) ~from:(Path.build dir)
-            in
             let dst_dir =
-              Path.Build.relative
-                (Path.Build.relative
-                   (Path.Build.relative
-                      (Path.Build.relative Path.Build.root "default")
-                      "inside")
-                   "output")
-                "lib"
+              Melange.lib_output_dir ~melange_stanza_dir ~lib_dir
+                ~target:target_dir
             in
             List.map groups ~f:(fun g ->
                 let dir = Path.build dst_dir in
@@ -323,18 +308,19 @@ let build_melange_js ~pkg_name ~js_modules ~rel_path ~dst_dir ~cctx m =
             ; Hidden_deps (deps libs ~groups:[ Melange Js ])
             ]))
   in
+  let melange_package_args =
+    let js_modules_str = Melange.Spec.to_string js_modules in
+    [ "--bs-module-type"; js_modules_str ]
+  in
   Super_context.add_rule sctx ~dir ?loc:(CC.loc cctx)
     (let open Action_builder.With_targets.O in
     Action_builder.with_no_targets cmj_deps
     >>> Command.run ~dir:(Path.build dir) (Ok compiler)
           [ Command.Args.S obj_dirs
-          ; Command.Args.S js_dir
-          ; Command.Args.as_any (CC.melange_js_includes cctx)
-          ; (* TODO: conditionally add based on lib package availability *)
-            Command.Args.as_any melange_js_includes
-          ; A "-I"
-          ; A "inside/output/lib"
-          ; As (melange_package_args ~pkg_name ~js_modules ~rel_path)
+            (* TODO: remove CC.melange_js_includes
+               ; Command.Args.as_any (CC.melange_js_includes cctx) *)
+          ; Command.Args.as_any melange_js_includes
+          ; As melange_package_args
           ; A "-o"
           ; Target output
           ; Dep (Path.build src)

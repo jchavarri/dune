@@ -58,3 +58,9 @@ module Cm_kind = struct
     let make_all x = { cmi = x; cmj = x }
   end
 end
+
+let lib_output_dir ~melange_stanza_dir ~lib_dir ~target =
+  let rel_path =
+    Path.reach (Path.build lib_dir) ~from:(Path.build melange_stanza_dir)
+  in
+  Path.Build.relative (Path.Build.relative melange_stanza_dir target) rel_path

@@ -170,7 +170,8 @@ end = struct
           ~obj_dir ~modules ~flags ~requires_compile ~requires_link
           ~opaque:Inherit_from_settings ~js_of_ocaml ~package ?vimpl
       in
-      let rules (mel : Melange_stanza.t) ~sctx ~dir ~scope ~expander =
+      let rules (mel : Melange_stanza.t) ~sctx ~melange_stanza_dir ~scope
+          ~expander =
         let open Memo.O in
         let* libs = Lib.Compile.direct_requires all_libs_compile_info in
         let* libs = Resolve.read_memo libs in
@@ -183,11 +184,9 @@ end = struct
             let info = Lib.Local.info lib in
             let lib_dir = Lib_info.src_dir info in
             let obj_dir = Lib_info.obj_dir info in
-            let rel_path =
-              Path.reach (Path.build lib_dir) ~from:(Path.build dir)
-            in
             let dst_dir =
-              Path.Build.relative (Path.Build.relative dir mel.target) rel_path
+              Melange.lib_output_dir ~melange_stanza_dir ~lib_dir
+                ~target:mel.target
             in
             let modules_group =
               Dir_contents.get sctx ~dir:lib_dir
@@ -202,10 +201,10 @@ end = struct
             in
             Memo.parallel_iter source_modules
               ~f:
-                (Module_compilation.build_melange_js ~pkg_name:mel.target
-                   ~js_modules:mel.spec ~rel_path ~dst_dir ~cctx))
+                (Module_compilation.build_melange_js ~melange_stanza_dir
+                   ~target_dir:mel.target ~js_modules:mel.spec ~dst_dir ~cctx))
       in
-      let* () = rules mel ~sctx ~dir ~scope ~expander in
+      let* () = rules mel ~sctx ~melange_stanza_dir:dir ~scope ~expander in
       Memo.return empty_none
     | _ -> Memo.return empty_none
 
