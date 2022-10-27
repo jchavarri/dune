@@ -154,8 +154,7 @@ end = struct
           [ (mel.loc, mel.target) ]
           mel.libraries ~pps ~dune_version
       in
-      let lib_cctx ~lib_rel_path ~sctx ~obj_dir ~modules ~expander ~scope
-          ~compile_info =
+      let lib_cctx ~sctx ~obj_dir ~modules ~expander ~scope ~compile_info =
         let flags = Ocaml_flags.empty in
         let vimpl =
           (* original impl in Lib_rules uses Virtual_rules.impl, will this break with virtual libs? *)
@@ -166,15 +165,10 @@ end = struct
         let requires_link = Lib.Compile.requires_link compile_info in
         let package = None in
         let js_of_ocaml = None in
-        let melange =
-          Some
-            (Melange.In_context.make ~lib_rel_path ~pkg_name:mel.target
-               ~spec:mel.spec)
-        in
         (* modes and pp are not passed, not sure if this will cause issues *)
         Compilation_context.create () ~super_context:sctx ~expander ~scope
           ~obj_dir ~modules ~flags ~requires_compile ~requires_link
-          ~opaque:Inherit_from_settings ~js_of_ocaml ~melange ~package ?vimpl
+          ~opaque:Inherit_from_settings ~js_of_ocaml ~package ?vimpl
       in
       let rules (mel : Melange_stanza.t) ~sctx ~dir ~scope ~expander =
         let open Memo.O in
@@ -203,8 +197,7 @@ end = struct
             let* source_modules = modules_group >>| Modules.impl_only in
             let* modules_group = modules_group in
             let* cctx =
-              lib_cctx ~lib_rel_path:rel_path ~sctx ~obj_dir
-                ~modules:modules_group ~expander ~scope
+              lib_cctx ~sctx ~obj_dir ~modules:modules_group ~expander ~scope
                 ~compile_info:lib_compile_info
             in
             Memo.parallel_iter source_modules

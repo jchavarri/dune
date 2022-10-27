@@ -33,7 +33,6 @@ val create :
   -> opaque:opaque
   -> ?stdlib:Ocaml_stdlib.t
   -> js_of_ocaml:Js_of_ocaml.In_context.t option
-  -> melange:Melange.In_context.t option
   -> package:Package.t option
   -> ?vimpl:Vimpl.t
   -> ?modes:Dune_file.Mode_conf.Set.Details.t Lib_mode.Map.t
@@ -79,8 +78,6 @@ val opaque : t -> bool
 val stdlib : t -> Ocaml_stdlib.t option
 
 val js_of_ocaml : t -> Js_of_ocaml.In_context.t option
-
-val melange : t -> Melange.In_context.t option
 
 val sandbox : t -> Sandbox_config.t
 

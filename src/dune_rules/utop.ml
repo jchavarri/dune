@@ -176,8 +176,8 @@ let setup sctx ~dir =
     let requires_link = Memo.lazy_ (fun () -> requires) in
     Compilation_context.create () ~super_context:sctx ~expander ~scope ~obj_dir
       ~modules ~opaque:(Explicit false) ~requires_link
-      ~requires_compile:requires ~flags ~js_of_ocaml:None ~melange:None
-      ~package:None ~preprocessing
+      ~requires_compile:requires ~flags ~js_of_ocaml:None ~package:None
+      ~preprocessing
   in
   let toplevel = Toplevel.make ~cctx ~source ~preprocess:pps in
   Toplevel.setup_rules toplevel

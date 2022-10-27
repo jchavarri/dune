@@ -330,8 +330,7 @@ let build_ppx_driver sctx ~scope ~target ~pps ~pp_names =
     Compilation_context.create ~super_context:sctx ~scope ~expander ~obj_dir
       ~modules ~flags
       ~requires_compile:(Memo.return requires_compile)
-      ~requires_link ~opaque ~js_of_ocaml:None ~melange:None ~package:None
-      ~bin_annot:false ()
+      ~requires_link ~opaque ~js_of_ocaml:None ~package:None ~bin_annot:false ()
   in
   let+ (_ : Exe.dep_graphs) =
     Exe.build_and_link ~program ~linkages cctx ~promote:None

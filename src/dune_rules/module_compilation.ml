@@ -205,14 +205,8 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
            [ Command.Args.A "-I"; Path (Path.build p) ])
   in
   let melange_args =
-    let mel = CC.melange cctx in
-    let pkg_args =
-      match mel with
-      | Some mel ->
-        melange_package_args ~pkg_name:mel.pkg_name ~js_modules:mel.spec
-          ~rel_path:mel.lib_rel_path
-      | None -> []
-    in
+    (* TODO: get pkg name optionally from opam *)
+    let pkg_args = [] in
     match cm_kind with
     | Melange Cmj -> "-bs-stop-after-cmj" :: pkg_args
     | Ocaml (Cmi | Cmo | Cmx) | Melange Cmi -> []

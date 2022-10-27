@@ -126,7 +126,7 @@ let executables_rules ~sctx ~dir ~expander ~dir_contents ~scope ~compile_info
     in
     Compilation_context.create () ~loc:exes.buildable.loc ~super_context:sctx
       ~expander ~scope ~obj_dir ~modules ~flags ~requires_link ~requires_compile
-      ~preprocessing:pp ~js_of_ocaml ~melange:None ~opaque:Inherit_from_settings
+      ~preprocessing:pp ~js_of_ocaml ~opaque:Inherit_from_settings
       ~package:exes.package
   in
   let stdlib_dir = ctx.Context.stdlib_dir in
