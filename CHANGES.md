@@ -18,6 +18,12 @@ Unreleased
 
 - Build progress status now shows number of failed jobs (#6242, @Alizter)
 
+- Allow absolute build directories to find public executables. For example,
+  those specified with `(deps %{bin:...})` (#6326, @anmonteiro)
+
+- Create a fake socket file `_build/.rpc/dune` on windows to allow rpc clients
+  to connect using the build directory. (#6329, @rgrinberg)
+
 3.5.0 (2022-10-19)
 ------------------
 

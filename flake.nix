@@ -22,7 +22,6 @@
           lwt = "*";
           csexp = "*";
           core_bench = "*";
-          bisect_ppx = "*";
           js_of_ocaml = "*";
           js_of_ocaml-compiler = "*";
           mdx = "*";
@@ -73,6 +72,29 @@
               ]
             );
           };
+
+        devShells.fmt =
+          pkgs.mkShell {
+            inputsFrom = [ pkgs.dune_3 ];
+            buildInputs = [ ocamlformat ];
+          };
+
+        devShells.slim = with pkgs.ocamlPackages; pkgs.mkShell {
+          inputsFrom = [ dune_3 ];
+          nativeBuildInputs = with pkgs; [ pkg-config nodejs-slim ];
+          buildInputs = [
+            merlin
+            ocamlformat
+            ppx_expect
+            ctypes
+            integers
+            mdx
+            cinaps
+            menhir
+            odoc
+            lwt
+          ];
+        };
 
         devShells.default =
           pkgs.mkShell {

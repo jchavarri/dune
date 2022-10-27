@@ -10,7 +10,6 @@ BIN := ./dune.exe
 # when tested in CI
 TEST_DEPS := \
 lwt \
-bisect_ppx \
 cinaps \
 core_bench \
 "csexp>=1.3.0" \
@@ -131,12 +130,12 @@ distclean: clean
 
 .PHONY: doc
 doc:
-	sphinx-build doc doc/_build
+	sphinx-build -W doc doc/_build
 
 # livedoc-deps: you may need to [pip3 install sphinx-autobuild] and [pip3 install sphinx-rtd-theme]
 livedoc:
 	cd doc && sphinx-autobuild . _build \
-	  --port 8888 -q  --host $(shell hostname) --re-ignore '\.#.*'
+	  --port 8888 -q  --host 0.0.0.0 --re-ignore '\.#.*'
 
 update-jbuilds: $(BIN)
 	$(BIN) build @doc/runtest --auto-promote
