@@ -116,7 +116,7 @@ module L = struct
           | Lib_mode.Ocaml mode -> (
             let acc =
               if visible_cmi t then
-                let public_cmi_dir = Obj_dir.public_cmi_dir obj_dir in
+                let public_cmi_dir = Obj_dir.public_cmi_ocaml_dir obj_dir in
                 Path.Set.add acc public_cmi_dir
               else acc
             in
@@ -125,7 +125,14 @@ module L = struct
             | Native ->
               let native_dir = Obj_dir.native_dir obj_dir in
               Path.Set.add acc native_dir)
-          | Melange -> Path.Set.add acc (Obj_dir.melange_dir obj_dir))
+          | Melange ->
+            let acc =
+              if visible_cmi t then
+                let public_cmi_dir = Obj_dir.public_cmi_melange_dir obj_dir in
+                Path.Set.add acc public_cmi_dir
+              else acc
+            in
+            Path.Set.add acc (Obj_dir.melange_dir obj_dir))
     in
     remove_stdlib dirs ts
 

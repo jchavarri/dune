@@ -2,6 +2,7 @@
  (name foo)
  (libraries lib))
 
-(alias
- (name default)
- (action (run ./foo.exe)))
+(rule
+ (alias default)
+ (action
+  (run ./foo.exe)))
