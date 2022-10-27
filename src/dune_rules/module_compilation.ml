@@ -269,6 +269,10 @@ let build_melange_js ~pkg_name ~js_modules ~rel_path ~dst_dir ~cctx m =
     |> List.concat_map ~f:(fun p ->
            [ Command.Args.A "-I"; Path (Path.build p) ])
   in
+  let js_dirs =
+    (* TODO: conditionally add based on lib package availability *)
+    [ Command.Args.A "-I"; Path (Path.build dst_dir) ]
+  in
   let dep_graph = Ml_kind.Dict.get (CC.dep_graphs cctx) ml_kind in
   let cmj_deps =
     Action_builder.dyn_paths_unit
@@ -288,6 +292,7 @@ let build_melange_js ~pkg_name ~js_modules ~rel_path ~dst_dir ~cctx m =
     Action_builder.with_no_targets cmj_deps
     >>> Command.run ~dir:(Path.build dir) (Ok compiler)
           [ Command.Args.S obj_dirs
+          ; Command.Args.S js_dirs
           ; Command.Args.as_any (CC.melange_js_includes cctx)
           ; As (melange_package_args ~pkg_name ~js_modules ~rel_path)
           ; A "-o"
