@@ -269,7 +269,7 @@ let build_melange_js ~pkg_name ~js_modules ~rel_path ~dst_dir ~cctx m =
     |> List.concat_map ~f:(fun p ->
            [ Command.Args.A "-I"; Path (Path.build p) ])
   in
-  let js_dirs =
+  let js_dir =
     (* TODO: conditionally add based on lib package availability *)
     [ Command.Args.A "-I"; Path (Path.build dst_dir) ]
   in
@@ -287,13 +287,53 @@ let build_melange_js ~pkg_name ~js_modules ~rel_path ~dst_dir ~cctx m =
             [ Path.build (in_dir name) ]
           else []))
   in
+  let melange_js_includes =
+    let open Resolve.Memo.O in
+    Command.Args.memo
+      (Resolve.Memo.args
+         (let+ libs = CC.requires_compile cctx in
+          let project = Scope.project (CC.scope cctx) in
+          let deps_of_lib (lib : Lib.t) ~groups =
+            let lib = Lib.Local.of_lib_exn lib in
+            let info = Lib.Local.info lib in
+            let lib_dir = Lib_info.src_dir info in
+            let _rel_path =
+              Path.reach (Path.build lib_dir) ~from:(Path.build dir)
+            in
+            let dst_dir =
+              Path.Build.relative
+                (Path.Build.relative
+                   (Path.Build.relative
+                      (Path.Build.relative Path.Build.root "default")
+                      "inside")
+                   "output")
+                "lib"
+            in
+            List.map groups ~f:(fun g ->
+                let dir = Path.build dst_dir in
+                Lib_file_deps.Group.to_predicate g
+                |> File_selector.create ~dir |> Dep.file_selector)
+            |> Dep.Set.of_list
+          in
+          let deps libs ~groups =
+            Dep.Set.union_map libs ~f:(deps_of_lib ~groups)
+          in
+          Command.Args.S
+            [ Lib_flags.L.include_flags ~project libs Melange
+            ; Hidden_deps (deps libs ~groups:[ Melange Js ])
+            ]))
+  in
   Super_context.add_rule sctx ~dir ?loc:(CC.loc cctx)
     (let open Action_builder.With_targets.O in
     Action_builder.with_no_targets cmj_deps
     >>> Command.run ~dir:(Path.build dir) (Ok compiler)
           [ Command.Args.S obj_dirs
-          ; Command.Args.S js_dirs
+          ; Command.Args.S js_dir
           ; Command.Args.as_any (CC.melange_js_includes cctx)
+          ; (* TODO: conditionally add based on lib package availability *)
+            Command.Args.as_any melange_js_includes
+          ; A "-I"
+          ; A "inside/output/lib"
           ; As (melange_package_args ~pkg_name ~js_modules ~rel_path)
           ; A "-o"
           ; Target output

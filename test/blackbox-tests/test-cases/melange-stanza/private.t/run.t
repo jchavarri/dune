@@ -1,4 +1,4 @@
 Compilation using melange
-  $ dune build inside/output/lib/x.js
-  $ node ./_build/default/inside/output/lib/x.js
+  $ dune build --verbose inside/output/app/app__B.js
+  $ node _build/default/inside/output/app/app__B.js
   buy it

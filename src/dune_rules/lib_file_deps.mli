@@ -14,6 +14,8 @@ module Group : sig
     | Ocaml of ocaml
     | Melange of melange
     | Header
+
+  val to_predicate : t -> string Predicate_with_id.t
 end
 
 (** [deps t libs ~files] returns a list of path dependencies for all the files
