@@ -147,6 +147,7 @@ end = struct
         let+ () = Mdx.gen_rules ~sctx ~dir ~scope ~expander mdx in
         empty_none)
     | Melange mel ->
+      let melange_stanza_dir = dir in
       let all_libs_compile_info =
         let dune_version = Scope.project scope |> Dune_project.dune_version in
         let pps = [] in
@@ -165,10 +166,11 @@ end = struct
         let requires_link = Lib.Compile.requires_link compile_info in
         let package = None in
         let js_of_ocaml = None in
+        let melange = (melange_stanza_dir, mel.target) in
         (* modes and pp are not passed, not sure if this will cause issues *)
         Compilation_context.create () ~super_context:sctx ~expander ~scope
           ~obj_dir ~modules ~flags ~requires_compile ~requires_link
-          ~opaque:Inherit_from_settings ~js_of_ocaml ~package ?vimpl
+          ~opaque:Inherit_from_settings ~js_of_ocaml ~package ~melange ?vimpl
       in
       let rules (mel : Melange_stanza.t) ~sctx ~melange_stanza_dir ~scope
           ~expander =
@@ -201,10 +203,10 @@ end = struct
             in
             Memo.parallel_iter source_modules
               ~f:
-                (Module_compilation.build_melange_js ~melange_stanza_dir
-                   ~target_dir:mel.target ~js_modules:mel.spec ~dst_dir ~cctx))
+                (Module_compilation.build_melange_js ~js_modules:mel.spec
+                   ~dst_dir ~cctx))
       in
-      let* () = rules mel ~sctx ~melange_stanza_dir:dir ~scope ~expander in
+      let* () = rules mel ~sctx ~melange_stanza_dir ~scope ~expander in
       Memo.return empty_none
     | _ -> Memo.return empty_none
 

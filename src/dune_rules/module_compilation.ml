@@ -239,8 +239,7 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
     >>| Action.Full.add_sandbox sandbox))
   |> Memo.Option.iter ~f:Fun.id
 
-let build_melange_js ~melange_stanza_dir ~target_dir ~js_modules ~dst_dir ~cctx
-    m =
+let build_melange_js ~js_modules ~dst_dir ~cctx m =
   let cm_kind = Lib_mode.Cm_kind.Melange Cmj in
   let sctx = CC.super_context cctx in
   let obj_dir = CC.obj_dir cctx in
@@ -280,46 +279,21 @@ let build_melange_js ~melange_stanza_dir ~target_dir ~js_modules ~dst_dir ~cctx
             [ Path.build (in_dir name) ]
           else []))
   in
-  let melange_js_includes =
-    let open Resolve.Memo.O in
-    Command.Args.memo
-      (Resolve.Memo.args
-         (let+ libs = CC.requires_compile cctx in
-          let project = Scope.project (CC.scope cctx) in
-          let deps_of_lib (lib : Lib.t) ~groups =
-            let lib = Lib.Local.of_lib_exn lib in
-            let info = Lib.Local.info lib in
-            let lib_dir = Lib_info.src_dir info in
-            let dst_dir =
-              Melange.lib_output_dir ~melange_stanza_dir ~lib_dir
-                ~target:target_dir
-            in
-            List.map groups ~f:(fun g ->
-                let dir = Path.build dst_dir in
-                Lib_file_deps.Group.to_predicate g
-                |> File_selector.create ~dir |> Dep.file_selector)
-            |> Dep.Set.of_list
-          in
-          let deps libs ~groups =
-            Dep.Set.union_map libs ~f:(deps_of_lib ~groups)
-          in
-          Command.Args.S
-            [ Lib_flags.L.include_flags ~project libs Melange
-            ; Hidden_deps (deps libs ~groups:[ Melange Js ])
-            ]))
-  in
   let melange_package_args =
     let js_modules_str = Melange.Spec.to_string js_modules in
     [ "--bs-module-type"; js_modules_str ]
+  in
+  let melange_js_includes =
+    match CC.melange_js_includes cctx with
+    | None -> Command.Args.As []
+    | Some args -> Command.Args.as_any args
   in
   Super_context.add_rule sctx ~dir ?loc:(CC.loc cctx)
     (let open Action_builder.With_targets.O in
     Action_builder.with_no_targets cmj_deps
     >>> Command.run ~dir:(Path.build dir) (Ok compiler)
           [ Command.Args.S obj_dirs
-            (* TODO: remove CC.melange_js_includes
-               ; Command.Args.as_any (CC.melange_js_includes cctx) *)
-          ; Command.Args.as_any melange_js_includes
+          ; melange_js_includes
           ; As melange_package_args
           ; A "-o"
           ; Target output

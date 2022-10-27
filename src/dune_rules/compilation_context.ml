@@ -76,7 +76,7 @@ type t =
   ; requires_compile : Lib.t list Resolve.Memo.t
   ; requires_link : Lib.t list Resolve.t Memo.Lazy.t
   ; includes : Includes.t
-  ; melange_js_includes : Command.Args.without_targets Command.Args.t
+  ; melange_js_includes : Command.Args.without_targets Command.Args.t option
   ; preprocessing : Pp_spec.t
   ; opaque : bool
   ; stdlib : Ocaml_stdlib.t option
@@ -142,7 +142,8 @@ let dep_graphs t = t.modules.dep_graphs
 
 let create ~super_context ~scope ~expander ~obj_dir ~modules ~flags
     ~requires_compile ~requires_link ?(preprocessing = Pp_spec.dummy) ~opaque
-    ?stdlib ~js_of_ocaml ~package ?vimpl ?modes ?(bin_annot = true) ?loc () =
+    ?stdlib ~js_of_ocaml ~package ?melange ?vimpl ?modes ?(bin_annot = true)
+    ?loc () =
   let open Memo.O in
   let project = Scope.project scope in
   let requires_compile =
@@ -179,14 +180,36 @@ let create ~super_context ~scope ~expander ~obj_dir ~modules ~flags
     }
   in
   let melange_js_includes =
-    let open Resolve.Memo.O in
-    Command.Args.memo
-      (Resolve.Memo.args
-         (let+ libs = requires_compile in
-          Command.Args.S
-            [ Lib_flags.L.include_flags ~project libs Melange
-            ; Hidden_deps (Lib_file_deps.deps libs ~groups:[ Melange Js ])
-            ]))
+    match melange with
+    | None -> None
+    | Some (melange_stanza_dir, target_dir) ->
+      let open Resolve.Memo.O in
+      Some
+        (Command.Args.memo
+           (Resolve.Memo.args
+              (let+ libs = requires_compile in
+               let project = Scope.project scope in
+               let deps_of_lib (lib : Lib.t) ~groups =
+                 let lib = Lib.Local.of_lib_exn lib in
+                 let info = Lib.Local.info lib in
+                 let lib_dir = Lib_info.src_dir info in
+                 let dst_dir =
+                   Melange.lib_output_dir ~melange_stanza_dir ~lib_dir
+                     ~target:target_dir
+                 in
+                 List.map groups ~f:(fun g ->
+                     let dir = Path.build dst_dir in
+                     Lib_file_deps.Group.to_predicate g
+                     |> File_selector.create ~dir |> Dep.file_selector)
+                 |> Dep.Set.of_list
+               in
+               let deps libs ~groups =
+                 Dep.Set.union_map libs ~f:(deps_of_lib ~groups)
+               in
+               Command.Args.S
+                 [ Lib_flags.L.include_flags ~project libs Melange
+                 ; Hidden_deps (deps libs ~groups:[ Melange Js ])
+                 ])))
   in
   let+ dep_graphs = Dep_rules.rules ocamldep_modules_data in
   { super_context
