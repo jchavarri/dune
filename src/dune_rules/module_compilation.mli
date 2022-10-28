@@ -20,7 +20,8 @@ val with_empty_intf :
   sctx:Super_context.t -> dir:Path.Build.t -> Module.t -> Module.t Memo.t
 
 val build_melange_js :
-     js_modules:Melange.Spec.t
+     pkg_name:Package.Name.t option
+  -> js_modules:Melange.Spec.t
   -> dst_dir:Path.Build.t
   -> cctx:Compilation_context.t
   -> Module.t

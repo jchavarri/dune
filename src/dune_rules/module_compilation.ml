@@ -197,14 +197,18 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
            [ Command.Args.A "-I"; Path (Path.build p) ])
   in
   let melange_args =
-    (* TODO: get pkg name optionally from opam *)
-    let pkg_args = [] in
     match cm_kind with
     | Melange Cmj ->
+      let pkg_name_args =
+        match CC.package cctx with
+        | None -> []
+        | Some pkg ->
+          [ "--bs-package-name"; Package.Name.to_string (Package.name pkg) ]
+      in
       "--bs-stop-after-cmj" :: "--bs-package-output"
       :: (* This should prob be Path.t or Path.Source.t *)
          Path.Build.to_string (CC.dir cctx)
-      :: pkg_args
+      :: pkg_name_args
     | Ocaml (Cmi | Cmo | Cmx) | Melange Cmi -> []
   in
   Super_context.add_rule sctx ~dir ?loc:(CC.loc cctx)
@@ -239,7 +243,7 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
     >>| Action.Full.add_sandbox sandbox))
   |> Memo.Option.iter ~f:Fun.id
 
-let build_melange_js ~js_modules ~dst_dir ~cctx m =
+let build_melange_js ~pkg_name ~js_modules ~dst_dir ~cctx m =
   let cm_kind = Lib_mode.Cm_kind.Melange Cmj in
   let sctx = CC.super_context cctx in
   let obj_dir = CC.obj_dir cctx in
@@ -280,8 +284,15 @@ let build_melange_js ~js_modules ~dst_dir ~cctx m =
           else []))
   in
   let melange_package_args =
+    let pkg_name_args =
+      match pkg_name with
+      | None -> []
+      | Some pkg_name ->
+        [ "--bs-package-name"; Package.Name.to_string pkg_name ]
+    in
+
     let js_modules_str = Melange.Spec.to_string js_modules in
-    [ "--bs-module-type"; js_modules_str ]
+    "--bs-module-type" :: js_modules_str :: pkg_name_args
   in
   let melange_js_includes =
     match CC.melange_js_includes cctx with

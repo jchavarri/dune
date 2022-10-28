@@ -201,10 +201,11 @@ end = struct
               lib_cctx ~sctx ~obj_dir ~modules:modules_group ~expander ~scope
                 ~compile_info:lib_compile_info
             in
+            let pkg_name = Lib_info.package info in
             Memo.parallel_iter source_modules
               ~f:
-                (Module_compilation.build_melange_js ~js_modules:mel.spec
-                   ~dst_dir ~cctx))
+                (Module_compilation.build_melange_js ~pkg_name
+                   ~js_modules:mel.spec ~dst_dir ~cctx))
       in
       let* () = rules mel ~sctx ~melange_stanza_dir ~scope ~expander in
       Memo.return empty_none
