@@ -10,7 +10,8 @@ Make sure no byte folders are included.
   0
   [1]
 
-JavaScript files are generated.
+As the dependency library `lib` is not added to `melange.emit` the js
+artifacts are not generated
 
   $ node ./_build/default/multilib/x/x__M_2.js
   done

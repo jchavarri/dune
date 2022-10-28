@@ -186,6 +186,19 @@ end = struct
             let info = Lib.Local.info lib in
             let lib_dir = Lib_info.src_dir info in
             let obj_dir = Lib_info.obj_dir info in
+            let () =
+              if not (Path.Build.is_descendant lib_dir ~of_:melange_stanza_dir)
+              then
+                User_error.raise
+                  [ Pp.textf
+                      "The library %s is used from a melange.emit stanza but \
+                       the library folder %s is not a descendant of the stanza \
+                       folder %s"
+                      (Lib_name.to_string (Lib_info.name info))
+                      (Path.Build.to_string lib_dir)
+                      (Path.Build.to_string melange_stanza_dir)
+                  ]
+            in
             let dst_dir =
               Melange.lib_output_dir ~melange_stanza_dir ~lib_dir
                 ~target:mel.target
