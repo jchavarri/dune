@@ -1,10 +1,8 @@
-Compilation using melange
-  $ dune rules lib/.x.objs/melange/x.js
-  $ dune build lib/x.js
-  $ node ./_build/default/lib/x.js
-  buy it
+Using `melange.emit` inside the same folder as the library will fail
 
-Rebuilding same project (js artifacts are tracked correctly)
-  $ dune build lib/x.js
-  $ node ./_build/default/x.js
-  buy it
+  $ dune build lib/simple/x.js
+  Error: Multiple rules generated for _build/default/lib/.x.objs/x.ml.d:
+  - <internal location>
+  - <internal location>
+  -> required by _build/default/lib/simple/x.js
+  [1]

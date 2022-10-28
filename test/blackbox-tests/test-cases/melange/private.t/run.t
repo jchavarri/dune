@@ -1,3 +1,5 @@
+Test the private libs flow when using `melange.emit` stanza
+
 Cmj rules should include --bs-package-output
   $ dune rules inside/app/.app.objs/melange/app.cmj | 
   > grep -e "--bs-package-output" --after-context=1 
