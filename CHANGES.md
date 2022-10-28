@@ -1,6 +1,9 @@
 Unreleased
 ----------
 
+- Support `CLICOLOR` and `CLICOLOR_FORCE` to enable/disable/force ANSI
+  colors. (#6340, fixes #6323, @MisterDA).
+
 - Allow `Byte_complete` binaries to be installable (#4873, @AltGr, @rgrinberg)
 
 - Revive `$ dune external-lib-deps` under `$ dune describe external-lib-deps`.
@@ -15,6 +18,17 @@ Unreleased
 
 - Introduce experimental support for the melange compiler (#6268, fixes #6230,
   @jchavarri)
+
+- Build progress status now shows number of failed jobs (#6242, @Alizter)
+
+- Allow absolute build directories to find public executables. For example,
+  those specified with `(deps %{bin:...})` (#6326, @anmonteiro)
+
+- Create a fake socket file `_build/.rpc/dune` on windows to allow rpc clients
+  to connect using the build directory. (#6329, @rgrinberg)
+
+- Prevent crash if absolute paths are used in the install stanza and in
+  recursive globs. These cases now result in a user error. (#6331, @gridbugs)
 
 3.5.0 (2022-10-19)
 ------------------

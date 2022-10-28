@@ -1,15 +1,20 @@
-name: Main workflow
+name: CI
 
 on:
   - push
   - pull_request
   - workflow_dispatch
 
+concurrency:
+  group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
 jobs:
   build:
+    name: Build
     strategy:
       fail-fast: false
       matrix:
@@ -24,8 +29,6 @@ jobs:
         # 4.02.x and 4.07.x in other environments
         ocaml-compiler:
           - 4.14.x
-        skip_test:
-          - false
         include:
           - ocaml-compiler: 4.13.x
             os: ubuntu-latest
@@ -99,21 +102,35 @@ jobs:
         run: opam install ./dune-configurator.opam
         if: ${{ matrix.configurator == true }}
 
-  lint-fmt:
+  nix:
+    name: Nix
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v18
+      - run: nix build
+
+  fmt:
+    name: Format
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Use OCaml 4.14.x
-        uses: ocaml/setup-ocaml@v2
-        with:
-          ocaml-compiler: 4.14.x
-          opam-pin: false
-          opam-depext: false
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v18
+      - run: nix develop .#fmt -c make fmt
 
-      - name: Install ocamlformat
-        run: opam exec -- make install-ocamlformat
-      - run: opam exec -- make fmt
+  doc:
+    name: Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v18
+      - run: nix develop .#doc -c make doc
 
   coq:
     name: Coq 8.16.0
@@ -131,7 +148,7 @@ jobs:
 
       - name: Install Coq
         run: opam install coq.8.16.0 coq-native
-      
+
       - run: opam exec -- make test-coq
         env:
           # We disable the Dune cache when running the tests

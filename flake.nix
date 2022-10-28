@@ -11,8 +11,9 @@
       url = "github:ocaml/opam-repository";
       flake = false;
     };
+    melange.url = "github:melange-re/melange";
   };
-  outputs = { self, flake-utils, opam-nix, nixpkgs, ocamllsp, opam-repository }@inputs:
+  outputs = { self, flake-utils, opam-nix, nixpkgs, ocamllsp, opam-repository, melange }@inputs:
     let package = "dune";
     in flake-utils.lib.eachDefaultSystem (system:
       let
@@ -21,7 +22,6 @@
           lwt = "*";
           csexp = "*";
           core_bench = "*";
-          bisect_ppx = "*";
           js_of_ocaml = "*";
           js_of_ocaml-compiler = "*";
           mdx = "*";
@@ -62,6 +62,40 @@
       {
         packages.default = scope.dune;
 
+        devShells.doc =
+          pkgs.mkShell {
+            buildInputs = (with pkgs;
+              [
+                sphinx
+                sphinx-autobuild
+                python310Packages.sphinx-rtd-theme
+              ]
+            );
+          };
+
+        devShells.fmt =
+          pkgs.mkShell {
+            inputsFrom = [ pkgs.dune_3 ];
+            buildInputs = [ ocamlformat ];
+          };
+
+        devShells.slim = with pkgs.ocamlPackages; pkgs.mkShell {
+          inputsFrom = [ dune_3 ];
+          nativeBuildInputs = with pkgs; [ pkg-config nodejs-slim ];
+          buildInputs = [
+            merlin
+            ocamlformat
+            ppx_expect
+            ctypes
+            integers
+            mdx
+            cinaps
+            menhir
+            odoc
+            lwt
+          ];
+        };
+
         devShells.default =
           pkgs.mkShell {
             nativeBuildInputs = [ pkgs.opam ];
@@ -74,8 +108,12 @@
                 pkg-config
                 file
                 ccls
+                mercurial
               ] ++ (if stdenv.isLinux then [ strace ] else [ ]))
-            ++ [ ocamllsp.outputs.packages.${system}.ocaml-lsp-server ]
+            ++ [
+              ocamllsp.outputs.packages.${system}.ocaml-lsp-server
+              melange.outputs.packages.${system}.default
+            ]
             ++ nixpkgs.lib.attrsets.attrVals (builtins.attrNames devPackages) scope;
             inputsFrom = [ self.packages.${system}.default ];
           };
