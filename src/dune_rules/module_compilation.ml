@@ -11,7 +11,7 @@ module CC = Compilation_context
 let force_read_cmi ~(cm_kind : Lib_mode.Cm_kind.t) source_file =
   let args = [ "-intf-suffix"; Path.extension source_file ] in
   match cm_kind with
-  | Melange Cmj -> "-bs-read-cmi" :: args
+  | Melange Cmj -> "--bs-read-cmi" :: args
   | Ocaml (Cmo | Cmx | Cmi) | Melange Cmi -> args
 
 (* Build the cm* if the corresponding source is present, in the case of cmi if
@@ -201,7 +201,7 @@ let build_cm cctx ~precompiled_cmi ~cm_kind (m : Module.t)
     let pkg_args = [] in
     match cm_kind with
     | Melange Cmj ->
-      "-bs-stop-after-cmj" :: "-bs-package-output"
+      "--bs-stop-after-cmj" :: "--bs-package-output"
       :: (* This should prob be Path.t or Path.Source.t *)
          Path.Build.to_string (CC.dir cctx)
       :: pkg_args
