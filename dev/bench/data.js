@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1672227475442,
+  "lastUpdate": 1672231402521,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -28,6 +28,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "41392.97405990667",
+            "unit": "millisecond"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "committer": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "distinct": true,
+          "id": "891fb8f1ebcee583db69acfbf164bd0a04d49552",
+          "message": "melange: fix some steps in bench workflow\n\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>",
+          "timestamp": "2022-12-28T12:21:51Z",
+          "tree_id": "ec72334ea17d287bdd3ab7410a3ceda7d1e9c18c",
+          "url": "https://github.com/jchavarri/dune/commit/891fb8f1ebcee583db69acfbf164bd0a04d49552"
+        },
+        "date": 1672231401572,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "41030.909589539995",
             "unit": "millisecond"
           }
         ]
