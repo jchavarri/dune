@@ -27,8 +27,8 @@ window.BENCHMARK_DATA = {
         "benches": [
           {
             "name": "pupilfirst build time (Linux)",
-            "value": "41392.97405990667",
-            "unit": "millisecond"
+            "value": "41.39297405990667",
+            "unit": "seconds"
           }
         ]
       },
@@ -56,8 +56,8 @@ window.BENCHMARK_DATA = {
         "benches": [
           {
             "name": "pupilfirst build time (Linux)",
-            "value": "41030.909589539995",
-            "unit": "millisecond"
+            "value": "41.030909589539995",
+            "unit": "seconds"
           }
         ]
       },
@@ -85,8 +85,8 @@ window.BENCHMARK_DATA = {
         "benches": [
           {
             "name": "pupilfirst build time (Linux)",
-            "value": "36575.94445184667",
-            "unit": "millisecond"
+            "value": "36.57594445184667",
+            "unit": "seconds"
           }
         ]
       }
