@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1673623476352,
+  "lastUpdate": 1673813982512,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -260,6 +260,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "36.057210825780004",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "alizter@gmail.com",
+            "name": "Ali Caglayan",
+            "username": "Alizter"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "15d60ef25217a3daf8ed55c9e1a60d9f8a0665a8",
+          "message": "chore(ci): add OCaml 5.0 (#6853)\n\nSigned-off-by: Ali Caglayan <alizter@gmail.com>",
+          "timestamp": "2023-01-14T19:25:31-06:00",
+          "tree_id": "6b3a6595ab2b8690a84f0a6cb752418bdb3ecec0",
+          "url": "https://github.com/jchavarri/dune/commit/15d60ef25217a3daf8ed55c9e1a60d9f8a0665a8"
+        },
+        "date": 1673813981196,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "42.042765227033335",
             "unit": "seconds"
           }
         ]
