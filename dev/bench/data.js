@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1674847924139,
+  "lastUpdate": 1674898643648,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -376,6 +376,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "37.28357110586",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "alizter@gmail.com",
+            "name": "Ali Caglayan",
+            "username": "Alizter"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3e27f8f2ebdc959ffac1a806e19062c214326e0b",
+          "message": "chore: update pp and remove redundant tests (#6954)\n\nSigned-off-by: Ali Caglayan <alizter@gmail.com>",
+          "timestamp": "2023-01-27T23:07:35-06:00",
+          "tree_id": "9c1a8a5afd1c167cda3c02fd0848c2e731d3a94f",
+          "url": "https://github.com/jchavarri/dune/commit/3e27f8f2ebdc959ffac1a806e19062c214326e0b"
+        },
+        "date": 1674898642905,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "35.48039901717333",
             "unit": "seconds"
           }
         ]
