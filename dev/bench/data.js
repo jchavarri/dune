@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675076484339,
+  "lastUpdate": 1675761168603,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -463,6 +463,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "43.321385829393336",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "46a4e2d3480c51df2347c7b7ed1f2859e9fc5f54",
+          "message": "test: demonstrate the \"misc\" section (#7014)\n\nThe \"misc\" section isn't currently supported by dune. Probably because\r\nit breaks the sandboxing guarantees of switches.\r\n\r\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2023-02-06T23:53:27-06:00",
+          "tree_id": "b731234b57cf62a77d2784e75fa4eb234c4d6802",
+          "url": "https://github.com/jchavarri/dune/commit/46a4e2d3480c51df2347c7b7ed1f2859e9fc5f54"
+        },
+        "date": 1675761167858,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "41.017883048133335",
             "unit": "seconds"
           }
         ]
