@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1676107933662,
+  "lastUpdate": 1677182243780,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -521,6 +521,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "34.300380481919994",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "anmonteiro@gmail.com",
+            "name": "Antonio Nuno Monteiro",
+            "username": "anmonteiro"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "24b31d7f823296fc0b482fde8e8093780d66ab5b",
+          "message": "feature: make `modes` field an Ordered_set_lang instance (#6611)\n\nSigned-off-by: Antonio Nuno Monteiro <anmonteiro@gmail.com>",
+          "timestamp": "2023-02-21T08:33:41-08:00",
+          "tree_id": "11e547cdcf9f3c39f442e460fc6468a864d4a6e7",
+          "url": "https://github.com/jchavarri/dune/commit/24b31d7f823296fc0b482fde8e8093780d66ab5b"
+        },
+        "date": 1677182243024,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "38.02175372357333",
             "unit": "seconds"
           }
         ]
