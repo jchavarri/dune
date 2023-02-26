@@ -80,6 +80,7 @@ let modules_rules ~preprocess ~preprocessor_deps ~lint
         then Module_compilation.with_empty_intf ~sctx ~dir m
         else Memo.return m)
   in
+  print_endline "modules_rules";
   (modules, pp)
 
 let modules_rules sctx kind expander ~dir scope modules =

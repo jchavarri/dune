@@ -357,7 +357,9 @@ module Make_map_traversals (Map : Map.S) = struct
     if Map.is_empty t then return Map.empty
     else
       let+ a =
-        parallel_array_of_list_map (Map.to_list t) ~f:(fun (k, v) -> f k v)
+        let l = Map.to_list t in
+        let res = parallel_array_of_list_map l ~f:(fun (k, v) -> f k v) in
+        res
       in
       let pos = ref 0 in
       Map.mapi t ~f:(fun _ _ ->
@@ -365,7 +367,6 @@ module Make_map_traversals (Map : Map.S) = struct
           pos := i + 1;
           a.(i))
 end
-[@@inline always]
 
 let rec repeat_while : 'a. f:('a -> 'a option t) -> init:'a -> unit t =
  fun ~f ~init ->

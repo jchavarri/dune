@@ -68,7 +68,9 @@ let init ~stats ~sandboxing_preference ~cache_config ~cache_debug_flags : unit =
 
 let get () =
   let open Memo.O in
+  print_endline "1";
   let* conf = Dune_load.load () in
+  print_endline "2";
   let* contexts = Context.DB.all () in
   let* scontexts = Memo.Lazy.force Super_context.all in
   let* () = Super_context.all_init_deferred () in

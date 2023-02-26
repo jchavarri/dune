@@ -144,6 +144,7 @@ let create ~super_context ~scope ~expander ~obj_dir ~modules ~flags
     ~requires_compile ~requires_link ?(preprocessing = Pp_spec.dummy) ~opaque
     ?stdlib ~js_of_ocaml ~package ?public_lib_name ?vimpl ?modes ?bin_annot ?loc
     () =
+  print_endline "create INIT";
   let open Memo.O in
   let project = Scope.project scope in
   let requires_compile =
@@ -151,6 +152,7 @@ let create ~super_context ~scope ~expander ~obj_dir ~modules ~flags
       Memo.Lazy.force requires_link
     else requires_compile
   in
+  print_endline "create 1";
   let sandbox =
     (* With sandboxing, there are a few build errors in ocaml platform 1162238ae
        like: File "ocaml_modules/ocamlgraph/src/pack.ml", line 1: Error: The
@@ -168,6 +170,7 @@ let create ~super_context ~scope ~expander ~obj_dir ~modules ~flags
     in
     Option.value ~default modes |> Lib_mode.Map.map ~f:Option.is_some
   in
+  print_endline "create 2";
   let opaque = eval_opaque (Super_context.context super_context) opaque in
   let ocamldep_modules_data : Ocamldep.Modules_data.t =
     { dir = Obj_dir.dir obj_dir
@@ -179,12 +182,16 @@ let create ~super_context ~scope ~expander ~obj_dir ~modules ~flags
     ; stdlib
     }
   in
-  let+ dep_graphs = Dep_rules.rules ocamldep_modules_data
-  and+ bin_annot =
+  print_endline "create 3";
+  let* dep_graphs = Dep_rules.rules ocamldep_modules_data
+in
+print_endline "create 3 y medio";
+let+ bin_annot =
     match bin_annot with
     | Some b -> Memo.return b
     | None -> Super_context.bin_annot super_context ~dir:(Obj_dir.dir obj_dir)
   in
+  print_endline "create END";
   { super_context
   ; scope
   ; expander

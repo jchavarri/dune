@@ -442,22 +442,30 @@ let cctx (lib : Library.t) ~sctx ~source_modules ~dir ~expander ~scope
   and* vimpl = Virtual_rules.impl sctx ~lib ~scope in
   let obj_dir = Library.obj_dir ~dir lib in
   let ctx = Super_context.context sctx in
+  print_endline "cctx 1 ";
   let* modules, pp =
     Buildable_rules.modules_rules sctx
       (Library (lib.buildable, snd lib.name))
       expander ~dir scope source_modules
   in
+  print_endline "cctx 2 ";
   let modules = Vimpl.impl_modules vimpl modules in
+  print_endline "cctx 3 ";
   let requires_compile = Lib.Compile.direct_requires compile_info in
+  print_endline "cctx 4 ";
   let requires_link = Lib.Compile.requires_link compile_info in
+  print_endline "cctx 5 ";
   let modes =
     let { Lib_config.has_native; _ } = ctx.lib_config in
     Dune_file.Mode_conf.Lib.Set.eval_detailed lib.modes ~has_native
   in
+  print_endline "cctx 6 ";
   let package = Dune_file.Library.package lib in
+  print_endline "cctx 7 ";
   let js_of_ocaml =
     Js_of_ocaml.In_context.make ~dir lib.buildable.js_of_ocaml
   in
+  print_endline "cctx 8 ";
   (* XXX(anmonteiro): `public_lib_name` is used to derive Melange's
      `--bs-package-name` argument. We only use the library name for public
      libraries because we need melange to preserve relative paths for private
@@ -467,14 +475,18 @@ let cctx (lib : Library.t) ~sctx ~source_modules ~dir ~expander ~scope
     | Public p -> Some (Public_lib.name p)
     | Private _ -> None
   in
-  Compilation_context.create () ~super_context:sctx ~expander ~scope ~obj_dir
+  print_endline "cctx 9 ";
+  let res = Compilation_context.create () ~super_context:sctx ~expander ~scope ~obj_dir
     ~modules ~flags ~requires_compile ~requires_link ~preprocessing:pp
     ~opaque:Inherit_from_settings ~js_of_ocaml:(Some js_of_ocaml)
     ?stdlib:lib.stdlib ~package ?vimpl ?public_lib_name ~modes
+in   print_endline "cctx 10";
+res
 
 let library_rules (lib : Library.t) ~local_lib ~cctx ~source_modules
     ~dir_contents ~compile_info =
-  let source_modules =
+    print_endline "library -1";
+let source_modules =
     Modules.fold_user_written source_modules ~init:[] ~f:(fun m acc -> m :: acc)
   in
   let modules = Compilation_context.modules cctx in
@@ -486,16 +498,20 @@ let library_rules (lib : Library.t) ~local_lib ~cctx ~source_modules
   let scope = Compilation_context.scope cctx in
   let* requires_compile = Compilation_context.requires_compile cctx in
   let stdlib_dir = (Compilation_context.context cctx).Context.stdlib_dir in
+  print_endline "library 0";
   let top_sorted_modules =
     let impl_only = Modules.impl_only modules in
     Dep_graph.top_closed_implementations
       (Compilation_context.dep_graphs cctx).impl impl_only
   in
+  print_endline "library 1";
   let* () =
     Memo.Option.iter vimpl
       ~f:(Virtual_rules.setup_copy_rules_for_impl ~sctx ~dir)
   in
+  print_endline "library 2";
   let* () = Check_rules.add_cycle_check sctx ~dir top_sorted_modules in
+  print_endline "library 3";
   let* () = gen_wrapped_compat_modules lib cctx
   and* () = Module_compilation.build_all cctx
   and* expander = Super_context.expander sctx ~dir
@@ -506,6 +522,7 @@ let library_rules (lib : Library.t) ~local_lib ~cctx ~source_modules
     let+ () = Check_rules.add_obj_dir sctx ~obj_dir mode in
     info
   in
+  print_endline "library 4";
   let+ () =
     Memo.when_
       (not (Library.is_virtual lib))
@@ -529,11 +546,13 @@ let library_rules (lib : Library.t) ~local_lib ~cctx ~source_modules
       ; compile_info
       }
   in
+  print_endline "library 5";
   let preprocess =
     Preprocess.Per_module.with_instrumentation lib.buildable.preprocess
       ~instrumentation_backend:
         (Lib.DB.instrumentation_backend (Scope.libs scope))
   in
+  print_endline "library 6";
   ( cctx
   , Merlin.make ~requires:requires_compile ~stdlib_dir ~flags ~modules
       ~source_dirs:Path.Source.Set.empty ~preprocess
@@ -545,19 +564,23 @@ let library_rules (lib : Library.t) ~local_lib ~cctx ~source_modules
 
 let rules (lib : Library.t) ~sctx ~dir_contents ~dir ~expander ~scope =
   let buildable = lib.buildable in
+  print_endline "rules 1";
   let* local_lib, compile_info =
     Lib.DB.get_compile_info (Scope.libs scope) (Library.best_name lib)
       ~allow_overlaps:buildable.allow_overlapping_dependencies
   in
+  print_endline "rules 2";
   let local_lib = Lib.Local.of_lib_exn local_lib in
   let f () =
     let* source_modules =
       Dir_contents.ocaml dir_contents
       >>| Ml_sources.modules ~for_:(Library (Library.best_name lib))
     in
+    print_endline "rules 3";
     let* cctx =
       cctx lib ~sctx ~source_modules ~dir ~scope ~expander ~compile_info
     in
+    print_endline "rules 4";
     let* () =
       match buildable.ctypes with
       | None -> Memo.return ()
@@ -565,6 +588,7 @@ let rules (lib : Library.t) ~sctx ~dir_contents ~dir ~expander ~scope =
         Ctypes_rules.gen_rules ~loc:(fst lib.name) ~cctx ~buildable ~sctx ~scope
           ~dir ~version
     in
+    print_endline "rules 5";
     library_rules lib ~local_lib ~cctx ~source_modules ~dir_contents
       ~compile_info
   in

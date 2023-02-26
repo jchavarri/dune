@@ -6,6 +6,8 @@
  (package dune)
  (enabled_if
   (<> %{profile} dune-bootstrap))
+;  (instrumentation
+;   (backend landmarks --auto))
  (libraries
   memo
   ocaml

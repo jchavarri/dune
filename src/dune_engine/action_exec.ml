@@ -239,10 +239,13 @@ let diff_eq_files { Diff.optional; mode; file1; file2 } =
   || compare_files mode file1 file2 = Eq
 
 let rec exec t ~display ~ectx ~eenv =
+  print_endline "Exe";
   match (t : Action.t) with
   | Run (Error e, _) -> Action.Prog.Not_found.raise e
   | Run (Ok prog, args) ->
+    print_endline ("BEFORE " ^ Path.to_string prog ^ ", args: " ^ String.concat ~sep:", " args);
     let+ () = exec_run ~display ~ectx ~eenv prog args in
+    print_endline ("AFTER");
     Done
   | With_accepted_exit_codes (exit_codes, t) ->
     let eenv =
@@ -283,7 +286,9 @@ let rec exec t ~display ~ectx ~eenv =
     Fiber.return Done
   | Copy (src, dst) ->
     let dst = Path.build dst in
+    print_endline "FIRST";
     Io.copy_file ~src ~dst ();
+    print_endline "SECOND";
     Fiber.return Done
   | Symlink (src, dst) ->
     Io.portable_symlink ~src ~dst:(Path.build dst);

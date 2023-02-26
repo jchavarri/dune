@@ -50,6 +50,7 @@ $(BIN):
 	@ocaml boot/bootstrap.ml
 
 dev: $(BIN)
+	# $(BIN) build --instrument-with landmarks @install
 	$(BIN) build @install
 
 all: $(BIN)

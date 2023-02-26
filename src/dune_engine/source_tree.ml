@@ -89,6 +89,7 @@ module Dune_file = struct
         match file with
         | None -> Memo.return Sub_dirs.Dir_map.empty
         | Some file ->
+          print_endline ("LOAD " ^ (Path.Source.to_string file));
           let decoder =
             { Sub_dirs.decode =
                 (fun ast d ->

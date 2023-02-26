@@ -43,7 +43,7 @@ let ooi_deps { vimpl; sctx; dir; obj_dir; modules = _; stdlib = _; sandbox = _ }
   in
   read
 
-let deps_of_module ({ modules; _ } as md) ~ml_kind m =
+let deps_of_module ({ modules; _ } as md) ~parse_comp_units ~ml_kind m =
   match Module.kind m with
   | Wrapped_compat ->
     let interface_module =
@@ -53,7 +53,11 @@ let deps_of_module ({ modules; _ } as md) ~ml_kind m =
     in
     List.singleton interface_module |> Action_builder.return |> Memo.return
   | _ -> (
-    let+ deps = Ocamldep.deps_of md ~ml_kind m in
+    (* print_endline
+       (Printf.sprintf "%f Before deps_of" (Unix.gettimeofday ())); *)
+    let+ deps = Ocamldep.deps_of md ~ml_kind ~parse_comp_units m in
+    (* print_endline
+       (Printf.sprintf "%f Afte deps_of" (Unix.gettimeofday ())); *)
     match Modules.alias_for modules m with
     | [] -> deps
     | aliases ->
@@ -85,7 +89,9 @@ let deps_of_vlib_module ({ obj_dir; vimpl; dir; sctx; _ } as md) ~ml_kind m =
     in
     Ocamldep.read_deps_of ~obj_dir:vlib_obj_dir ~modules ~ml_kind m
 
-let rec deps_of md ~ml_kind (m : Modules.Sourced_module.t) =
+let foo = ref 0
+
+let rec deps_of md ~parse_comp_units ~ml_kind (m : Modules.Sourced_module.t) =
   let is_alias =
     match m with
     | Impl_of_virtual_module _ -> false
@@ -97,15 +103,38 @@ let rec deps_of md ~ml_kind (m : Modules.Sourced_module.t) =
   if is_alias then Memo.return (Action_builder.return [])
   else
     let skip_if_source_absent f m =
-      if Module.has m ~ml_kind then f m
-      else Memo.return (Action_builder.return [])
+      (* print_endline
+         (Printf.sprintf "%f Before skip_if_source_absent" (Unix.gettimeofday ())); *)
+      let res =
+        if Module.has m ~ml_kind then f m
+        else Memo.return (Action_builder.return [])
+      in
+      (* print_endline
+         (Printf.sprintf "%f After skip_if_source_absent" (Unix.gettimeofday ())); *)
+      res
     in
     match m with
     | Imported_from_vlib m ->
+      print_endline "Imported_from_vlib";
       skip_if_source_absent (deps_of_vlib_module md ~ml_kind) m
-    | Normal m -> skip_if_source_absent (deps_of_module md ~ml_kind) m
+    | Normal m ->
+      print_endline ("Normal INIT " ^ string_of_int !foo);
+      (* print_endline
+         (Printf.sprintf "%f Before deps_of_module" (Unix.gettimeofday ())); *)
+      let deps = deps_of_module md ~parse_comp_units ~ml_kind in
+      (* print_endline
+         (Printf.sprintf "%f After deps_of_module" (Unix.gettimeofday ())); *)
+      (* print_endline
+         (Printf.sprintf "%f Before skip_if_source_absent" (Unix.gettimeofday ())); *)
+      let res = skip_if_source_absent deps m in
+      (* print_endline
+         (Printf.sprintf "%f After skip_if_source_absent" (Unix.gettimeofday ())); *)
+      print_endline ("Normal END " ^ string_of_int !foo);
+      foo := !foo + 1;
+      res
     | Impl_of_virtual_module impl_or_vlib -> (
-      deps_of md ~ml_kind
+      print_endline "Impl_of_virtual_module";
+      deps_of md ~parse_comp_units ~ml_kind
       @@
       let m = Ml_kind.Dict.get impl_or_vlib ml_kind in
       match ml_kind with
@@ -130,20 +159,46 @@ let immediate_deps_of unit modules obj_dir ml_kind =
     else Ocamldep.read_immediate_deps_of ~obj_dir ~modules ~ml_kind unit
 
 let dict_of_func_concurrently f =
-  let+ impl = f ~ml_kind:Ml_kind.Impl
-  and+ intf = f ~ml_kind:Ml_kind.Intf in
-  Ml_kind.Dict.make ~impl ~intf
+  print_endline "dict_of_func_concurrently 1";
+  let* impl = f ~ml_kind:Ml_kind.Impl in
+  print_endline "dict_of_func_concurrently 2";
+  let+ intf = f ~ml_kind:Ml_kind.Intf in
+  print_endline "dict_of_func_concurrently 3";
+  let res = Ml_kind.Dict.make ~impl ~intf in
+  print_endline "dict_of_func_concurrently 4";
+  res
 
 let for_module md module_ =
-  dict_of_func_concurrently (deps_of md (Normal module_))
+  let parse_comp_units = Ocamldep.parse_compilation_units ~modules:md.modules in
+  dict_of_func_concurrently (deps_of md ~parse_comp_units (Normal module_))
 
 let rules md =
   let modules = md.modules in
   match Modules.as_singleton modules with
   | Some m -> Memo.return (Dep_graph.Ml_kind.dummy m)
   | None ->
-    dict_of_func_concurrently (fun ~ml_kind ->
-        let+ per_module =
-          Modules.obj_map_build modules ~f:(deps_of md ~ml_kind)
-        in
-        Dep_graph.make ~dir:md.dir ~per_module)
+    print_endline "DIC INIT";
+    let res =
+      dict_of_func_concurrently (fun ~ml_kind ->
+          print_endline ("DIC 1, " ^ Ml_kind.to_string ml_kind);
+          let parse_comp_units =
+            Ocamldep.parse_compilation_units ~modules:md.modules
+          in
+          let f = deps_of md ~parse_comp_units ~ml_kind in
+          print_endline ("DIC 1 y medio, " ^ Ml_kind.to_string ml_kind);
+          print_endline
+            (Printf.sprintf "%f Before Modules_obj_map_build, %s"
+               (Unix.gettimeofday ())
+               (Ml_kind.to_string ml_kind));
+          let+ per_module = Modules.obj_map_build modules ~f in
+          print_endline
+            (Printf.sprintf "%f After Modules_obj_map_build, %s"
+               (Unix.gettimeofday ())
+               (Ml_kind.to_string ml_kind));
+          print_endline ("DIC 2, " ^ Ml_kind.to_string ml_kind);
+          let res = Dep_graph.make ~dir:md.dir ~per_module in
+          print_endline ("DIC 3, " ^ Ml_kind.to_string ml_kind);
+          res)
+    in
+    print_endline "DIC END";
+    res

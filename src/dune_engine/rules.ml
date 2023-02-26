@@ -32,7 +32,7 @@ module Dir_rules = struct
     | Rule rule ->
       Dyn.Variant
         ( "Rule"
-        , [ Record [ ("targets", Targets.Validated.to_dyn rule.targets) ] ] )
+        , [ Record [ ("targets", Targets.Validated.to_dyn rule.targets); ] ] )
     | Alias alias ->
       Dyn.Variant
         ("Alias", [ Record [ ("name", Alias.Name.to_dyn alias.name) ] ])

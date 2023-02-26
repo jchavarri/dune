@@ -1085,7 +1085,12 @@ let rec obj_map : 'a. t -> f:(Sourced_module.t -> 'a) -> 'a Module.Obj_map.t =
 let obj_map_build :
       'a. t -> f:(Sourced_module.t -> 'a Memo.t) -> 'a Module.Obj_map.t Memo.t =
  fun t ~f ->
-  Module.Obj_map_traversals.parallel_map (obj_map t ~f) ~f:(fun _ x -> x)
+  print_endline "obj_map_build 1";
+  let obj_map = (obj_map t ~f) in
+  print_endline "obj_map_build 2";
+  let res = Module.Obj_map_traversals.parallel_map obj_map ~f:(fun _ x -> x) in
+  print_endline "obj_map_build 3";
+  res
 
 let entry_modules t =
   List.filter

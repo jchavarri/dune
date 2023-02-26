@@ -64,21 +64,27 @@ end = struct
   let of_stanza stanza ~sctx ~src_dir ~ctx_dir ~scope ~dir_contents ~expander
       ~files_to_install =
     let dir = ctx_dir in
+    print_endline "of_stanza 1";
     match stanza with
     | Toplevel toplevel ->
+      print_endline "Toplevel init";
       let+ () = Toplevel_rules.setup ~sctx ~dir ~toplevel in
       empty_none
     | Library lib ->
+      print_endline "Library init";
       let* () =
         Odoc.setup_private_library_doc_alias sctx ~scope ~dir:ctx_dir lib
       in
+      print_endline "Library 2";
       let* available =
         Lib.DB.available (Scope.libs scope) (Dune_file.Library.best_name lib)
       in
+      print_endline "Library 3";
       if available then
         let+ cctx, merlin =
           Lib_rules.rules lib ~sctx ~dir ~scope ~dir_contents ~expander
         in
+        print_endline "Library 4";
         { merlin = Some merlin
         ; cctx = Some (lib.buildable.loc, cctx)
         ; js = None
@@ -86,11 +92,13 @@ end = struct
         }
       else Memo.return empty_none
     | Foreign_library lib ->
+      print_endline "Foreign_library init";
       let+ () =
         Lib_rules.foreign_rules lib ~sctx ~dir ~dir_contents ~expander
       in
       empty_none
     | Executables exes -> (
+      print_endline "Executables init";
       Expander.eval_blang expander exes.enabled_if >>= function
       | false -> Memo.return empty_none
       | true ->
@@ -107,9 +115,11 @@ end = struct
         ; source_dirs = None
         })
     | Alias alias ->
+      print_endline "Alias init";
       let+ () = Simple_rules.alias sctx alias ~dir ~expander in
       empty_none
     | Tests tests ->
+      print_endline "Tests init";
       let+ cctx, merlin =
         Test_rules.rules tests ~sctx ~dir ~scope ~expander ~dir_contents
       in
@@ -119,6 +129,7 @@ end = struct
       ; source_dirs = None
       }
     | Copy_files { files = glob; _ } ->
+      print_endline "Copy_files init";
       let* source_dirs =
         let loc = String_with_vars.loc glob in
         let+ src_glob = Expander.No_deps.expand_str expander glob in
@@ -130,21 +141,26 @@ end = struct
       in
       Memo.return { merlin = None; cctx = None; js = None; source_dirs }
     | Install i ->
+      print_endline "Install init";
       let+ () = files_to_install i in
       empty_none
     | Plugin p ->
+      print_endline "Plugin init";
       let+ () = Plugin_rules.setup_rules ~sctx ~dir p in
       empty_none
     | Cinaps.T cinaps ->
+      print_endline "Cinaps init";
       let+ () = Cinaps.gen_rules sctx cinaps ~dir ~scope in
       empty_none
     | Mdx.T mdx -> (
+      print_endline "Mdx init";
       Expander.eval_blang expander (Mdx.enabled_if mdx) >>= function
       | false -> Memo.return empty_none
       | true ->
         let+ () = Mdx.gen_rules ~sctx ~dir ~scope ~expander mdx in
         empty_none)
     | Melange_stanzas.Emit.T mel ->
+      print_endline "Melange_stanzas init";
       let+ cctx, merlin =
         Melange_rules.setup_emit_cmj_rules ~dir_contents ~dir ~scope ~sctx
           ~expander mel
@@ -154,18 +170,27 @@ end = struct
       ; js = None
       ; source_dirs = None
       }
-    | _ -> Memo.return empty_none
+    | _ ->
+      (* print_endline "Wildcard init"; *)
+      Memo.return empty_none
 
   let of_stanzas stanzas ~cctxs ~sctx ~src_dir ~ctx_dir ~scope ~dir_contents
       ~expander ~files_to_install =
+    print_endline "of_stanzas 1";
     let of_stanza =
       of_stanza ~sctx ~src_dir ~ctx_dir ~scope ~dir_contents ~expander
         ~files_to_install
     in
-    let+ l = Memo.parallel_map stanzas ~f:of_stanza in
-    List.fold_left l ~init:{ empty_list with cctx = cctxs } ~f:(fun acc x ->
-        cons acc x)
-    |> rev
+    print_endline "of_stanzas 2";
+    let+ l = Memo.sequential_map stanzas ~f:of_stanza in
+    print_endline "of_stanzas 3";
+    let res =
+      List.fold_left l ~init:{ empty_list with cctx = cctxs } ~f:(fun acc x ->
+          cons acc x)
+      |> rev
+    in
+    print_endline "of_stanzas 4";
+    res
 end
 
 (* This is used to determine the list of source directories to give to Merlin.
@@ -208,6 +233,7 @@ let define_all_alias ~dir ~project ~js_targets =
 
 let gen_rules sctx dir_contents cctxs expander
     { Dune_file.dir = src_dir; stanzas; project } ~dir:ctx_dir =
+  print_endline "gen_rules";
   let files_to_install install_conf =
     let expand_str = Expander.No_deps.expand_str expander in
     let files_and_dirs =
@@ -227,6 +253,7 @@ let gen_rules sctx dir_contents cctxs expander
     in
     Rules.Produce.Alias.add_deps (Alias.all ~dir:ctx_dir) action
   in
+  print_endline "of_stanzas";
   let* { For_stanza.merlin = merlins
        ; cctx = cctxs
        ; js = js_targets
@@ -236,6 +263,7 @@ let gen_rules sctx dir_contents cctxs expander
     For_stanza.of_stanzas stanzas ~cctxs ~sctx ~src_dir ~ctx_dir ~scope
       ~dir_contents ~expander ~files_to_install
   in
+  print_endline "merlins";
   let* () =
     Memo.sequential_iter merlins ~f:(fun merlin ->
         let more_src_dirs =
@@ -243,6 +271,7 @@ let gen_rules sctx dir_contents cctxs expander
         in
         Merlin.add_rules sctx ~dir:ctx_dir ~more_src_dirs ~expander merlin)
   in
+  print_endline "stanzs";
   let* () =
     Memo.parallel_iter stanzas ~f:(fun stanza ->
         match (stanza : Stanza.t) with
@@ -314,12 +343,16 @@ let collect_directory_targets ~init ~dir =
 
 let gen_rules sctx dir_contents cctxs ~source_dir ~dir :
     (Loc.t * Compilation_context.t) list Memo.t =
+  print_endline "gen_rles 1";
   let* expander =
     let+ expander = Super_context.expander sctx ~dir in
     Dir_contents.add_sources_to_expander sctx expander
   and* tests = Source_tree.Dir.cram_tests source_dir in
+  print_endline "gen_rles 2";
   let* () = Cram_rules.rules ~sctx ~expander ~dir tests in
+  print_endline "gen_rles 3";
   let* () = Format_rules.setup_alias sctx ~dir in
+  print_endline "gen_rles 4";
   Only_packages.stanzas_in_dir dir >>= function
   | Some d -> gen_rules sctx dir_contents cctxs expander d ~dir
   | None ->

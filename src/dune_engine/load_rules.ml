@@ -667,12 +667,14 @@ end = struct
             && Subdir_set.mem build_dir_only_sub_dirs name
           then report_rule_internal_dir_conflict name loc);
       let* rules_produced = Memo.Lazy.force rules in
+      (* print_endline (Dyn.to_string (Rules.to_dyn rules_produced)); *)
       let rules =
         let dir = Path.build dir in
         Rules.find rules_produced dir
       in
       let collected = Rules.Dir_rules.consume rules in
       let rules = collected.rules in
+      print_endline ("LEGNT " ^ (string_of_int (List.length rules)));
       (* Compute the set of sources and targets promoted to the source tree that
          must not be copied to the build directory. *)
       let source_files_to_ignore, source_dirnames_to_ignore =
@@ -872,9 +874,14 @@ end = struct
       Console.print_user_message
         (User_message.make
            [ Pp.textf "Loading build directory %s" (Path.to_string dir) ]);
-    get_dir_triage ~dir >>= function
+    let res = get_dir_triage ~dir >>= function
     | Known l -> Memo.return l
-    | Build_directory x -> load_build_directory_exn x
+    | Build_directory x -> load_build_directory_exn x in
+    if !Clflags.debug_load_dir then
+      Console.print_user_message
+        (User_message.make
+           [ Pp.textf "Loaded build directory %s" (Path.to_string dir) ]);
+    res
 
   let load_dir =
     let load_dir_impl dir = load_dir_impl ~dir in

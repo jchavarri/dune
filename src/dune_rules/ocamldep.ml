@@ -35,18 +35,43 @@ let parse_module_names ~dir ~(unit : Module.t) ~modules words =
           ])
 
 let parse_compilation_units ~modules =
+  let tmp = Unix.gettimeofday () in
   let obj_map =
-    Modules.obj_map modules ~f:(function
-      | Normal m -> m
-      | Imported_from_vlib m -> m
-      | Impl_of_virtual_module { intf = _; impl } -> impl)
-    |> Module.Obj_map.to_list_map ~f:(fun m _ -> (Module.obj_name m, m))
-    |> Module_name.Unique.Map.of_list_exn
+    let res1 =
+      Modules.obj_map modules ~f:(function
+        | Normal m -> m
+        | Imported_from_vlib m -> m
+        | Impl_of_virtual_module { intf = _; impl } -> impl)
+    in
+    print_endline
+      (Printf.sprintf "%f parse_compilation_units: obj_map"
+         (Unix.gettimeofday () -. tmp));
+    let tmp = Unix.gettimeofday () in
+    let res2 =
+      Module.Obj_map.to_list_map ~f:(fun m _ -> (Module.obj_name m, m)) res1
+    in
+    print_endline
+      (Printf.sprintf "%f parse_compilation_units: to_list_map"
+         (Unix.gettimeofday () -. tmp));
+    let tmp = Unix.gettimeofday () in
+    print_endline ("LENTGH " ^ string_of_int (List.length res2));
+    let res3 = Module_name.Unique.Map.of_list_exn res2 in
+    print_endline
+      (Printf.sprintf "%f parse_compilation_units: of_list_exn"
+         (Unix.gettimeofday () -. tmp));
+    res3
   in
-  Staged.stage
-    (List.filter_map ~f:(fun m ->
-         let obj_name = Module_name.Unique.of_string m in
-         Module_name.Unique.Map.find obj_map obj_name))
+  let tmp = Unix.gettimeofday () in
+  let res =
+    Staged.stage
+      (List.filter_map ~f:(fun m ->
+           let obj_name = Module_name.Unique.of_string m in
+           Module_name.Unique.Map.find obj_map obj_name))
+  in
+  print_endline
+    (Printf.sprintf "%f parse_compilation_units: stages"
+       (Unix.gettimeofday () -. tmp));
+  res
 
 let parse_deps_exn ~file lines =
   let invalid () =
@@ -70,13 +95,15 @@ let parse_deps_exn ~file lines =
 
 let deps_of
     ({ sandbox; modules; sctx; dir; obj_dir; vimpl = _; stdlib = _ } as md)
-    ~ml_kind unit =
+    ~ml_kind ~parse_comp_units unit =
   let source = Option.value_exn (Module.source unit ~ml_kind) in
   let dep = Obj_dir.Module.dep obj_dir in
   let context = Super_context.context sctx in
   let all_deps_file = dep (Transitive (unit, ml_kind)) in
   let ocamldep_output = dep (Immediate (unit, ml_kind)) in
   let open Memo.O in
+  let* () = Memo.return () in
+  let tmp = Unix.gettimeofday () in
   let* () =
     Super_context.add_rule sctx ~dir
       (let open Action_builder.With_targets.O in
@@ -94,6 +121,8 @@ let deps_of
         ]
       >>| Action.Full.add_sandbox sandbox)
   in
+  print_endline (Printf.sprintf "%f Run ocamldep" (Unix.gettimeofday () -. tmp));
+  let tmp = Unix.gettimeofday () in
   let+ () =
     let produce_all_deps =
       let transitive_deps modules =
@@ -133,10 +162,26 @@ let deps_of
     Action_builder.With_targets.map ~f:Action.Full.make produce_all_deps
     |> Super_context.add_rule sctx ~dir
   in
+  print_endline
+    (Printf.sprintf "%f Produce all deps" (Unix.gettimeofday () -. tmp));
+  let tmp = Unix.gettimeofday () in
   let all_deps_file = Path.build all_deps_file in
-  Action_builder.lines_of all_deps_file
-  |> Action_builder.map ~f:(Staged.unstage @@ parse_compilation_units ~modules)
-  |> Action_builder.memoize (Path.to_string all_deps_file)
+  let res1 = Action_builder.lines_of all_deps_file in
+  print_endline
+    (Printf.sprintf "%f Action_builder.lines_of" (Unix.gettimeofday () -. tmp));
+  let tmp = Unix.gettimeofday () in
+  let res2 =
+    Action_builder.map
+      ~f:(Staged.unstage @@ parse_comp_units)
+      res1
+  in
+  print_endline
+    (Printf.sprintf "%f parse_compilation_units" (Unix.gettimeofday () -. tmp));
+  let tmp = Unix.gettimeofday () in
+  let res3 = Action_builder.memoize (Path.to_string all_deps_file) res2 in
+  print_endline
+    (Printf.sprintf "%f Action_builder.memoize" (Unix.gettimeofday () -. tmp));
+  res3
 
 let read_deps_of ~obj_dir ~modules ~ml_kind unit =
   let all_deps_file = Obj_dir.Module.dep obj_dir (Transitive (unit, ml_kind)) in
