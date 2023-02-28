@@ -985,7 +985,7 @@ window.BENCHMARK_DATA = {
         "tool": "customSmallerIsBetter",
         "benches": [
           {
-            "name": "synthetic build time (Linux)",
+            "name": "synthetic build time (cold, Linux)",
             "value": "4.12570778586",
             "unit": "seconds"
           }
@@ -1014,7 +1014,7 @@ window.BENCHMARK_DATA = {
         "tool": "customSmallerIsBetter",
         "benches": [
           {
-            "name": "synthetic build time (Linux)",
+            "name": "synthetic build time (cold, Linux)",
             "value": "40.72116023812",
             "unit": "seconds"
           }
@@ -1043,7 +1043,7 @@ window.BENCHMARK_DATA = {
         "tool": "customSmallerIsBetter",
         "benches": [
           {
-            "name": "synthetic build time (Linux)",
+            "name": "synthetic build time (cold, Linux)",
             "value": "44.852259832373335",
             "unit": "seconds"
           }
@@ -1072,7 +1072,7 @@ window.BENCHMARK_DATA = {
         "tool": "customSmallerIsBetter",
         "benches": [
           {
-            "name": "synthetic build time (Linux)",
+            "name": "synthetic build time (cold, Linux)",
             "value": "87.69418109254666",
             "unit": "seconds"
           }
@@ -1101,7 +1101,7 @@ window.BENCHMARK_DATA = {
         "tool": "customSmallerIsBetter",
         "benches": [
           {
-            "name": "synthetic build time (Linux)",
+            "name": "synthetic build time (cold, Linux)",
             "value": "68.98147396018668",
             "unit": "seconds"
           }
@@ -1130,7 +1130,7 @@ window.BENCHMARK_DATA = {
         "tool": "customSmallerIsBetter",
         "benches": [
           {
-            "name": "synthetic build time (Linux)",
+            "name": "synthetic build time (cold, Linux)",
             "value": "82.85091616282",
             "unit": "seconds"
           }
@@ -1159,7 +1159,7 @@ window.BENCHMARK_DATA = {
         "tool": "customSmallerIsBetter",
         "benches": [
           {
-            "name": "synthetic build time (Linux)",
+            "name": "synthetic build time (cold, Linux)",
             "value": "67.80892452580666",
             "unit": "seconds"
           }
