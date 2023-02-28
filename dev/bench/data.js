@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1677623703305,
+  "lastUpdate": 1677623734816,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -927,6 +927,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "34.78673992228",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "committer": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "distinct": true,
+          "id": "810caaa075b19dd97c4e99add608cee6ee139faa",
+          "message": "benchmark: add warm run\n\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>",
+          "timestamp": "2023-02-28T22:16:20Z",
+          "tree_id": "4a630dd02a612c54551b19c432a019dc095657c7",
+          "url": "https://github.com/jchavarri/dune/commit/810caaa075b19dd97c4e99add608cee6ee139faa"
+        },
+        "date": 1677623733990,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "36.78798283337334",
             "unit": "seconds"
           }
         ]
