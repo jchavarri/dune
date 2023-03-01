@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1677708398746,
+  "lastUpdate": 1677710778934,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -1043,6 +1043,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "35.78289287231333",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "committer": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "distinct": true,
+          "id": "24dcba9a89d0ecbcf9ff261a001c7e755bab528c",
+          "message": "bench: fix hyperfine installation\n\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>",
+          "timestamp": "2023-03-01T22:20:03Z",
+          "tree_id": "595c59601fe0b32df88fb8fa8a540d0c9fd9d01c",
+          "url": "https://github.com/jchavarri/dune/commit/24dcba9a89d0ecbcf9ff261a001c7e755bab528c"
+        },
+        "date": 1677710777658,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "46.94647213791999",
             "unit": "seconds"
           }
         ]
