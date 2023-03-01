@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1677705670606,
+  "lastUpdate": 1677706035639,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -1248,6 +1248,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (warm, Linux)",
             "value": "5.284143706973334",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b8fd9dffecfd1a102720ca2ab485e80fcee2cb65",
+          "message": "fix: custom log file path (#7200)\n\nCreate directory when using a custom path for the log file\r\n\r\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2023-03-01T11:24:30-08:00",
+          "tree_id": "4713ed049c7d250ddd6841136f703fb08bcadd45",
+          "url": "https://github.com/jchavarri/dune/commit/b8fd9dffecfd1a102720ca2ab485e80fcee2cb65"
+        },
+        "date": 1677706035023,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (Linux)",
+            "value": "72.11485305868666",
             "unit": "seconds"
           }
         ]
