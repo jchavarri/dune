@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1677770446072,
+  "lastUpdate": 1677770892433,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -1480,6 +1480,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (Linux)",
             "value": "93.92902493321333",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "committer": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "distinct": true,
+          "id": "df78305d94db03d524348b87aa08cb536bd734c4",
+          "message": "add mel to pins in make melange\n\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>",
+          "timestamp": "2023-03-02T15:02:04Z",
+          "tree_id": "4723a99770577115d6621d1fcdb26073e88d0430",
+          "url": "https://github.com/jchavarri/dune/commit/df78305d94db03d524348b87aa08cb536bd734c4"
+        },
+        "date": 1677770891462,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (Linux)",
+            "value": "88.33613867769999",
             "unit": "seconds"
           }
         ]
