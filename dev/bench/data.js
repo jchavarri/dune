@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1677881078754,
+  "lastUpdate": 1677881092856,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -1886,6 +1886,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (cold, Linux)",
             "value": "86.19166495644",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "committer": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "distinct": true,
+          "id": "263a7c0fcf065a279613f1040af697b26f82016d",
+          "message": "Merge branch 'main' into perf/run-parse_compilation_units-once\n\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>",
+          "timestamp": "2023-03-03T21:32:56Z",
+          "tree_id": "ff9b4386de175b46b081a74be30761fb769620fe",
+          "url": "https://github.com/jchavarri/dune/commit/263a7c0fcf065a279613f1040af697b26f82016d"
+        },
+        "date": 1677881091852,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (warm, Linux)",
+            "value": "2.2619958405600005",
             "unit": "seconds"
           }
         ]
