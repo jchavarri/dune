@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1678398991530,
+  "lastUpdate": 1678399001605,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -2524,6 +2524,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (cold, Linux)",
             "value": "66.83847473591334",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "committer": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "distinct": true,
+          "id": "7cfbefa45ee474f3d99dfaba16e95b3e2f16561b",
+          "message": "benchmarks: reduce number of modules from 2k to 800\n\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>",
+          "timestamp": "2023-03-09T21:28:14Z",
+          "tree_id": "6a9e118658ae0f45480a32a6bdf1138db3bc4731",
+          "url": "https://github.com/jchavarri/dune/commit/7cfbefa45ee474f3d99dfaba16e95b3e2f16561b"
+        },
+        "date": 1678399001021,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (warm, Linux)",
+            "value": "1.6065419014066666",
             "unit": "seconds"
           }
         ]
