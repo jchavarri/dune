@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1677883303873,
+  "lastUpdate": 1678370170886,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -1362,6 +1362,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "41.71651593549333",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "committer": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "distinct": true,
+          "id": "7b8e3271090598dce07bb4ff744cb0750b35aba9",
+          "message": "benchmarks: add step to run synth watch benchmark\n\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>",
+          "timestamp": "2023-03-09T13:29:14Z",
+          "tree_id": "51fa8b82ab8f85a9603848eb4e00913d4799c7bf",
+          "url": "https://github.com/jchavarri/dune/commit/7b8e3271090598dce07bb4ff744cb0750b35aba9"
+        },
+        "date": 1678370169692,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "37.02739840589333",
             "unit": "seconds"
           }
         ]
