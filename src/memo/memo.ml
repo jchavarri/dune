@@ -482,22 +482,19 @@ module M = struct
     let to_list = Array.fold_left ~init:[] ~f:(fun acc x -> x :: acc)
 
     let changed_or_not t ~f =
-      let rec go index =
-        if index < 0 then (
-          if !Counters.enabled then
-            Counters.edges_traversed :=
-              !Counters.edges_traversed + Array.length t;
-          Fiber.return Changed_or_not.Unchanged)
-        else
-          f t.(index) >>= function
-          | Changed_or_not.Unchanged -> go (index - 1)
-          | (Changed | Cancelled _) as res ->
-            if !Counters.enabled then
-              Counters.edges_traversed :=
-                !Counters.edges_traversed + (Array.length t - index);
-            Fiber.return res
+      let changed = ref Changed_or_not.Unchanged in
+      let+ () =
+        Fiber.parallel_iter (Array.to_list t) ~f:(fun x ->
+            f x >>| function
+            | Changed_or_not.Unchanged -> ()
+            | (Changed | Cancelled _) as res ->
+              if !Counters.enabled then
+                Counters.edges_traversed := !Counters.edges_traversed + 1;
+              if !changed = Unchanged then changed := res)
       in
-      go (Array.length t - 1)
+      if !Counters.enabled then
+        Counters.edges_traversed := !Counters.edges_traversed + Array.length t;
+      !changed
   end
 
   (** The following state transition diagram shows how a node's state changes
