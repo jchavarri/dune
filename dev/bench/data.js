@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1678381862999,
+  "lastUpdate": 1678382245113,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -2379,6 +2379,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (warm, Linux)",
             "value": "1.60859546188",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "committer": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "distinct": true,
+          "id": "eae751225e0f085ae376c5b91146af292fc47566",
+          "message": "benchmarks: add synthetic watch parallel\n\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>",
+          "timestamp": "2023-03-09T16:32:05Z",
+          "tree_id": "c6b5a35f5a0e70e91a1b17e311a012a8bf068828",
+          "url": "https://github.com/jchavarri/dune/commit/eae751225e0f085ae376c5b91146af292fc47566"
+        },
+        "date": 1678382244019,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (cold, Linux)",
+            "value": "75.32079617506001",
             "unit": "seconds"
           }
         ]
