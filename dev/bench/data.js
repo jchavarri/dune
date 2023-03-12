@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1678634132820,
+  "lastUpdate": 1678634143961,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -3191,6 +3191,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (cold, Linux)",
             "value": "68.05969749687334",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "449cbd322ca2a2c50d437d2a2b69d81d5bdf0439",
+          "message": "chore: improve file copying benchmark (#7294)\n\nallow changing the directory and the size of files\r\n\r\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2023-03-11T22:13:19-08:00",
+          "tree_id": "5ce869c6ce3e4c036e9b8c727748a3bf3276d1d9",
+          "url": "https://github.com/jchavarri/dune/commit/449cbd322ca2a2c50d437d2a2b69d81d5bdf0439"
+        },
+        "date": 1678634143101,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (warm, Linux)",
+            "value": "1.7608166159933336",
             "unit": "seconds"
           }
         ]
