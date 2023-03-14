@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1678634143961,
+  "lastUpdate": 1678785336247,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -1739,6 +1739,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "35.87302966166667",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "736279c9d0daa716c9afa67c67528b3dcc137d09",
+          "message": "fix: move setting no sigpipe to right place (#7313)\n\nIt should be done on the client, rather than server fd\r\n\r\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2023-03-14T01:24:20-07:00",
+          "tree_id": "566d453ffd52d5f6dcb9bca36b09c46fde56e8ab",
+          "url": "https://github.com/jchavarri/dune/commit/736279c9d0daa716c9afa67c67528b3dcc137d09"
+        },
+        "date": 1678785335213,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "44.31271429412667",
             "unit": "seconds"
           }
         ]
