@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1678785783608,
+  "lastUpdate": 1678814822429,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -1768,6 +1768,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "44.31271429412667",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@emillon.org",
+            "name": "Etienne Millon",
+            "username": "emillon"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "8621946251ef39e52c115cb36d79d5f56818dd04",
+          "message": "fix(stdlib): pass flags when building stdlib.ml (#7241)\n\nReported by @gretay-js.\r\n\r\nThis ensures that when building `stdlib.ml` (the main module of a\r\nlibrary with `(stdlib)`), flags set in the corresponding stanza\r\n`(library)` are correctly passed.\r\n\r\nSigned-off-by: Etienne Millon <me@emillon.org>",
+          "timestamp": "2023-03-14T10:08:46+01:00",
+          "tree_id": "f455d9414c9c8ae0c0e6767b07525663d9ca935d",
+          "url": "https://github.com/jchavarri/dune/commit/8621946251ef39e52c115cb36d79d5f56818dd04"
+        },
+        "date": 1678814821476,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "32.80966712614",
             "unit": "seconds"
           }
         ]
