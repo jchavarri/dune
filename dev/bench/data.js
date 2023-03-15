@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1678889393367,
+  "lastUpdate": 1678889821040,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -3423,6 +3423,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (warm, Linux)",
             "value": "1.5726673039466668",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": false,
+          "id": "aafa99289d7f570f4a998aaa88364f06c073180f",
+          "message": "refactor(csexp_rpc): remove useless socket arg (#7318)\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>\r\n\r\n<!-- ps-id: ec04f08e-5c43-4325-af38-6b32ae471217 -->",
+          "timestamp": "2023-03-14T13:37:55-07:00",
+          "tree_id": "8ee35a42bf1da96c17f0a1458ce3fd08fac9d3b9",
+          "url": "https://github.com/jchavarri/dune/commit/aafa99289d7f570f4a998aaa88364f06c073180f"
+        },
+        "date": 1678889820088,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (cold, Linux)",
+            "value": "84.67879675748001",
             "unit": "seconds"
           }
         ]
