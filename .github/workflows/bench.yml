@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - main
-      - benchmark/add-synthetic-watch
+      - benchmark/add-synthetic-watch-parallel
 
 permissions:
   # deployments permission to deploy GitHub pages website
