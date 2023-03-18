@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1679156356857,
+  "lastUpdate": 1679167690610,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -4005,6 +4005,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "33.39538372421334",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "4245029f2914bcfdca915e9916a5155a0afa95fb",
+          "message": "feature: add action runners (#6737)\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2023-03-17T16:47:22-07:00",
+          "tree_id": "c854afadcc9812714d9415eca4c789aeb33a416e",
+          "url": "https://github.com/jchavarri/dune/commit/4245029f2914bcfdca915e9916a5155a0afa95fb"
+        },
+        "date": 1679167689357,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "31.932653113073332",
             "unit": "seconds"
           }
         ]
