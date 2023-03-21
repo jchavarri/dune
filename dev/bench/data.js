@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1679411612705,
+  "lastUpdate": 1679411982361,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -3858,6 +3858,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (warm, Linux)",
             "value": "1.5724990190066668",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@emillon.org",
+            "name": "Etienne Millon",
+            "username": "emillon"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9f925df484e78ba10e8833b301903526645ba6fd",
+          "message": "Document how to add DCO in a hook (#7363)\n\nFixes #7346\r\n\r\nSigned-off-by: Etienne Millon <me@emillon.org>",
+          "timestamp": "2023-03-21T15:15:03+01:00",
+          "tree_id": "53b3a8d4ee76374ce36f11bf10561204e5db9b19",
+          "url": "https://github.com/jchavarri/dune/commit/9f925df484e78ba10e8833b301903526645ba6fd"
+        },
+        "date": 1679411981707,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (cold, Linux)",
+            "value": "72.60523384107333",
             "unit": "seconds"
           }
         ]
