@@ -137,6 +137,8 @@ module Emit = struct
        ; compile_flags
        ; allow_overlapping_dependencies
        })
+
+  let target_dir (emit : t) ~dir = Path.Build.relative dir emit.target
 end
 
 let syntax =
