@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1679613034152,
+  "lastUpdate": 1679613629083,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -1971,6 +1971,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "38.6474784518",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ece416166f6696fa565dc2f36594ec2e0ecd0f85",
+          "message": "refactor(config): add alias for enable/disable (#7394)\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2023-03-23T13:50:05-07:00",
+          "tree_id": "5c380d83153c63019dea4e8270d131bda2fef1e5",
+          "url": "https://github.com/jchavarri/dune/commit/ece416166f6696fa565dc2f36594ec2e0ecd0f85"
+        },
+        "date": 1679613626864,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "42.34025572241999",
             "unit": "seconds"
           }
         ]
