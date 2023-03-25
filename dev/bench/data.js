@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1679614057870,
+  "lastUpdate": 1679785530540,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -4353,6 +4353,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "40.951281545806665",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c75ecf0752d51eade40717521cb59679d9f3fd4e",
+          "message": "fix: disable cutoff where it hurts concurrency (#7395)\n\nMake it possible to enable it with the \"speculative_cutoff\" internal\r\nconfig option\r\n\r\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2023-03-25T09:12:32-07:00",
+          "tree_id": "73af60657f9e14dd6b586d7952aac8a47a911aa5",
+          "url": "https://github.com/jchavarri/dune/commit/c75ecf0752d51eade40717521cb59679d9f3fd4e"
+        },
+        "date": 1679785529548,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "22.9924261293",
             "unit": "seconds"
           }
         ]
