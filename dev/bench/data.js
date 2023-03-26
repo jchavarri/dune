@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1679865356432,
+  "lastUpdate": 1679865367197,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -4148,6 +4148,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (cold, Linux)",
             "value": "65.85749737161332",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "anmonteiro@gmail.com",
+            "name": "Antonio Nuno Monteiro",
+            "username": "anmonteiro"
+          },
+          "committer": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "distinct": true,
+          "id": "7533eb9910d773a3c644a8e82e5bb686a3b4cf00",
+          "message": "fix(x-compilation): only install the context passed to -x\n\nSigned-off-by: Antonio Nuno Monteiro <anmonteiro@gmail.com>\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2023-03-26T12:34:28-07:00",
+          "tree_id": "228d4cb1d96893ed6ca648d8fb8236ac0ae6e154",
+          "url": "https://github.com/jchavarri/dune/commit/7533eb9910d773a3c644a8e82e5bb686a3b4cf00"
+        },
+        "date": 1679865366215,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (warm, Linux)",
+            "value": "1.6105775825000002",
             "unit": "seconds"
           }
         ]
