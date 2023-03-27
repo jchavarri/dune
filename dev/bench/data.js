@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1679904259976,
+  "lastUpdate": 1679904272713,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -4235,6 +4235,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (cold, Linux)",
             "value": "76.05027242242",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "alizter@gmail.com",
+            "name": "Ali Caglayan",
+            "username": "Alizter"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9264dda63d2d3fe3d2992117eebc597868849bae",
+          "message": "test: spec of Path.mkdir_p w.r.t existing file / dir (#7420)\n\nSigned-off-by: Ali Caglayan <alizter@gmail.com>",
+          "timestamp": "2023-03-26T22:21:33-07:00",
+          "tree_id": "d95bdc97bf9847d4ec86f6316dd5d0025d6b0b71",
+          "url": "https://github.com/jchavarri/dune/commit/9264dda63d2d3fe3d2992117eebc597868849bae"
+        },
+        "date": 1679904271657,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (warm, Linux)",
+            "value": "1.9642199222466665",
             "unit": "seconds"
           }
         ]
