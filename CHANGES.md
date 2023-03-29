@@ -1,6 +1,15 @@
 Unreleased
 ----------
 
+- Fix `dune install` when cross compiling (#7410, fixes #6191, @anmonteiro,
+  @rizo)
+
+- Find `pps` dependencies in the host context when cross-compiling,  (#7410,
+  fixes #4156, @anmonteiro)
+
+- Dune in watch mode no longer builds concurrent rules in serial (#7395
+  @rgrinberg, @jchavarri)
+
 - `dune coq top` now correctly respects the project root when called from a
   subdirectory. However, absolute filenames passed to `dune coq top` are no
   longer supported (due to being buggy) (#7357, fixes #7344, @rlepigre and
@@ -22,7 +31,7 @@ Unreleased
 - Speed up file copying on macos by using `clonefile` when available
   (@rgrinberg, #7210)
 
-- Adds support for loading plugins in toplevels (#6082, fixes #6081, 
+- Adds support for loading plugins in toplevels (#6082, fixes #6081,
   @ivg, @richardlford)
 
 - Support commands that output 8-bit and 24-bit colors in the terminal (#7188,
@@ -73,6 +82,9 @@ Unreleased
 
 - Fix segfault on MacOS when dune was being shutdown while in watch mode.
   (#7312, fixes #6151, @gridbugs, @emillon)
+
+- Support `(link_flags ...)` in `(cinaps ...)` stanza. (#7423, fixes #7416,
+  @nojb)
 
 3.7.0 (2023-02-17)
 ------------------
