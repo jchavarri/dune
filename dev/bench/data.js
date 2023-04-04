@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1680599063302,
+  "lastUpdate": 1680599725948,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -2116,6 +2116,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "35.72358405236667",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6282035fbe9ff242381e6979b7a1645977c45431",
+          "message": "refactor: stop qualifying Lang.Instance.t (#7482)\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2023-04-03T17:33:11-07:00",
+          "tree_id": "cc15f78f499fc34bba3607c0429b9515822d3a11",
+          "url": "https://github.com/jchavarri/dune/commit/6282035fbe9ff242381e6979b7a1645977c45431"
+        },
+        "date": 1680599723349,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "48.49992932971333",
             "unit": "seconds"
           }
         ]
