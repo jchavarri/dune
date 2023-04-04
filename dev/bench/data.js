@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1680600190641,
+  "lastUpdate": 1680619671769,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -5020,6 +5020,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "30.352240395766668",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@emillon.org",
+            "name": "Etienne Millon",
+            "username": "emillon"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "75bb78d550839493932888095dc8ce8de7f065e3",
+          "message": "doc: split preprocessing into ref and explanation (#7466)\n\n* doc: split preprocessing into ref and explanation\r\n\r\nThe existing section from \"concepts\" mixes reference info and an\r\nexplanation about how preprocessing works. These concerns are split into\r\ntwo pages.\r\n\r\nSigned-off-by: Etienne Millon <me@emillon.org>\r\nCo-authored-by: Ali Caglayan <alizter@gmail.com>",
+          "timestamp": "2023-04-04T14:39:56+02:00",
+          "tree_id": "97d49e071509ff796b5dcc6dbdd0f1c10220afe4",
+          "url": "https://github.com/jchavarri/dune/commit/75bb78d550839493932888095dc8ce8de7f065e3"
+        },
+        "date": 1680619670659,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "23.61463408698",
             "unit": "seconds"
           }
         ]
