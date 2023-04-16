@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1681669338517,
+  "lastUpdate": 1681672011439,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -5252,6 +5252,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "22.182204769246663",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "82c670eac095b305d9d0def10b7c19c0e697303e",
+          "message": "refactor: link time code gen cleanups (#7559)\n\n* tighten up the scopes of variables\r\n* make the code generation a little lazier by delaying it until the\r\n  rules are executed\r\n\r\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2023-04-15T21:03:22-07:00",
+          "tree_id": "3d95b361838c6cd116a1f6b95402584250e10841",
+          "url": "https://github.com/jchavarri/dune/commit/82c670eac095b305d9d0def10b7c19c0e697303e"
+        },
+        "date": 1681672010503,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "21.93068164984",
             "unit": "seconds"
           }
         ]
