@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1681668998249,
+  "lastUpdate": 1681669327915,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -4554,6 +4554,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (warm, Linux)",
             "value": "1.8230127640999998",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "66573762f28b84268cf04c3c46d0deaef9945316",
+          "message": "feature: allow header files in bootstrap (#7503)\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2023-04-05T16:44:15-07:00",
+          "tree_id": "c2a6afcdd7958813327f7d898b319e905c8f0187",
+          "url": "https://github.com/jchavarri/dune/commit/66573762f28b84268cf04c3c46d0deaef9945316"
+        },
+        "date": 1681669327045,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (cold, Linux)",
+            "value": "65.71366768033334",
             "unit": "seconds"
           }
         ]
