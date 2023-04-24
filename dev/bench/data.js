@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1682305985639,
+  "lastUpdate": 1682306492495,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -2232,6 +2232,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "36.14596033492",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7bb6de7087e1a0a50e8cc9836d2a0e8bc200fc25",
+          "message": "refactor: move action encoders (#7520)\n\nAction.For_shell.t encoders are only used for printing rules in `$ dune\r\nrules`. Therefore, we can just move them to the module that implements\r\nrule printing.\r\n\r\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2023-04-22T23:20:26-07:00",
+          "tree_id": "31cd43a5d0af2c51e39b037939d58a97728abeb0",
+          "url": "https://github.com/jchavarri/dune/commit/7bb6de7087e1a0a50e8cc9836d2a0e8bc200fc25"
+        },
+        "date": 1682306490734,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "37.11540602420667",
             "unit": "seconds"
           }
         ]
