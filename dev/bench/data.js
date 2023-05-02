@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1682306846625,
+  "lastUpdate": 1683017232089,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -5484,6 +5484,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "22.571297545633332",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9ebbb77076de537b6113e0677a959e569991141e",
+          "message": "refactor: deforest scope construction a little (#7661)\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2023-04-29T08:23:58-07:00",
+          "tree_id": "8edcbbcd9066231fb71274b99e16a0e30de87a01",
+          "url": "https://github.com/jchavarri/dune/commit/9ebbb77076de537b6113e0677a959e569991141e"
+        },
+        "date": 1683017231355,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "22.629724720486667",
             "unit": "seconds"
           }
         ]
