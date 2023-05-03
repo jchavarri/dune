@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1683017232089,
+  "lastUpdate": 1683099655572,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -5513,6 +5513,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "22.629724720486667",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "anmonteiro@gmail.com",
+            "name": "Antonio Nuno Monteiro",
+            "username": "anmonteiro"
+          },
+          "committer": {
+            "email": "anmonteiro@gmail.com",
+            "name": "Antonio Nuno Monteiro",
+            "username": "anmonteiro"
+          },
+          "distinct": true,
+          "id": "69541075d26ad1892925da2d8d8deaebededcc2e",
+          "message": "refactor: add `Path.drop_prefix` and `Path.drop_prefix_exn`\n\nSigned-off-by: Antonio Nuno Monteiro <anmonteiro@gmail.com>",
+          "timestamp": "2023-05-02T23:05:14-07:00",
+          "tree_id": "24d0caac72314975940768279cdb0235f94d26fe",
+          "url": "https://github.com/jchavarri/dune/commit/69541075d26ad1892925da2d8d8deaebededcc2e"
+        },
+        "date": 1683099654761,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "23.998318095600002",
             "unit": "seconds"
           }
         ]
