@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1683099655572,
+  "lastUpdate": 1683139647155,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -5542,6 +5542,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "23.998318095600002",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "e+git@x80.org",
+            "name": "Emilio Jesus Gallego Arias",
+            "username": "ejgallego"
+          },
+          "committer": {
+            "email": "alizter@gmail.com",
+            "name": "Ali Caglayan",
+            "username": "Alizter"
+          },
+          "distinct": true,
+          "id": "f446181c0e79c16c3f904cda18a2ef0c30f31897",
+          "message": "[coq] Deprecate Coq Lang < 0.8\n\nAs discussed with Ali, we want the previous semantics with implicit\nglobal theories to go away ASAP as they don't provide a usable\nworkflow in general.\n\nSigned-off-by: Emilio Jesus Gallego Arias <e+git@x80.org>",
+          "timestamp": "2023-05-03T19:46:41+02:00",
+          "tree_id": "cb50ebfa5f2c5777d12d664d60ff5adffdcf6ae1",
+          "url": "https://github.com/jchavarri/dune/commit/f446181c0e79c16c3f904cda18a2ef0c30f31897"
+        },
+        "date": 1683139646005,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "24.52675490980667",
             "unit": "seconds"
           }
         ]
