@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1683288108827,
+  "lastUpdate": 1683288121896,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -4844,6 +4844,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (cold, Linux)",
             "value": "80.26249613142",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "alizter@gmail.com",
+            "name": "Ali Caglayan",
+            "username": "Alizter"
+          },
+          "committer": {
+            "email": "alizter@gmail.com",
+            "name": "Ali Caglayan",
+            "username": "Alizter"
+          },
+          "distinct": true,
+          "id": "6baaf6a3b9c358a0547cb60d502f81730302c80c",
+          "message": "fix(merlin): drop instrumentation from Merlin.make\n\nWe drop any instrumentation preprocessing for merlin. This also\nsimplifies some of the code.\n\nSigned-off-by: Ali Caglayan <alizter@gmail.com>",
+          "timestamp": "2023-05-05T11:47:15+02:00",
+          "tree_id": "cb08c36c15ad375dbb99ed2121a2817955a52f73",
+          "url": "https://github.com/jchavarri/dune/commit/6baaf6a3b9c358a0547cb60d502f81730302c80c"
+        },
+        "date": 1683288121022,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (warm, Linux)",
+            "value": "2.10908859914",
             "unit": "seconds"
           }
         ]
