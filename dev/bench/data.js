@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1683288121896,
+  "lastUpdate": 1683549770009,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -5716,6 +5716,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "26.954623172686667",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "alizter@gmail.com",
+            "name": "Ali Caglayan",
+            "username": "Alizter"
+          },
+          "committer": {
+            "email": "alizter@gmail.com",
+            "name": "Ali Caglayan",
+            "username": "Alizter"
+          },
+          "distinct": true,
+          "id": "c28b2c6b051d20646df3ca708df3de23b63600f3",
+          "message": "refactor: cleanup menhir logic in super_context.ml\n\nSigned-off-by: Ali Caglayan <alizter@gmail.com>",
+          "timestamp": "2023-05-06T21:49:57+02:00",
+          "tree_id": "930cb19e5720b9f7c836786b550193b9dda88a45",
+          "url": "https://github.com/jchavarri/dune/commit/c28b2c6b051d20646df3ca708df3de23b63600f3"
+        },
+        "date": 1683549768786,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "20.482215561126665",
             "unit": "seconds"
           }
         ]
