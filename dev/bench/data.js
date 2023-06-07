@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1686163031915,
+  "lastUpdate": 1686163622255,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -2348,6 +2348,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "49.48136015376",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@emillon.org",
+            "name": "Etienne Millon",
+            "username": "emillon"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "bd1193de7b5b59770d01d0a3f43e6936c6271a16",
+          "message": "doc: .opam.template files can be generated (#7911)\n\nSigned-off-by: Etienne Millon <me@emillon.org>",
+          "timestamp": "2023-06-07T14:04:52+02:00",
+          "tree_id": "812657e8e73fb243601ac298fdfa3b34dcd19293",
+          "url": "https://github.com/jchavarri/dune/commit/bd1193de7b5b59770d01d0a3f43e6936c6271a16"
+        },
+        "date": 1686163621231,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "46.524088147040004",
             "unit": "seconds"
           }
         ]
