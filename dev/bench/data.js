@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1688052190425,
+  "lastUpdate": 1688052696567,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -2377,6 +2377,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "46.524088147040004",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c1c95e50a501b26c584db79bbca2688f30a69116",
+          "message": "refactor: remove unused function (#8080)\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2023-06-29T07:00:35-07:00",
+          "tree_id": "9847f93f111545d710f7cec315bed6155b8f49f5",
+          "url": "https://github.com/jchavarri/dune/commit/c1c95e50a501b26c584db79bbca2688f30a69116"
+        },
+        "date": 1688052695740,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "46.4045747395",
             "unit": "seconds"
           }
         ]
