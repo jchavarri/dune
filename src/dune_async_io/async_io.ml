@@ -34,7 +34,7 @@ type t =
     pipe_write : Unix.file_descr
   ; mutex : Mutex.t
   ; scheduler : (module Scheduler)
-  ; mutable running : bool
+  ; running : bool
   ; (* this flag is to save a write to the pipe we used to interrupt select *)
     mutable interrupting : bool
   ; pipe_buf : Bytes.t
@@ -214,7 +214,7 @@ let rec select_loop t =
 
 let t_var = Fiber.Var.create ()
 
-let with_io scheduler f =
+let with_io scheduler (f : unit -> 'b Fiber.t) =
   let module Scheduler = (val scheduler : Scheduler) in
   let t =
     let pipe_read, pipe_write =
@@ -247,7 +247,7 @@ let with_io scheduler f =
           ~f:(fun () -> select_loop t)
           ~finally:(fun () -> Mutex.unlock t.mutex))
   in
-  Fiber.Var.set t_var t (fun () -> f)
+  Fiber.Var.set t_var t (fun () -> f ())
 
 let with_ f =
   let+ t = Fiber.Var.get_exn t_var in
