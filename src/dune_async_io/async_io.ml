@@ -190,6 +190,10 @@ let rec select_loop t =
          [t.pipe_write] will interrupt this select *)
       Unix.select read write [] (-1.0)
     in
+    print_endline
+      (Printf.sprintf "Readers: %s\nWriters: %s"
+         (String.concat ~sep:", " (List.map ~f:Obj.magic readers))
+         (String.concat ~sep:", " (List.map ~f:Obj.magic writers)));
     assert (ex = []);
     (* Before we acquire the lock, it's possible that new tasks were added.
        This is fine. *)
@@ -243,13 +247,7 @@ let with_io scheduler f =
           ~f:(fun () -> select_loop t)
           ~finally:(fun () -> Mutex.unlock t.mutex))
   in
-  Fiber.Var.set t_var t (fun () ->
-      Fiber.finalize f ~finally:(fun () ->
-          Mutex.lock t.mutex;
-          t.running <- false;
-          interrupt t;
-          Mutex.unlock t.mutex;
-          Fiber.return ()))
+  Fiber.Var.set t_var t (fun () -> f)
 
 let with_ f =
   let+ t = Fiber.Var.get_exn t_var in
