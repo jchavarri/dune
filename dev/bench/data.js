@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1689934793595,
+  "lastUpdate": 1689934808323,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -5366,6 +5366,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (cold, Linux)",
             "value": "80.91767703816",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "alizter@gmail.com",
+            "name": "Ali Caglayan",
+            "username": "Alizter"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "92d88482edb5c97a28609257ea0cec5271a5a017",
+          "message": "doc: document INSIDE_DUNE in hacking.rst (#8221)\n\n* doc: document INSIDE_DUNE in hacking.rst\r\n\r\nSigned-off-by: Ali Caglayan <alizter@gmail.com>\r\nCo-authored-by: Christine Rose <christinerose@users.noreply.github.com>",
+          "timestamp": "2023-07-20T14:35:57+02:00",
+          "tree_id": "81194e0ecf69e746276c651f600d3f6b0c59b567",
+          "url": "https://github.com/jchavarri/dune/commit/92d88482edb5c97a28609257ea0cec5271a5a017"
+        },
+        "date": 1689934807114,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (warm, Linux)",
+            "value": "2.4117031873",
             "unit": "seconds"
           }
         ]
