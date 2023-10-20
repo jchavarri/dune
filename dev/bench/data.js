@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1695377432172,
+  "lastUpdate": 1697784444336,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -6644,6 +6644,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "21.535250423706668",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "878c4d72167b5dfdba632086a51e446bdc619531",
+          "message": "fix: load rules even if some packages aren't found (#8948)\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2023-10-19T17:51:26+01:00",
+          "tree_id": "423edb6b91bbecad2248f65962fcd2b1dfe2c598",
+          "url": "https://github.com/jchavarri/dune/commit/878c4d72167b5dfdba632086a51e446bdc619531"
+        },
+        "date": 1697784442478,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "26.486209350453333",
             "unit": "seconds"
           }
         ]
