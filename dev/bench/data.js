@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1699256421593,
+  "lastUpdate": 1699256852692,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -2580,6 +2580,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "40.805867096086665",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9cd2757adf94f681ffcf83650576794e089c14c3",
+          "message": "refactor(pkg): split pkg commands into modules (#9093)\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2023-11-06T06:49:05Z",
+          "tree_id": "95b9f92cc4bca06bbfc8aff6ddf1440f7eea9748",
+          "url": "https://github.com/jchavarri/dune/commit/9cd2757adf94f681ffcf83650576794e089c14c3"
+        },
+        "date": 1699256851022,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "37.45291018337334",
             "unit": "seconds"
           }
         ]
