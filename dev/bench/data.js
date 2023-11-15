@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1700059437013,
+  "lastUpdate": 1700059445792,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -5888,6 +5888,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (cold, Linux)",
             "value": "41.42604897859333",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@emillon.org",
+            "name": "Etienne Millon",
+            "username": "emillon"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "78b4b2e95bd425b53eb972f49c6476b7aa75bc76",
+          "message": "test: add repro for #9024 (#9120)\n\nSigned-off-by: Etienne Millon <me@emillon.org>",
+          "timestamp": "2023-11-15T09:50:45+01:00",
+          "tree_id": "09fcf1c67f88c7b6bad3c11f1309250eb614da84",
+          "url": "https://github.com/jchavarri/dune/commit/78b4b2e95bd425b53eb972f49c6476b7aa75bc76"
+        },
+        "date": 1700059444804,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (warm, Linux)",
+            "value": "1.2518835239000001",
             "unit": "seconds"
           }
         ]
