@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1703772427477,
+  "lastUpdate": 1703772637424,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -6033,6 +6033,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (warm, Linux)",
             "value": "1.15783775766",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "amokhov@janestreet.com",
+            "name": "Andrey Mokhov",
+            "username": "snowleopard"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e620e8531a411d98ab4ffcde8b9d8e6658ee89ee",
+          "message": "Optimise Dep.Fact.Files.t (#9574)\n\nSigned-off-by: Andrey Mokhov <amokhov@janestreet.com>",
+          "timestamp": "2023-12-27T21:54:59Z",
+          "tree_id": "54e293e35767f88cb8f2124dc74e0c1f5f5deba2",
+          "url": "https://github.com/jchavarri/dune/commit/e620e8531a411d98ab4ffcde8b9d8e6658ee89ee"
+        },
+        "date": 1703772636686,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (cold, Linux)",
+            "value": "41.170872410019996",
             "unit": "seconds"
           }
         ]
