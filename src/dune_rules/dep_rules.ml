@@ -145,6 +145,12 @@ let immediate_deps_of unit modules obj_dir ml_kind =
     else Ocamldep.read_immediate_deps_of ~obj_dir ~modules ~ml_kind unit
 ;;
 
+let dict_of_func_concurrently_lazy f =
+  let+ impl = f ~ml_kind:Ml_kind.Impl
+  and+ intf = f ~ml_kind:Ml_kind.Intf in
+  fun () -> Ml_kind.Dict.make ~impl:(impl ()) ~intf:(intf ())
+;;
+
 let dict_of_func_concurrently f =
   let+ impl = f ~ml_kind:Ml_kind.Impl
   and+ intf = f ~ml_kind:Ml_kind.Intf in
@@ -153,16 +159,17 @@ let dict_of_func_concurrently f =
 
 let for_module md module_ = dict_of_func_concurrently (deps_of md (Normal module_))
 
-let rules md =
+let rules : t -> (unit -> Dep_graph.Ml_kind.t) Memo.t =
+  fun md ->
   let modules = md.modules in
   match Modules.as_singleton modules with
-  | Some m -> Memo.return (Dep_graph.Ml_kind.dummy m)
+  | Some m -> Memo.return (fun () -> Dep_graph.Ml_kind.dummy m)
   | None ->
-    dict_of_func_concurrently (fun ~ml_kind ->
+    dict_of_func_concurrently_lazy (fun ~ml_kind ->
       let+ per_module =
         Modules.obj_map modules
         |> Module_name.Unique.Map_traversals.parallel_map ~f:(fun _obj_name m ->
           deps_of md ~ml_kind m)
       in
-      Dep_graph.make ~dir:md.dir ~per_module)
+      fun () -> Dep_graph.make ~dir:md.dir ~per_module)
 ;;

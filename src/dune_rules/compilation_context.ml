@@ -60,11 +60,11 @@ let eval_opaque (ocaml : Ocaml_toolchain.t) profile = function
 
 type modules =
   { modules : Modules.t
-  ; dep_graphs : Dep_graph.t Ml_kind.Dict.t
+  ; dep_graphs : Dep_graph.t Ml_kind.Dict.t Lazy.t
   }
 
 let singleton_modules m =
-  { modules = Modules.singleton m; dep_graphs = Dep_graph.Ml_kind.dummy m }
+  { modules = Modules.singleton m; dep_graphs = lazy (Dep_graph.Ml_kind.dummy m) }
 ;;
 
 type t =
@@ -114,7 +114,7 @@ let modes t = t.modes
 let bin_annot t = t.bin_annot
 let context t = Super_context.context t.super_context
 let ocamldep_modules_data t = t.ocamldep_modules_data
-let dep_graphs t = t.modules.dep_graphs
+let dep_graphs t = Lazy.force t.modules.dep_graphs
 let ocaml t = t.ocaml
 
 let create
@@ -185,7 +185,7 @@ let create
   { super_context
   ; scope
   ; obj_dir
-  ; modules = { modules; dep_graphs }
+  ; modules = { modules; dep_graphs = Lazy.from_fun dep_graphs }
   ; flags
   ; requires_compile
   ; requires_link

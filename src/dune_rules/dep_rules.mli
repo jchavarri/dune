@@ -14,4 +14,4 @@ val immediate_deps_of
   -> Ml_kind.t
   -> Module.t list Action_builder.t
 
-val rules : Ocamldep.Modules_data.t -> Dep_graph.t Ml_kind.Dict.t Memo.t
+val rules : Ocamldep.Modules_data.t -> (unit -> Dep_graph.Ml_kind.t) Memo.t

@@ -425,7 +425,7 @@ let iter_modes_concurrently (t : _ Ocaml.Mode.Dict.t) ~(f : Ocaml.Mode.t -> unit
   ()
 ;;
 
-let setup_build_archives
+let _setup_build_archives
   (lib : Dune_file.Library.t)
   ~top_sorted_modules
   ~cctx
@@ -580,16 +580,16 @@ let library_rules
   let* requires_compile = Compilation_context.requires_compile cctx in
   let ocaml = Compilation_context.ocaml cctx in
   let stdlib_dir = ocaml.lib_config.stdlib_dir in
-  let top_sorted_modules =
+  (* let top_sorted_modules =
     let impl_only = Modules.impl_only modules in
     Dep_graph.top_closed_implementations
       (Compilation_context.dep_graphs cctx).impl
       impl_only
-  in
+  in *)
   let* () =
     Memo.Option.iter vimpl ~f:(Virtual_rules.setup_copy_rules_for_impl ~sctx ~dir)
   in
-  let* () = Check_rules.add_cycle_check sctx ~dir top_sorted_modules in
+  (* let* () = Check_rules.add_cycle_check sctx ~dir top_sorted_modules in *)
   let* () = gen_wrapped_compat_modules lib cctx
   and* () = Module_compilation.build_all cctx
   and* expander = Super_context.expander sctx ~dir
@@ -600,11 +600,11 @@ let library_rules
     let+ () = Check_rules.add_obj_dir sctx ~obj_dir mode in
     info
   in
-  let+ () =
+  (* let+ () =
     Memo.when_
       (not (Library.is_virtual lib))
-      (fun () -> setup_build_archives lib ~lib_info ~top_sorted_modules ~cctx ~expander)
-  and+ () =
+      (fun () -> setup_build_archives lib ~lib_info ~top_sorted_modules ~cctx ~expander) *)
+  let+ () =
     let vlib_stubs_o_files = Vimpl.vlib_stubs_o_files vimpl in
     Memo.when_
       (Library.has_foreign lib || List.is_non_empty vlib_stubs_o_files)
