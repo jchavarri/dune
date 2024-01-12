@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1705058708711,
+  "lastUpdate": 1705058716645,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -6149,6 +6149,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (cold, Linux)",
             "value": "41.96129081626666",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "811e7162ca2617f4433021a027b8e91ed1530a4d",
+          "message": "test(pkg): copying empty directories (#9715)\n\ndemonstrate that we just ignore empty directories\r\n\r\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2024-01-12T07:01:53Z",
+          "tree_id": "51ef04458732a3d6b6946809b1788cce9416793e",
+          "url": "https://github.com/jchavarri/dune/commit/811e7162ca2617f4433021a027b8e91ed1530a4d"
+        },
+        "date": 1705058716005,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (warm, Linux)",
+            "value": "1.2225579396666666",
             "unit": "seconds"
           }
         ]
