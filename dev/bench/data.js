@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1705655087076,
+  "lastUpdate": 1705655363587,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -2725,6 +2725,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "23.50128014142",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ecb7a06a35b8866029c409f52810e2df5b7d5b21",
+          "message": "fix(pkg): use all packages in a workspace (#9770)\n\nFixes #9765\r\n\r\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2024-01-19T03:29:26Z",
+          "tree_id": "56f76e1dc344385a4510a792b8ccc05b0ce118de",
+          "url": "https://github.com/jchavarri/dune/commit/ecb7a06a35b8866029c409f52810e2df5b7d5b21"
+        },
+        "date": 1705655363060,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "23.562397798306662",
             "unit": "seconds"
           }
         ]
