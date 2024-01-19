@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1705655576238,
+  "lastUpdate": 1705655583955,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -6236,6 +6236,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (cold, Linux)",
             "value": "41.75942331324",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ecb7a06a35b8866029c409f52810e2df5b7d5b21",
+          "message": "fix(pkg): use all packages in a workspace (#9770)\n\nFixes #9765\r\n\r\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2024-01-19T03:29:26Z",
+          "tree_id": "56f76e1dc344385a4510a792b8ccc05b0ce118de",
+          "url": "https://github.com/jchavarri/dune/commit/ecb7a06a35b8866029c409f52810e2df5b7d5b21"
+        },
+        "date": 1705655583448,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (warm, Linux)",
+            "value": "1.19116799494",
             "unit": "seconds"
           }
         ]
