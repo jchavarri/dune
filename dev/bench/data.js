@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1706088871451,
+  "lastUpdate": 1706090851271,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -7688,6 +7688,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "13.814091742346667",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a379928b3cced11e50318d3cdb30d630ae97eede",
+          "message": "refactor: move [status_map] to own module (#9825)\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2024-01-24T09:43:01Z",
+          "tree_id": "76ca3762acdb86c4e4ae7757a66162b51ea9eea3",
+          "url": "https://github.com/jchavarri/dune/commit/a379928b3cced11e50318d3cdb30d630ae97eede"
+        },
+        "date": 1706090850469,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "13.755871185899998",
             "unit": "seconds"
           }
         ]
