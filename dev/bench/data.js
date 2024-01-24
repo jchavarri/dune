@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1705655583955,
+  "lastUpdate": 1706088380488,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -7572,6 +7572,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "14.154706036320002",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "305dc68b01b3ed1128613bb728878d224e2177d3",
+          "message": "refactor: split source dir status to own module (#9823)\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2024-01-24T08:51:57Z",
+          "tree_id": "ff4e873e9145df62cbf3ce4c30e378ba2c73b710",
+          "url": "https://github.com/jchavarri/dune/commit/305dc68b01b3ed1128613bb728878d224e2177d3"
+        },
+        "date": 1706088379776,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "13.814091742346667",
             "unit": "seconds"
           }
         ]
