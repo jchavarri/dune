@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1706188678428,
+  "lastUpdate": 1706188950681,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -2812,6 +2812,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "23.080312068426664",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2f954897efea55a3556439c86e737e742160924d",
+          "message": "refactor: move subdir stanza (#9837)\n\nMove it to submodules in [Source_dir_status]\r\n\r\nAfter this change, [Sub_dirs] only contains implementation details of\r\n[Dune_file0], so it can be combined.\r\n\r\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2024-01-25T03:55:41Z",
+          "tree_id": "334789de4227264c92719eb2de02e8b53e2ca011",
+          "url": "https://github.com/jchavarri/dune/commit/2f954897efea55a3556439c86e737e742160924d"
+        },
+        "date": 1706188949920,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "23.23522696526",
             "unit": "seconds"
           }
         ]
