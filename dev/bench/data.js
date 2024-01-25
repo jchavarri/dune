@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1706206644275,
+  "lastUpdate": 1706206926484,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -2841,6 +2841,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "23.23522696526",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a4de6fe7326dbf52e5fd18daea3c0ca8b4953092",
+          "message": "bump version to 3.14 (#9840)\n\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>",
+          "timestamp": "2024-01-25T17:48:33Z",
+          "tree_id": "cd716ae98ce0e7912da2251e8864eb690eddd6c3",
+          "url": "https://github.com/jchavarri/dune/commit/a4de6fe7326dbf52e5fd18daea3c0ca8b4953092"
+        },
+        "date": 1706206925858,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "24.141370115299996",
             "unit": "seconds"
           }
         ]
