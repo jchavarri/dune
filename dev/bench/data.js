@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1706261254665,
+  "lastUpdate": 1706261263369,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -6671,6 +6671,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (cold, Linux)",
             "value": "41.85070352670666",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "07ba1765e0ffae2716eb7a8983609e2c8bf5af8d",
+          "message": "refactor(pkg): quick simplification (#9844)\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2024-01-26T06:43:57Z",
+          "tree_id": "dd9c659625c9ce2fec8819c75cc3f158ffd5d21b",
+          "url": "https://github.com/jchavarri/dune/commit/07ba1765e0ffae2716eb7a8983609e2c8bf5af8d"
+        },
+        "date": 1706261262372,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (warm, Linux)",
+            "value": "1.2309162303666665",
             "unit": "seconds"
           }
         ]
