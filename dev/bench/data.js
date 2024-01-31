@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1706714823188,
+  "lastUpdate": 1706715013672,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -6845,6 +6845,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (warm, Linux)",
             "value": "1.1692612354800003",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "committer": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "distinct": true,
+          "id": "e6866bd882a38020467ce523df42a5897c56dcbb",
+          "message": "refactor: conditionally add odoc alias rules\n\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>",
+          "timestamp": "2024-01-31T15:14:02Z",
+          "tree_id": "241a4bf38b8569838097cbea4c3b93a50c8b159d",
+          "url": "https://github.com/jchavarri/dune/commit/e6866bd882a38020467ce523df42a5897c56dcbb"
+        },
+        "date": 1706715012696,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (cold, Linux)",
+            "value": "41.06022454092667",
             "unit": "seconds"
           }
         ]
