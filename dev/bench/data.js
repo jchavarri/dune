@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1706714532307,
+  "lastUpdate": 1706714541950,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -8210,6 +8210,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "13.709786480706667",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@emillon.org",
+            "name": "Etienne Millon",
+            "username": "emillon"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "85cf6233b3cfe48ec16eea60eb5f076b8ff32b9c",
+          "message": "doc: add \"How to Install Dune\" (#9863)\n\nThis was buried in the quickstart document (actually a collection of\r\nhowtos). This is intended to be the central place that documents opam\r\nenv, etc, so the other \"if this does not work\" paragraphs are removed.\r\n\r\nSigned-off-by: Etienne Millon <me@emillon.org>",
+          "timestamp": "2024-01-31T12:00:19+01:00",
+          "tree_id": "2628131e2a4932f7ae820213295e56f1531dd0f4",
+          "url": "https://github.com/jchavarri/dune/commit/85cf6233b3cfe48ec16eea60eb5f076b8ff32b9c"
+        },
+        "date": 1706714541165,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "13.852992697393335",
             "unit": "seconds"
           }
         ]
