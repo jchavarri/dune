@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1706715027733,
+  "lastUpdate": 1706870660762,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -8500,6 +8500,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "13.852992697393335",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "marek@tarides.com",
+            "name": "Marek Kubica",
+            "username": "Leonidas-from-XIV"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "21557d8d0b68650d4997c5ec94a1a782a2847a87",
+          "message": "feature(pkg): Submodule support (#9798)\n\n* feature(pkg): Submodule support\r\n\r\nSigned-off-by: Marek Kubica <marek@tarides.com>",
+          "timestamp": "2024-02-02T10:09:44Z",
+          "tree_id": "440c7e860fd2d0cffd7a25f18372c6e2224db5b2",
+          "url": "https://github.com/jchavarri/dune/commit/21557d8d0b68650d4997c5ec94a1a782a2847a87"
+        },
+        "date": 1706870659968,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "13.671853760460001",
             "unit": "seconds"
           }
         ]
