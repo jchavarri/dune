@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1707232542060,
+  "lastUpdate": 1707232749374,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -7077,6 +7077,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (warm, Linux)",
             "value": "1.16738104818",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@emillon.org",
+            "name": "Etienne Millon",
+            "username": "emillon"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9ea459016edcd01471ff27a5d75e142d813cc06d",
+          "message": "doc: explain the bootstrap process (#9829)\n\nSigned-off-by: Etienne Millon <me@emillon.org>",
+          "timestamp": "2024-02-06T13:54:03+01:00",
+          "tree_id": "2faa495d351eab6c11caa3a7565d846c7ce64ada",
+          "url": "https://github.com/jchavarri/dune/commit/9ea459016edcd01471ff27a5d75e142d813cc06d"
+        },
+        "date": 1707232748726,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (cold, Linux)",
+            "value": "40.645745822546665",
             "unit": "seconds"
           }
         ]
