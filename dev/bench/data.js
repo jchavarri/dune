@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1707738064176,
+  "lastUpdate": 1707738072411,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -7193,6 +7193,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (cold, Linux)",
             "value": "40.763377739886664",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "03677116b167f2daf22bb7000bf0fcdbfafef1b1",
+          "message": "test(pkg): dune build command when pinning (#9974)\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2024-02-12T08:35:55Z",
+          "tree_id": "f1b858627f9f80dcfe04d0237072987407e9fa74",
+          "url": "https://github.com/jchavarri/dune/commit/03677116b167f2daf22bb7000bf0fcdbfafef1b1"
+        },
+        "date": 1707738071413,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (warm, Linux)",
+            "value": "1.1560960161933336",
             "unit": "seconds"
           }
         ]
