@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1707826691450,
+  "lastUpdate": 1707826901684,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -7251,6 +7251,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (warm, Linux)",
             "value": "1.1560960161933336",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "339f529cb5e9664588802ab4dfa2d7de2f490bfb",
+          "message": "refactor: move [Package] to [Dune_lang] (#10009)\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2024-02-13T09:12:34Z",
+          "tree_id": "46fe5e82f1e175672878e87d3f8556dd7a088595",
+          "url": "https://github.com/jchavarri/dune/commit/339f529cb5e9664588802ab4dfa2d7de2f490bfb"
+        },
+        "date": 1707826901054,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (cold, Linux)",
+            "value": "41.35980535490666",
             "unit": "seconds"
           }
         ]
