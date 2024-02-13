@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1707841282060,
+  "lastUpdate": 1707841489478,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -7338,6 +7338,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (warm, Linux)",
             "value": "1.1634292103933335",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ad2b3d9109a1a6956fe81b15024cfb0820b1d6db",
+          "message": "refactor: simplify melange js rules setup (#10010)\n\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>",
+          "timestamp": "2024-02-13T15:54:07Z",
+          "tree_id": "7fbc0b1b5dbf29c206883f9cbdc00567bb5e1dac",
+          "url": "https://github.com/jchavarri/dune/commit/ad2b3d9109a1a6956fe81b15024cfb0820b1d6db"
+        },
+        "date": 1707841488874,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (cold, Linux)",
+            "value": "40.71811696975333",
             "unit": "seconds"
           }
         ]
