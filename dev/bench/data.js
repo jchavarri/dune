@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1707929385781,
+  "lastUpdate": 1707929698930,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -3131,6 +3131,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "22.981935651966666",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f932c9f106268c401a02eeaae6f89a6b83b2aad5",
+          "message": "refactor: remove useless field from [Readdir] (#10024)\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2024-02-14T05:16:50Z",
+          "tree_id": "071a9d9d3662ddcbc0a77bd2737f8447aed38c26",
+          "url": "https://github.com/jchavarri/dune/commit/f932c9f106268c401a02eeaae6f89a6b83b2aad5"
+        },
+        "date": 1707929697866,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "24.107273416140004",
             "unit": "seconds"
           }
         ]
