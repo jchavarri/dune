@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1707929925967,
+  "lastUpdate": 1708011836212,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -9196,6 +9196,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "14.275076371766668",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": false,
+          "id": "581f852c5144b03be0067a93289e90262fa8cbc6",
+          "message": "chore: leave CR for $ dune init weirdness (#10032)\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2024-02-15T07:26:40Z",
+          "tree_id": "990f89e1b03debf3919c5e4c8d450ceccc0b2c19",
+          "url": "https://github.com/jchavarri/dune/commit/581f852c5144b03be0067a93289e90262fa8cbc6"
+        },
+        "date": 1708011835179,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "13.548216670986667",
             "unit": "seconds"
           }
         ]
