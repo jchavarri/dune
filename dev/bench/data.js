@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1708012360381,
+  "lastUpdate": 1708083636536,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -9312,6 +9312,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "13.548216670986667",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "stephen@sherra.tt",
+            "name": "Stephen Sherratt",
+            "username": "gridbugs"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a263cc00dba9476825f230a62581ebe70fc25502",
+          "message": "pkg: back single_run_file_cache with fiber_cache (#10053)\n\nSigned-off-by: Stephen Sherratt <stephen@sherra.tt>",
+          "timestamp": "2024-02-16T21:50:27+11:00",
+          "tree_id": "73836b0f62548d31329df819bd636a4f1c84199e",
+          "url": "https://github.com/jchavarri/dune/commit/a263cc00dba9476825f230a62581ebe70fc25502"
+        },
+        "date": 1708083635523,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "13.75527450204",
             "unit": "seconds"
           }
         ]
