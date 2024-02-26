@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1708084157740,
+  "lastUpdate": 1708971338030,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -9428,6 +9428,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "13.75527450204",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "marek@tarides.com",
+            "name": "Marek Kubica",
+            "username": "Leonidas-from-XIV"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "466d225090c9441ab8fdc3f8a07f63046ed1c2d3",
+          "message": "test(pkg): Extend the test to use recursive submodules (#10130)\n\nSigned-off-by: Marek Kubica <marek@tarides.com>",
+          "timestamp": "2024-02-26T18:03:00+01:00",
+          "tree_id": "e94dc698496a35c5a104d219141931393097be7a",
+          "url": "https://github.com/jchavarri/dune/commit/466d225090c9441ab8fdc3f8a07f63046ed1c2d3"
+        },
+        "date": 1708971337173,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "14.091897906433333",
             "unit": "seconds"
           }
         ]
