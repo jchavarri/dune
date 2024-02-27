@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1708971338030,
+  "lastUpdate": 1709024402577,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -9457,6 +9457,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "14.091897906433333",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cb45602d48efbad778b6eadf778bf429b0a8331c",
+          "message": "test(pkg): debug tarball test (#10147)\n\nRun the test server only once for both tarballs\r\n\r\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2024-02-27T03:16:51Z",
+          "tree_id": "be5774e7150b1725657362c8e7fa710593327024",
+          "url": "https://github.com/jchavarri/dune/commit/cb45602d48efbad778b6eadf778bf429b0a8331c"
+        },
+        "date": 1709024401036,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "13.760578434746668",
             "unit": "seconds"
           }
         ]
