@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1709024402577,
+  "lastUpdate": 1709116775761,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -9486,6 +9486,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "13.760578434746668",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ce5c9cad0449993a189372a973103859f81f432b",
+          "message": "fix(pkg): correctly extract tarballs (#10122)\n\nPreviously, we'd extract sources as [source/$basename-of-tar]. We should\r\ninstead extract the sources into [source/] directly.\r\n\r\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2024-02-28T09:38:06Z",
+          "tree_id": "1c0363afe09e5eb5ed0d9396c765fb264c138f14",
+          "url": "https://github.com/jchavarri/dune/commit/ce5c9cad0449993a189372a973103859f81f432b"
+        },
+        "date": 1709116774746,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "14.05104193582667",
             "unit": "seconds"
           }
         ]
