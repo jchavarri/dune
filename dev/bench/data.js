@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1709146445458,
+  "lastUpdate": 1709147030995,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -9544,6 +9544,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "13.834224978633335",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c3d880195668acd8c4fdb7bb06ac114ac70258d5",
+          "message": "fix(pkg): correctly rebuild packages when default branch changes (#10131)\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2024-02-28T13:26:26Z",
+          "tree_id": "af4547fa30aea29934c52dc9e4fd57d34d57ee75",
+          "url": "https://github.com/jchavarri/dune/commit/c3d880195668acd8c4fdb7bb06ac114ac70258d5"
+        },
+        "date": 1709147030138,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "13.844933321653334",
             "unit": "seconds"
           }
         ]
