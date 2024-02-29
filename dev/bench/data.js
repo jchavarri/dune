@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1709192248361,
+  "lastUpdate": 1709192319773,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -9747,6 +9747,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "13.831534323173331",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "committer": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "distinct": true,
+          "id": "cf9a9d8c22903ea43c5aa9876c35c27437c6cee6",
+          "message": "Merge branch 'main' into bench/fix-melange-pupilfirst\n\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>",
+          "timestamp": "2024-02-29T07:24:59Z",
+          "tree_id": "42590661c071820ee7f6212551df8bb90f07974f",
+          "url": "https://github.com/jchavarri/dune/commit/cf9a9d8c22903ea43c5aa9876c35c27437c6cee6"
+        },
+        "date": 1709192318788,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "13.79188692484",
             "unit": "seconds"
           }
         ]
