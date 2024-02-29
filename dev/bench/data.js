@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1709236834400,
+  "lastUpdate": 1709236986831,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -3276,6 +3276,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "21.582457694373332",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "anmonteiro@gmail.com",
+            "name": "Antonio Nuno Monteiro",
+            "username": "anmonteiro"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "034114e4ffc9aa7a5c2a69e8e293001ea5b53473",
+          "message": "Merge branch 'main' into bench/fix-melange-pupilfirst",
+          "timestamp": "2024-02-29T11:51:08-08:00",
+          "tree_id": "8ac6df8054440c84bea823ea83432589a95b720b",
+          "url": "https://github.com/jchavarri/dune/commit/034114e4ffc9aa7a5c2a69e8e293001ea5b53473"
+        },
+        "date": 1709236985810,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "21.68937327486",
             "unit": "seconds"
           }
         ]
