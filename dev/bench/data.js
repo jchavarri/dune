@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1709191653458,
+  "lastUpdate": 1709192248361,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -9718,6 +9718,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "13.667841468859999",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "98c576e643450659e2893ced9ae8e076b6129d95",
+          "message": "fix(cram): add missing location to error (#10167)\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2024-02-29T06:33:34Z",
+          "tree_id": "0e241417e1e88b90e9c2769f2cd3cacead7f7f49",
+          "url": "https://github.com/jchavarri/dune/commit/98c576e643450659e2893ced9ae8e076b6129d95"
+        },
+        "date": 1709192247523,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "13.831534323173331",
             "unit": "seconds"
           }
         ]
