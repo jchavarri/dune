@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1709649767995,
+  "lastUpdate": 1709649986083,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -8034,6 +8034,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (warm, Linux)",
             "value": "1.1666666220133333",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "edd1192b704208d84c31d2942808e74a6ad8eca9",
+          "message": "refactor: rename [lib_artifacts] to [public_libs] (#10209)\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2024-03-04T20:29:07Z",
+          "tree_id": "dbe516e242a6db579f92fc6bae238ac5785a866a",
+          "url": "https://github.com/jchavarri/dune/commit/edd1192b704208d84c31d2942808e74a6ad8eca9"
+        },
+        "date": 1709649985605,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (cold, Linux)",
+            "value": "42.88564071927334",
             "unit": "seconds"
           }
         ]
