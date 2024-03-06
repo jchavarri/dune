@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1709649994204,
+  "lastUpdate": 1709715480942,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -10211,6 +10211,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "14.436154132699999",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@emillon.org",
+            "name": "Etienne Millon",
+            "username": "emillon"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "0e00294d097f32585c7f179f07667ec64ac1dd7e",
+          "message": "doc: remove dune:field directive (#10215)\n\n* Use describe for dune:field\r\n\r\nSigned-off-by: Etienne Millon <me@emillon.org>\r\n\r\n* remove field code\r\n\r\nSigned-off-by: Etienne Millon <me@emillon.org>\r\n\r\n---------\r\n\r\nSigned-off-by: Etienne Millon <me@emillon.org>",
+          "timestamp": "2024-03-05T17:28:25+01:00",
+          "tree_id": "4f7a819c1e16d5a7d2b8d14ee090a5b70b0cbdee",
+          "url": "https://github.com/jchavarri/dune/commit/0e00294d097f32585c7f179f07667ec64ac1dd7e"
+        },
+        "date": 1709715480090,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "14.076680102333334",
             "unit": "seconds"
           }
         ]
