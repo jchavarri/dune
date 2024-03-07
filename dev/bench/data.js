@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1709821779797,
+  "lastUpdate": 1709821929452,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -3421,6 +3421,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "22.87597062968",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "8ef54069e4310fe6d306f26cf5a54750295d04e8",
+          "message": "refactor: delay env loading in super context (#10225)\n\nthis allows us to use expanders without loading all the packages/stanzas\r\nin a workspace\r\n\r\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2024-03-07T10:12:04Z",
+          "tree_id": "0bde04d790a57c717a3390f24d2fe3246ad01751",
+          "url": "https://github.com/jchavarri/dune/commit/8ef54069e4310fe6d306f26cf5a54750295d04e8"
+        },
+        "date": 1709821928744,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "21.800814581120004",
             "unit": "seconds"
           }
         ]
