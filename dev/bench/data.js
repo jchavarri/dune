@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1709800964628,
+  "lastUpdate": 1709800973279,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -8237,6 +8237,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (cold, Linux)",
             "value": "44.59352470010666",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "moyodiallo@gmail.com",
+            "name": "Alpha Issiaga DIALLO",
+            "username": "moyodiallo"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9ee62e2a813f26075312928868dc8763caed34ce",
+          "message": "fix: `select` with `bigarray` in OCaml 5 (#10011)\n\nThis is related to #9981.\r\n\r\nSigned-off-by: Alpha DIALLO <moyodiallo@gmail.com>",
+          "timestamp": "2024-03-06T21:20:46Z",
+          "tree_id": "50a9dbc890394fe9e86f3c7819c1afe9eca6707a",
+          "url": "https://github.com/jchavarri/dune/commit/9ee62e2a813f26075312928868dc8763caed34ce"
+        },
+        "date": 1709800972638,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (warm, Linux)",
+            "value": "1.3543917156400003",
             "unit": "seconds"
           }
         ]
