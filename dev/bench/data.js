@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1709886423841,
+  "lastUpdate": 1709886431561,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -8411,6 +8411,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (cold, Linux)",
             "value": "41.822061407986666",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "stephen@sherra.tt",
+            "name": "Stephen Sherratt",
+            "username": "gridbugs"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1f8042665aa62476b7a8d15add2f744fdd731219",
+          "message": "Test error cases of OSL and predicate langugae (#10226)\n\nSigned-off-by: Stephen Sherratt <stephen@sherra.tt>",
+          "timestamp": "2024-03-08T17:38:03+11:00",
+          "tree_id": "f3e96d368ca67c72b7095105f79dae66a2affd72",
+          "url": "https://github.com/jchavarri/dune/commit/1f8042665aa62476b7a8d15add2f744fdd731219"
+        },
+        "date": 1709886430975,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (warm, Linux)",
+            "value": "1.2049832679133332",
             "unit": "seconds"
           }
         ]
