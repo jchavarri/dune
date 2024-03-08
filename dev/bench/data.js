@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1709898052654,
+  "lastUpdate": 1709898206722,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -3479,6 +3479,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "21.925703790706667",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "89f1c299ad1710686c972f057a55c7da47a3d674",
+          "message": "refactor: remove some more one letter vars (#10237)\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2024-03-08T11:15:54Z",
+          "tree_id": "f8d8a7e5ddc00f7d62e1a529139a2a521db857a3",
+          "url": "https://github.com/jchavarri/dune/commit/89f1c299ad1710686c972f057a55c7da47a3d674"
+        },
+        "date": 1709898205677,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "22.007805498393335",
             "unit": "seconds"
           }
         ]
