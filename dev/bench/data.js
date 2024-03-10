@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1709898431519,
+  "lastUpdate": 1710103363038,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -10791,6 +10791,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "13.964759735346666",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "eebd8d6bdee5f24df7a7cbac7716f3ba10035a83",
+          "message": "refactor: delay scope loading in expander (#10243)\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2024-03-10T17:15:23Z",
+          "tree_id": "5fd9c52d77b2df69dfaca2cf218ecedc61a4d320",
+          "url": "https://github.com/jchavarri/dune/commit/eebd8d6bdee5f24df7a7cbac7716f3ba10035a83"
+        },
+        "date": 1710103362056,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "13.775396714846666",
             "unit": "seconds"
           }
         ]
