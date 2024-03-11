@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1710164708083,
+  "lastUpdate": 1710164860195,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -3537,6 +3537,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "21.41797778692",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@emillon.org",
+            "name": "Etienne Millon",
+            "username": "emillon"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6c40cb12deb7b05dc1d947330324ecbd0e5b61c7",
+          "message": "fix(windows): use unicode version of CreateProcess (#10212)\n\nThis does several things:\r\n- update our spawn vendored version to include janestreet/spawn#58\r\n- pick the dune file\r\n- add new build flags for bootstrapping\r\n\r\nFixes #10180\r\n\r\nSigned-off-by: Etienne Millon <me@emillon.org>",
+          "timestamp": "2024-03-11T11:13:52+01:00",
+          "tree_id": "1845dce39db3af37ee77efcb6ad106c9de0a831a",
+          "url": "https://github.com/jchavarri/dune/commit/6c40cb12deb7b05dc1d947330324ecbd0e5b61c7"
+        },
+        "date": 1710164859115,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "21.369071837480003",
             "unit": "seconds"
           }
         ]
