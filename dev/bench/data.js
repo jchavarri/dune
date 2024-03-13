@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1710339972162,
+  "lastUpdate": 1710340181391,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -8817,6 +8817,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (warm, Linux)",
             "value": "1.1664774665666666",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ffa6e1f19a9635511cad1c3f7ad769ab1dcc3cf9",
+          "message": "eif: fix name collision in same folder for exes and melange emits (#10220)\n\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>\r\nCo-authored-by: Antonio Nuno Monteiro <anmonteiro@gmail.com>\r\nCo-authored-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2024-03-13T13:41:25Z",
+          "tree_id": "fa66823f02377cdc9bf5778053dca40b0b90e9a6",
+          "url": "https://github.com/jchavarri/dune/commit/ffa6e1f19a9635511cad1c3f7ad769ab1dcc3cf9"
+        },
+        "date": 1710340180858,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (cold, Linux)",
+            "value": "41.09095587768666",
             "unit": "seconds"
           }
         ]
