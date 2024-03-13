@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1710317136286,
+  "lastUpdate": 1710317349449,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -8730,6 +8730,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (warm, Linux)",
             "value": "1.159282787586667",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "stephen@sherra.tt",
+            "name": "Stephen Sherratt",
+            "username": "gridbugs"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "5980dfda00eea658e5680596a53378cecf16fcb7",
+          "message": "Add test reproducing gh10254 (#10255)\n\nSigned-off-by: Stephen Sherratt <stephen@sherra.tt>",
+          "timestamp": "2024-03-13T01:54:10Z",
+          "tree_id": "af16842ae18c9c3a6bec1ad0f2ce3ca780b87fc4",
+          "url": "https://github.com/jchavarri/dune/commit/5980dfda00eea658e5680596a53378cecf16fcb7"
+        },
+        "date": 1710317348918,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (cold, Linux)",
+            "value": "41.90335760518",
             "unit": "seconds"
           }
         ]
