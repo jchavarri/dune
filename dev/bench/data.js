@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1710340188893,
+  "lastUpdate": 1710492689754,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -11255,6 +11255,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "13.737805893786666",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "68484209bb728109b7753b87354f1097546597b5",
+          "message": "Merge pull request #8784 from frejsoya/ctypes-add-stubs-link-flags\n\nAdd link flags ocamlmklib when using ctypes stubs.",
+          "timestamp": "2024-03-14T21:01:07Z",
+          "tree_id": "e62223a0b53b425ff996f34b3176f072f8e17e25",
+          "url": "https://github.com/jchavarri/dune/commit/68484209bb728109b7753b87354f1097546597b5"
+        },
+        "date": 1710492688976,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "13.722118123426666",
             "unit": "seconds"
           }
         ]
