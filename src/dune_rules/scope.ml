@@ -27,32 +27,27 @@ module DB = struct
     type t = private
       | Found of Lib_info.external_
       | Redirect of (Loc.t * Lib_name.t)
-      | Many of t list
       | Deprecated_library_name of (Loc.t * Lib_name.t)
 
-    val redirect : Lib_name.t -> Loc.t * Lib_name.t -> Lib_name.t * t
-    val many : t list -> t
-    val deprecated_library_name : Lib_name.t -> Loc.t * Lib_name.t -> Lib_name.t * t
+    val redirect : Lib_name.t -> Loc.t * Lib_name.t -> Lib_name.t * t list
+    val deprecated_library_name : Lib_name.t -> Loc.t * Lib_name.t -> Lib_name.t * t list
     val found : Lib_info.external_ -> t
   end = struct
     type t =
       | Found of Lib_info.external_
       | Redirect of (Loc.t * Lib_name.t)
-      | Many of t list
       | Deprecated_library_name of (Loc.t * Lib_name.t)
 
     let redirect from (loc, to_) =
       if Lib_name.equal from to_
       then Code_error.raise ~loc "Invalid redirect" [ "to_", Lib_name.to_dyn to_ ]
-      else from, Redirect (loc, to_)
+      else from, [ Redirect (loc, to_) ]
     ;;
-
-    let many x = Many x
 
     let deprecated_library_name from (loc, to_) =
       if Lib_name.equal from to_
       then Code_error.raise ~loc "Invalid redirect" [ "to_", Lib_name.to_dyn to_ ]
-      else from, Deprecated_library_name (loc, to_)
+      else from, [ Deprecated_library_name (loc, to_) ]
     ;;
 
     let found x = Found x
@@ -80,22 +75,24 @@ module DB = struct
             let expander = Expander0.get ~dir in
             Library.to_lib_info conf ~expander ~dir ~lib_config |> Lib_info.of_local
           in
-          Library.best_name conf, Found_or_redirect.found info)
-      |> Lib_name.Map.of_list_reducei ~f:(fun name (v1 : Found_or_redirect.t) v2 ->
+          Library.best_name conf, [ Found_or_redirect.found info ])
+      |> Lib_name.Map.of_list_reducei ~f:(fun name (v1 : Found_or_redirect.t list) v2 ->
         let res =
           match v1, v2 with
-          | Found _, Found _
-          | Found _, Redirect _
-          | Redirect _, Found _
-          | Redirect _, Redirect _ -> Ok (Found_or_redirect.many [ v1; v2 ])
-          | Found info, Deprecated_library_name (loc, _)
-          | Deprecated_library_name (loc, _), Found info -> Error (loc, Lib_info.loc info)
-          | Deprecated_library_name (loc2, lib2), Redirect (loc1, lib1)
-          | Redirect (loc1, lib1), Deprecated_library_name (loc2, lib2) ->
+          | [], _ | _, [] | _ :: _ :: _, _ | _, _ :: _ :: _ -> assert false
+          | [ (Found _ as a) ], [ (Found _ as b) ]
+          | [ (Found _ as a) ], [ (Redirect _ as b) ]
+          | [ (Redirect _ as a) ], [ (Found _ as b) ]
+          | [ (Redirect _ as a) ], [ (Redirect _ as b) ] -> Ok [ a; b ]
+          | [ Found info ], [ Deprecated_library_name (loc, _) ]
+          | [ Deprecated_library_name (loc, _) ], [ Found info ] ->
+            Error (loc, Lib_info.loc info)
+          | [ Deprecated_library_name (loc2, lib2) ], [ Redirect (loc1, lib1) ]
+          | [ Redirect (loc1, lib1) ], [ Deprecated_library_name (loc2, lib2) ] ->
             if Lib_name.equal lib1 lib2 then Ok v1 else Error (loc1, loc2)
-          | Deprecated_library_name (loc1, lib1), Deprecated_library_name (loc2, lib2) ->
+          | ( [ Deprecated_library_name (loc1, lib1) ]
+            , [ Deprecated_library_name (loc2, lib2) ] ) ->
             if Lib_name.equal lib1 lib2 then Ok v1 else Error (loc1, loc2)
-          | Many _, _ | _, Many _ -> assert false
         in
         match res with
         | Ok x -> x
@@ -126,10 +123,12 @@ module DB = struct
         Memo.return
         @@
         match Lib_name.Map.find map name with
-        | None -> Lib.DB.Resolve_result.not_found
-        | Some (Redirect lib) -> Lib.DB.Resolve_result.redirect_in_the_same_db lib
-        | Some (Found lib) -> Lib.DB.Resolve_result.found lib
-        | Some (Many libs) ->
+        | None | Some [] -> Lib.DB.Resolve_result.not_found
+        | Some [ Redirect lib ] -> Lib.DB.Resolve_result.redirect_in_the_same_db lib
+        | Some [ Found lib ] -> Lib.DB.Resolve_result.found lib
+        | Some [ Deprecated_library_name lib ] ->
+          Lib.DB.Resolve_result.deprecated_library_name lib
+        | Some (_ :: _ :: _ as libs) ->
           let results =
             List.map
               ~f:(function
@@ -137,13 +136,10 @@ module DB = struct
                   Lib.DB.Resolve_result.redirect_in_the_same_db lib
                 | Found lib -> Lib.DB.Resolve_result.found lib
                 | Deprecated_library_name lib ->
-                  Lib.DB.Resolve_result.deprecated_library_name lib
-                | Many _ -> assert false)
+                  Lib.DB.Resolve_result.deprecated_library_name lib)
               libs
           in
-          Lib.DB.Resolve_result.multiple_results results
-        | Some (Deprecated_library_name lib) ->
-          Lib.DB.Resolve_result.deprecated_library_name lib)
+          Lib.DB.Resolve_result.multiple_results results)
       ~all:(fun () -> Memo.return @@ Lib_name.Map.keys map)
       ~lib_config
       ~instrument_with
