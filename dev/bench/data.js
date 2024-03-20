@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1710934391969,
+  "lastUpdate": 1710934600800,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -8991,6 +8991,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (warm, Linux)",
             "value": "1.121663479526667",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "moyodiallo@gmail.com",
+            "name": "Alpha Issiaga DIALLO",
+            "username": "moyodiallo"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "171c23129e4c86ad34bea4750d7fa4608d3019c2",
+          "message": "fix: handle utf8 characters in the dune files(#9728) (#10113)\n\n* fix: handle utf8 characters in the dune files(#9728)\r\n\r\nSigned-off-by: Alpha DIALLO <moyodiallo@gmail.com>\r\nSigned-off-by: Etienne Millon <me@emillon.org>\r\n\r\n* Add the changes file and revert the modification of the lexer\r\n\r\nSigned-off-by: Alpha DIALLO <moyodiallo@gmail.com>\r\nSigned-off-by: Etienne Millon <me@emillon.org>\r\n\r\n* Use uutf\r\n\r\nAlso leaving a note about using the stdlib later.\r\n\r\nSigned-off-by: Etienne Millon <me@emillon.org>\r\n\r\n* changelog\r\n\r\nSigned-off-by: Etienne Millon <me@emillon.org>\r\n\r\n---------\r\n\r\nSigned-off-by: Alpha DIALLO <moyodiallo@gmail.com>\r\nSigned-off-by: Etienne Millon <me@emillon.org>\r\nCo-authored-by: Etienne Millon <me@emillon.org>",
+          "timestamp": "2024-03-20T10:40:15+01:00",
+          "tree_id": "8020559d2f5c21d5b1910b90764d4fe5fca2c6aa",
+          "url": "https://github.com/jchavarri/dune/commit/171c23129e4c86ad34bea4750d7fa4608d3019c2"
+        },
+        "date": 1710934600170,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (cold, Linux)",
+            "value": "40.936968658733335",
             "unit": "seconds"
           }
         ]
