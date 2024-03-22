@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1711127095276,
+  "lastUpdate": 1711127103449,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -9107,6 +9107,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (cold, Linux)",
             "value": "45.45171670291333",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@emillon.org",
+            "name": "Etienne Millon",
+            "username": "emillon"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3a4ce9cf68b9ddeeff39bf2c4c15b716fc28bb4a",
+          "message": "doc: use grid layout for long TOCs (#9758)\n\nSigned-off-by: Etienne Millon <me@emillon.org>",
+          "timestamp": "2024-03-22T09:55:58+01:00",
+          "tree_id": "04012a8db31be834e8fa0f2cd9783080075b1ee7",
+          "url": "https://github.com/jchavarri/dune/commit/3a4ce9cf68b9ddeeff39bf2c4c15b716fc28bb4a"
+        },
+        "date": 1711127102815,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (warm, Linux)",
+            "value": "1.2181646892466667",
             "unit": "seconds"
           }
         ]
