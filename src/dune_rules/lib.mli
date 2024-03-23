@@ -123,7 +123,6 @@ module DB : sig
     -> t
 
   val find : t -> Lib_name.t -> lib option Memo.t
-  val find_invalid : t -> Lib_name.t -> User_message.t option Memo.t
   val find_even_when_hidden : t -> Lib_name.t -> lib option Memo.t
   val available : t -> Lib_name.t -> bool Memo.t
 

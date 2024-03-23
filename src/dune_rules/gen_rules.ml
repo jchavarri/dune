@@ -111,14 +111,20 @@ end = struct
       let+ () = Toplevel.Stanza.setup ~sctx ~dir ~toplevel in
       empty_none
     | Library.T lib ->
-      let db = Scope.libs scope in
       (* This check surfaces conflicts between private names of public libraries,
          without it the user might get duplicated rules errors for cmxs
          when the libraries are defined in the same folder and have the same private name *)
-      let* res = Lib.DB.find_invalid db (Library.private_name lib) in
-      (match res with
-       | Some err -> User_error.raise [ User_message.pp err ]
-       | None ->
+      let* resolve_result =
+        let db = Scope.libs scope in
+        let loc, name =
+          let ((loc, _) as name) = lib.name in
+          loc, Lib_name.of_local name
+        in
+        Lib.DB.resolve db (loc, name)
+      in
+      (match Resolve.to_result resolve_result with
+       | Error err -> Resolve.raise_error_with_stack_trace err
+       | Ok _ ->
          let* lib_info =
            let* ocaml =
              let ctx = Super_context.context sctx in

@@ -26,25 +26,30 @@ module DB = struct
   module Found_or_redirect : sig
     type t = private
       | Found of Lib_info.external_
-      | Redirect of (Loc.t * Lib_name.t)
+      | Redirect of (Loc.t * Lib_name.t) * Toggle.t Memo.Lazy.t
       | Many of t list
       | Deprecated_library_name of (Loc.t * Lib_name.t)
 
-    val redirect : Lib_name.t -> Loc.t * Lib_name.t -> Lib_name.t * t
+    val redirect
+      :  enabled:Toggle.t Memo.Lazy.t
+      -> Lib_name.t
+      -> Loc.t * Lib_name.t
+      -> Lib_name.t * t
+
     val many : t list -> t
     val deprecated_library_name : Lib_name.t -> Loc.t * Lib_name.t -> Lib_name.t * t
     val found : Lib_info.external_ -> t
   end = struct
     type t =
       | Found of Lib_info.external_
-      | Redirect of (Loc.t * Lib_name.t)
+      | Redirect of (Loc.t * Lib_name.t) * Toggle.t Memo.Lazy.t
       | Many of t list
       | Deprecated_library_name of (Loc.t * Lib_name.t)
 
-    let redirect from (loc, to_) =
+    let redirect ~enabled from (loc, to_) =
       if Lib_name.equal from to_
       then Code_error.raise ~loc "Invalid redirect" [ "to_", Lib_name.to_dyn to_ ]
-      else from, Redirect (loc, to_)
+      else from, Redirect ((loc, to_), enabled)
     ;;
 
     let many x = Many x
@@ -61,7 +66,7 @@ module DB = struct
   module Library_related_stanza = struct
     type t =
       | Library of Path.Build.t * Library.t
-      | Library_redirect of Library_redirect.Local.t
+      | Library_redirect of Path.Build.t * Library_redirect.Local.t
       | Deprecated_library_name of Deprecated_library_name.t
   end
 
@@ -69,9 +74,16 @@ module DB = struct
     let map =
       List.map stanzas ~f:(fun stanza ->
         match (stanza : Library_related_stanza.t) with
-        | Library_redirect s ->
-          let old_public_name = Lib_name.of_local s.old_name in
-          Found_or_redirect.redirect old_public_name s.new_public_name
+        | Library_redirect (dir, s) ->
+          let old_public_name = Lib_name.of_local s.old_name.lib_name in
+          let enabled =
+            Memo.lazy_ (fun () ->
+              let open Memo.O in
+              let* expander = Expander0.get ~dir in
+              let+ enabled = Expander0.eval_blang expander s.old_name.enabled in
+              Toggle.of_bool enabled)
+          in
+          Found_or_redirect.redirect ~enabled old_public_name s.new_public_name
         | Deprecated_library_name s ->
           let old_public_name = Deprecated_library_name.old_public_name s in
           Found_or_redirect.deprecated_library_name old_public_name s.new_public_name
@@ -90,8 +102,8 @@ module DB = struct
           | Redirect _, Redirect _ -> Ok (Found_or_redirect.many [ v1; v2 ])
           | Found info, Deprecated_library_name (loc, _)
           | Deprecated_library_name (loc, _), Found info -> Error (loc, Lib_info.loc info)
-          | Deprecated_library_name (loc2, lib2), Redirect (loc1, lib1)
-          | Redirect (loc1, lib1), Deprecated_library_name (loc2, lib2) ->
+          | Deprecated_library_name (loc2, lib2), Redirect ((loc1, lib1), _)
+          | Redirect ((loc1, lib1), _), Deprecated_library_name (loc2, lib2) ->
             if Lib_name.equal lib1 lib2 then Ok v1 else Error (loc1, loc2)
           | Deprecated_library_name (loc1, lib1), Deprecated_library_name (loc2, lib2) ->
             if Lib_name.equal lib1 lib2 then Ok v1 else Error (loc1, loc2)
@@ -123,27 +135,38 @@ module DB = struct
       ()
       ~parent:(Some parent)
       ~resolve:(fun name ->
-        Memo.return
-        @@
         match Lib_name.Map.find map name with
-        | None -> Lib.DB.Resolve_result.not_found
-        | Some (Redirect lib) -> Lib.DB.Resolve_result.redirect_in_the_same_db lib
-        | Some (Found lib) -> Lib.DB.Resolve_result.found lib
+        | None -> Memo.return Lib.DB.Resolve_result.not_found
+        | Some (Redirect (lib, enabled)) ->
+          let+ enabled =
+            let+ toggle = Memo.Lazy.force enabled in
+            Toggle.enabled toggle
+          in
+          if enabled
+          then Lib.DB.Resolve_result.redirect_in_the_same_db lib
+          else Lib.DB.Resolve_result.not_found
+        | Some (Found lib) -> Memo.return (Lib.DB.Resolve_result.found lib)
         | Some (Many libs) ->
-          let results =
-            List.map
+          let+ results =
+            Memo.List.filter_map
               ~f:(function
-                | Found_or_redirect.Redirect lib ->
-                  Lib.DB.Resolve_result.redirect_in_the_same_db lib
-                | Found lib -> Lib.DB.Resolve_result.found lib
+                | Found_or_redirect.Redirect (lib, enabled) ->
+                  let+ enabled =
+                    let+ toggle = Memo.Lazy.force enabled in
+                    Toggle.enabled toggle
+                  in
+                  if enabled
+                  then Some (Lib.DB.Resolve_result.redirect_in_the_same_db lib)
+                  else None
+                | Found lib -> Memo.return (Some (Lib.DB.Resolve_result.found lib))
                 | Deprecated_library_name lib ->
-                  Lib.DB.Resolve_result.deprecated_library_name lib
+                  Memo.return (Some (Lib.DB.Resolve_result.deprecated_library_name lib))
                 | Many _ -> assert false)
               libs
           in
           Lib.DB.Resolve_result.multiple_results results
         | Some (Deprecated_library_name lib) ->
-          Lib.DB.Resolve_result.deprecated_library_name lib)
+          Memo.return (Lib.DB.Resolve_result.deprecated_library_name lib))
       ~all:(fun () -> Memo.return @@ Lib_name.Map.keys map)
       ~lib_config
       ~instrument_with
@@ -269,7 +292,7 @@ module DB = struct
         let project =
           match stanza with
           | Library (_, lib) -> lib.project
-          | Library_redirect x -> x.project
+          | Library_redirect (_, x) -> x.project
           | Deprecated_library_name x -> x.project
         in
         Dune_project.root project, stanza)
@@ -355,7 +378,9 @@ module DB = struct
             let ctx_dir = Path.Build.append_source build_dir (Dune_file.dir dune_file) in
             Library_related_stanza.Library (ctx_dir, lib) :: acc, coq_acc
           | Deprecated_library_name.T d -> Deprecated_library_name d :: acc, coq_acc
-          | Library_redirect.Local.T d -> Library_redirect d :: acc, coq_acc
+          | Library_redirect.Local.T d ->
+            let ctx_dir = Path.Build.append_source build_dir (Dune_file.dir dune_file) in
+            Library_redirect (ctx_dir, d) :: acc, coq_acc
           | Coq_stanza.Theory.T coq_lib ->
             let ctx_dir = Path.Build.append_source build_dir (Dune_file.dir dune_file) in
             acc, (ctx_dir, coq_lib) :: coq_acc

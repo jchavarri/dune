@@ -19,12 +19,13 @@ the same folder.
 Without any consumers of the libraries
 
   $ dune build
-  Error:
   File "dune", line 1, characters 0-44:
+  1 | (library
+  2 |  (name foo)
+  3 |  (public_name bar.foo))
   Error: A library with name "foo" is defined in two folders: _build/default
   and _build/default. Either change one of the names, or enable them
   conditionally using the 'enabled_if' field.
-  
   [1]
 
 With some consumer
@@ -46,12 +47,6 @@ With some consumer
   > EOF
 
   $ dune build
-  Error:
-  File "dune", line 1, characters 0-44:
-  Error: A library with name "foo" is defined in two folders: _build/default
-  and _build/default. Either change one of the names, or enable them
-  conditionally using the 'enabled_if' field.
-  
   File "dune", line 1, characters 0-0:
   Error: Module "Main" is used in several stanzas:
   - dune:1
@@ -61,4 +56,11 @@ With some consumer
   library, executable, and executables stanzas in this dune file. Note that
   each module cannot appear in more than one "modules" field - it must belong
   to a single library or executable.
+  File "dune", line 1, characters 0-44:
+  1 | (library
+  2 |  (name foo)
+  3 |  (public_name bar.foo))
+  Error: A library with name "foo" is defined in two folders: _build/default
+  and _build/default. Either change one of the names, or enable them
+  conditionally using the 'enabled_if' field.
   [1]
