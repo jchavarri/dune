@@ -1742,7 +1742,7 @@ end = struct
                | _ ->
                  R.lift
                    (let open Memo.O in
-                    resolve_library_id db lib.library_id
+                   find_internal db lib.name
                     >>= function
                     | Status.Found lib' ->
                       if lib = lib'
@@ -1755,7 +1755,6 @@ end = struct
                         "Unexpected find result"
                         [ "found", Status.to_dyn found
                         ; "lib.name", Lib_name.to_dyn lib.name
-                        ; "lib.library_id", Library.Id.to_dyn lib.library_id
                         ]))
           in
           let* new_stack = R.lift (Dep_stack.push stack ~implements_via lib.unique_id) in
