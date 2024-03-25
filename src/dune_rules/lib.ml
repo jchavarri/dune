@@ -1234,13 +1234,16 @@ end = struct
          Memo.return
            (List.fold_left libs ~init:Status.Not_found ~f:(fun acc status ->
               match acc, status with
-              | Status.Found a, Status.Found b ->
-                let a = info a
-                and b = info b in
-                let loc = Lib_info.loc b in
-                let dir_a = Lib_info.best_src_dir a in
-                let dir_b = Lib_info.best_src_dir b in
-                Status.Invalid (Error.duplicated ~loc ~name ~dir_a ~dir_b)
+              | (Status.Found a as lib), Status.Found b ->
+                if a = b
+                then lib
+                else (
+                  let a = info a
+                  and b = info b in
+                  let loc = Lib_info.loc b in
+                  let dir_a = Lib_info.best_src_dir a in
+                  let dir_b = Lib_info.best_src_dir b in
+                  Status.Invalid (Error.duplicated ~loc ~name ~dir_a ~dir_b))
               | Invalid _, _ -> acc
               | (Found _ as lib), (Hidden _ | Ignore | Not_found | Invalid _)
               | (Hidden _ | Ignore | Not_found), (Found _ as lib) -> lib
@@ -1742,7 +1745,7 @@ end = struct
                | _ ->
                  R.lift
                    (let open Memo.O in
-                   find_internal db lib.name
+                    find_internal db lib.name
                     >>= function
                     | Status.Found lib' ->
                       if lib = lib'
