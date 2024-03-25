@@ -2040,12 +2040,15 @@ module DB = struct
     | Ignore | Invalid _ | Not_found -> None
   ;;
 
-  let find_stanza_id t name =
+  let rec find_stanza_id t name =
     let open Memo.O in
     Resolve_names.find_stanza_id_internal t name
-    >>| function
-    | [] -> None
-    | [ library_id ] -> Some library_id
+    >>= function
+    | [] ->
+      (match t.parent with
+       | None -> Memo.return None
+       | Some db -> find_stanza_id db name)
+    | [ library_id ] -> Memo.return (Some library_id)
     | _libs -> assert false
   ;;
 
