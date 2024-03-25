@@ -96,9 +96,7 @@ let impl sctx ~(lib : Library.t) ~scope =
             | External _, Local | Local, External _ -> assert false
             | External modules, External fa -> Memo.return (modules, fa)
             | Local, Local ->
-              let name = Lib.name vlib in
-              let* library_id = Lib.DB.find_stanza_id db name in
-              let library_id = Option.value_exn library_id in
+              let library_id = Lib.library_id vlib in
               let vlib = Lib.Local.of_lib_exn vlib in
               let* dir_contents =
                 let info = Lib.Local.info vlib in
