@@ -84,3 +84,21 @@ val to_lib_info
   -> dir:Path.Build.t
   -> lib_config:Lib_config.t
   -> Lib_info.local
+
+(** What's the subset of fields that uniquely identifies this stanza? *)
+module Id : sig
+  type stanza := t
+  type t
+
+  module Map : Map.S with type key = t
+
+  val equal : t -> t -> bool
+  val make : loc:Loc.t -> src_dir:Path.Source.t -> enabled_if:Blang.t -> Lib_name.t -> t
+  val external_ : loc:Loc.t -> src_dir:Path.t -> enabled_if:Blang.t -> Lib_name.t -> t
+  val name : t -> Lib_name.t
+  val loc : t -> Loc.t
+
+  (* val src_dir : t -> Path.Source.t *)
+  val of_stanza : src_dir:Path.Source.t -> stanza -> t
+  val to_dyn : t -> Dyn.t
+end

@@ -583,7 +583,7 @@ let libs_of_pkg ctx ~pkg =
   List.filter_map entries ~f:(fun (entry : Scope.DB.Lib_entry.t) ->
     match entry with
     | Deprecated_library_name _ -> None
-    | Library lib ->
+    | Library (_, lib) ->
       (match Lib.Local.to_lib lib |> Lib.info |> Lib_info.implements with
        | None -> Some lib
        | Some _ -> None))
@@ -950,8 +950,9 @@ let setup_private_library_doc_alias sctx ~scope ~dir (l : Library.t) =
   | Private _ ->
     let ctx = Super_context.context sctx in
     let* lib =
-      Lib.DB.find_even_when_hidden (Scope.libs scope) (Library.best_name l)
-      >>| Option.value_exn
+      let src_dir = Path.drop_optional_build_context_src_exn (Path.build dir) in
+      let library_id = Library.Id.of_stanza ~src_dir l in
+      Lib.DB.find_even_when_hidden (Scope.libs scope) library_id >>| Option.value_exn
     in
     let lib = Lib (Lib.Local.of_lib_exn lib) in
     Rules.Produce.Alias.add_deps
@@ -1005,8 +1006,12 @@ let gen_rules sctx ~dir rest =
        let* lib, lib_db = Scope_key.of_string (Context.name ctx) lib_unique_name_or_pkg in
        (* jeremiedimino: why isn't [None] some kind of error here? *)
        let* lib =
-         let+ lib = Lib.DB.find lib_db lib in
-         Option.bind ~f:Lib.Local.of_lib lib
+         let* library_id = Lib.DB.find_stanza_id lib_db lib in
+         match library_id with
+         | None -> Memo.return None
+         | Some library_id ->
+           let+ lib = Lib.DB.find lib_db library_id in
+           Option.bind ~f:Lib.Local.of_lib lib
        in
        let+ () =
          match lib with
@@ -1036,8 +1041,12 @@ let gen_rules sctx ~dir rest =
        let* lib, lib_db = Scope_key.of_string (Context.name ctx) lib_unique_name_or_pkg in
        (* jeremiedimino: why isn't [None] some kind of error here? *)
        let* lib =
-         let+ lib = Lib.DB.find lib_db lib in
-         Option.bind ~f:Lib.Local.of_lib lib
+         let* library_id = Lib.DB.find_stanza_id lib_db lib in
+         match library_id with
+         | None -> Memo.return None
+         | Some library_id ->
+           let+ lib = Lib.DB.find lib_db library_id in
+           Option.bind ~f:Lib.Local.of_lib lib
        in
        let+ () =
          match lib with

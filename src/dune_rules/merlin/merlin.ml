@@ -525,20 +525,24 @@ module Unprocessed = struct
             (let open Memo.O in
              let* scope = Scope.DB.find_by_dir (Expander.dir expander) in
              let libs = Scope.libs scope in
-             Lib.DB.find libs (Lib_name.of_string "melange")
+             Lib.DB.find_stanza_id libs (Lib_name.of_string "melange")
              >>= function
-             | Some lib ->
-               let+ libs =
-                 let linking =
-                   Dune_project.implicit_transitive_deps (Scope.project scope)
-                 in
-                 Lib.closure [ lib ] ~linking
-                 |> Resolve.Memo.peek
-                 >>| function
-                 | Ok libs -> libs
-                 | Error _ -> []
-               in
-               Lib.Set.union requires (Lib.Set.of_list libs)
+             | Some library_id ->
+               Lib.DB.find libs library_id
+               >>= (function
+                | Some lib ->
+                  let+ libs =
+                    let linking =
+                      Dune_project.implicit_transitive_deps (Scope.project scope)
+                    in
+                    Lib.closure [ lib ] ~linking
+                    |> Resolve.Memo.peek
+                    >>| function
+                    | Ok libs -> libs
+                    | Error _ -> []
+                  in
+                  Lib.Set.union requires (Lib.Set.of_list libs)
+                | None -> Memo.return requires)
              | None -> Memo.return requires)
       in
       let+ flags = flags

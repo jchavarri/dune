@@ -11,6 +11,7 @@ val to_dyn : t -> Dyn.t
     or the [name] if not. *)
 val name : t -> Lib_name.t
 
+val library_id : t -> Library.Id.t
 val lib_config : t -> Lib_config.t
 val implements : t -> t Resolve.Memo.t option
 
@@ -100,9 +101,10 @@ module DB : sig
     val not_found : t
     val found : Lib_info.external_ -> t
     val to_dyn : t Dyn.builder
-    val redirect : db -> Loc.t * Lib_name.t -> t
+    val redirect : db -> Library.Id.t -> t
     val redirect_in_the_same_db : Loc.t * Lib_name.t -> t
-    val multiple_results : t list -> t
+
+    (* val multiple_results : t list -> t *)
     val deprecated_library_name : Loc.t * Lib_name.t -> t
   end
 
@@ -115,23 +117,25 @@ module DB : sig
       [all] returns the list of names of libraries available in this database. *)
   val create
     :  parent:t option
-    -> resolve:(Lib_name.t -> Resolve_result.t Memo.t)
-    -> all:(unit -> Lib_name.t list Memo.t)
+    -> find_stanza_id:(Lib_name.t -> Library.Id.t list Memo.t)
+    -> resolve:(Library.Id.t -> Resolve_result.t Memo.t)
+    -> all:(unit -> Library.Id.t list Memo.t)
     -> lib_config:Lib_config.t
     -> instrument_with:Lib_name.t list
     -> unit
     -> t
 
-  val find : t -> Lib_name.t -> lib option Memo.t
-  val find_even_when_hidden : t -> Lib_name.t -> lib option Memo.t
-  val available : t -> Lib_name.t -> bool Memo.t
+  val find : t -> Library.Id.t -> lib option Memo.t
+  val find_stanza_id : t -> Lib_name.t -> Library.Id.t option Memo.t
+  val find_even_when_hidden : t -> Library.Id.t -> lib option Memo.t
+  val available : t -> Library.Id.t -> bool Memo.t
 
   (** Retrieve the compile information for the given library. Works for
       libraries that are optional and not available as well. *)
   val get_compile_info
     :  t
     -> allow_overlaps:bool
-    -> Lib_name.t
+    -> Library.Id.t
     -> (lib * Compile.t) Memo.t
 
   val resolve : t -> Loc.t * Lib_name.t -> lib Resolve.Memo.t

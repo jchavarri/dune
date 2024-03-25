@@ -329,6 +329,7 @@ module T = struct
     { info : Lib_info.external_
     ; name : Lib_name.t
     ; unique_id : Id.t
+    ; library_id : Library.Id.t
     ; re_exports : t list Resolve.t
     ; (* [requires] is contains all required libraries, including the ones
          mentioned in [re_exports]. *)
@@ -394,24 +395,34 @@ module Status = struct
     | Invalid of User_message.t
     | Ignore
 
-  let to_dyn t =
-    let open Dyn in
-    match t with
-    | Invalid e -> variant "Invalid" [ Dyn.string (User_message.to_string e) ]
-    | Not_found -> variant "Not_found" []
-    | Hidden { lib = _; path; reason } ->
-      variant "Hidden" [ Path.to_dyn path; string reason ]
-    | Found t -> variant "Found" [ to_dyn t ]
-    | Ignore -> variant "Ignore" []
+  let to_dyn =
+    let lib_to_dyn = to_dyn in
+    let (* rec *) to_dyn t =
+      let open Dyn in
+      match t with
+      | Invalid e -> variant "Invalid" [ Dyn.string (User_message.to_string e) ]
+      | Not_found -> variant "Not_found" []
+      | Hidden { lib = _; path; reason } ->
+        variant "Hidden" [ Path.to_dyn path; string reason ]
+      | Found t -> variant "Found" [ lib_to_dyn t ]
+      | Ignore -> variant "Ignore" []
+    in
+    to_dyn
   ;;
 end
 
 type db =
   { parent : db option
-  ; resolve : Lib_name.t -> resolve_result Memo.t
+  ; find_stanza_id : Lib_name.t -> Library.Id.t list Memo.t
+  ; resolve : Library.Id.t -> resolve_result Memo.t
   ; instantiate :
-      (Lib_name.t -> Path.t Lib_info.t -> hidden:string option -> Status.t Memo.t) Lazy.t
-  ; all : Lib_name.t list Memo.Lazy.t
+      (Lib_name.t
+       -> Library.Id.t
+       -> Path.t Lib_info.t
+       -> hidden:string option
+       -> Status.t Memo.t)
+        Lazy.t
+  ; all : Library.Id.t list Memo.Lazy.t
   ; lib_config : Lib_config.t
   ; instrument_with : Lib_name.t list
   }
@@ -423,12 +434,12 @@ and resolve_result =
   | Invalid of User_message.t
   | Ignore
   | Redirect_in_the_same_db of (Loc.t * Lib_name.t)
-  | Multiple_results of resolve_result list
-  | Redirect of db * (Loc.t * Lib_name.t)
+  | Redirect of db * Library.Id.t
   | Deprecated_library_name of (Loc.t * Lib_name.t)
 
 let lib_config (t : lib) = t.lib_config
 let name t = t.name
+let library_id t = t.library_id
 let info t = t.info
 let project t = t.project
 let implements t = Option.map ~f:Memo.return t.implements
@@ -823,6 +834,7 @@ let instrumentation_backend instrument_with resolve libname =
 
 module rec Resolve_names : sig
   val find_internal : db -> Lib_name.t -> Status.t Memo.t
+  val find_stanza_id_internal : db -> Lib_name.t -> Library.Id.t list Memo.t
 
   val resolve_dep
     :  db
@@ -830,8 +842,8 @@ module rec Resolve_names : sig
     -> private_deps:private_deps
     -> lib Resolve.t option Memo.t
 
-  val resolve_name : db -> Lib_name.t -> Status.t Memo.t
-  val available_internal : db -> Lib_name.t -> bool Memo.t
+  val resolve_library_id : db -> Library.Id.t -> Status.t Memo.t
+  val available_internal : db -> Library.Id.t -> bool Memo.t
 
   val resolve_simple_deps
     :  db
@@ -870,7 +882,11 @@ module rec Resolve_names : sig
 
   val make_instantiate
     :  db Lazy.t
-    -> (Lib_name.t -> Path.t Lib_info.t -> hidden:string option -> Status.t Memo.t)
+    -> (Lib_name.t
+        -> Library.Id.t
+        -> Path.t Lib_info.t
+        -> hidden:string option
+        -> Status.t Memo.t)
          Staged.t
 end = struct
   open Resolve_names
@@ -887,7 +903,7 @@ end = struct
       >>| Package.Name.Map.of_list_exn)
   ;;
 
-  let instantiate_impl db (name, info, hidden) =
+  let instantiate_impl db (name, library_id, info, hidden) =
     let db = Lazy.force db in
     let open Memo.O in
     let unique_id = Id.make ~name ~path:(Lib_info.src_dir info) in
@@ -1051,6 +1067,7 @@ end = struct
          { info
          ; name
          ; unique_id
+         ; library_id
          ; requires
          ; ppx_runtime_deps
          ; pps
@@ -1096,13 +1113,13 @@ end = struct
   ;;
 
   module Input = struct
-    type t = Lib_name.t * Path.t Lib_info.t * string option
+    type t = Lib_name.t * Library.Id.t * Path.t Lib_info.t * string option
 
-    let equal (lib_name, info, _) (lib_name', info', _) =
-      Lib_name.equal lib_name lib_name' && Lib_info.equal info info'
+    let equal (lib_name, library_id, _, _) (lib_name', library_id', _, _) =
+      Lib_name.equal lib_name lib_name' && Library.Id.equal library_id library_id'
     ;;
 
-    let hash (x, _, _) = Lib_name.hash x
+    let hash (x, _, _, _) = Lib_name.hash x
     let to_dyn = Dyn.opaque
   end
 
@@ -1111,6 +1128,7 @@ end = struct
       module Rec : sig
         val memo
           :  Lib_name.t
+          -> Library.Id.t
           -> Path.t Lib_info.t
           -> hidden:string option
           -> Status.t Memo.t
@@ -1121,10 +1139,11 @@ end = struct
               "db-instantiate"
               ~input:(module Input)
               (instantiate_impl db)
-              ~human_readable_description:(fun (name, info, _hidden) ->
+              ~human_readable_description:(fun (name, _library_id, info, _hidden) ->
                 Dep_path.Entry.Lib.pp { name; path = Lib_info.src_dir info })
           in
-          fun name info ~hidden -> Memo.exec memo (name, info, hidden)
+          fun name library_id info ~hidden ->
+            Memo.exec memo (name, library_id, info, hidden)
         ;;
       end
     end
@@ -1133,60 +1152,80 @@ end = struct
   ;;
 
   let instantiate db name info ~hidden = (Lazy.force db.instantiate) name info ~hidden
-  let find_internal db (name : Lib_name.t) = resolve_name db name
+  let find_stanza_id_internal db (name : Lib_name.t) = db.find_stanza_id name
 
-  let resolve_dep db (loc, name) ~private_deps : t Resolve.t option Memo.t =
+  let find_internal db (name : Lib_name.t) =
     let open Memo.O in
-    find_internal db name
-    >>= function
-    | Ignore -> Memo.return None
-    | Found lib ->
-      check_private_deps lib ~loc ~private_deps |> Resolve.Memo.of_result >>| Option.some
-    | Not_found -> Error.not_found ~loc ~name >>| Option.some
-    | Invalid why -> Resolve.Memo.of_result (Error why) >>| Option.some
-    | Hidden h -> Hidden.error h ~loc ~name >>| Option.some
-  ;;
-
-  let resolve_name db name =
-    let open Memo.O in
-    db.resolve name
-    >>= function
-    | Ignore -> Memo.return Status.Ignore
-    | Deprecated_library_name (_, name') -> find_internal db name'
-    | Redirect_in_the_same_db (_, name') -> find_internal db name'
-    | Redirect (db', (_, name')) -> find_internal db' name'
-    | Found info -> instantiate db name info ~hidden:None
-    | Multiple_results libs ->
+    find_stanza_id_internal db name
+    >>= fun xs ->
+    match xs with
+    | [] ->
+      (match db.parent with
+       | None -> Memo.return Status.Not_found
+       | Some db -> find_internal db name)
+    | [ library_id ] -> resolve_library_id db library_id
+    | candidates ->
+      (* let+ results =
+         Memo.List.filter_map candidates ~f:(fun candidate ->
+         let+ status = resolve_library_id db candidate in
+         match status with
+         | Found _ | Hidden _ -> Some status
+         | Not_found | Ignore -> None
+         | Invalid _ -> assert false)
+         in
+         (match results with
+         | [] -> Status.Not_found
+         | [ status ] -> status
+         | _ :: _ ->
+         let main_message =
+         let name = Library.Id.name lib1 in
+         Pp.textf "Library %s is defined twice:" (Lib_name.to_string name)
+         in
+         let loc1 = Library.Id.loc lib1
+         and loc2 = Library.Id.loc lib2 in
+         let annots =
+         let main = User_message.make ~loc:loc2 [ main_message ] in
+         let related =
+         [ User_message.make ~loc:loc1 [ Pp.text "Already defined here" ] ]
+         in
+         User_message.Annots.singleton
+         Compound_user_error.annot
+         [ Compound_user_error.make ~main ~related ]
+         in
+         User_error.raise
+         ~annots
+         [ main_message
+           ; Pp.textf "- %s" (Loc.to_file_colon_line loc1)
+           ; Pp.textf "- %s" (Loc.to_file_colon_line loc2)
+           ]) *)
       let* libs =
-        Memo.List.filter_map
-          ~f:(function
-            | Ignore -> Memo.return (Some Status.Ignore)
-            | Deprecated_library_name (_, name') ->
-              find_internal db name' >>| fun f -> Some f
-            | Redirect_in_the_same_db (_, name') ->
-              find_internal db name' >>| fun f -> Some f
-            | Redirect (db', (_, name')) -> find_internal db' name' >>| fun f -> Some f
-            | Found info ->
-              let* enabled = Lib_info.enabled info in
-              (match enabled with
-               | Disabled_because_of_enabled_if -> Memo.return None
-               | Normal | Optional ->
-                 instantiate db name info ~hidden:None >>| fun f -> Some f)
-            | Multiple_results _libs ->
-              (* There can't be nested Multiple_results *) assert false
-            | Invalid e -> Memo.return (Some (Status.Invalid e))
-            | Not_found ->
-              (match db.parent with
-               | None -> Memo.return (Some Status.Not_found)
-               | Some db -> find_internal db name >>| fun f -> Some f)
-            | Hidden { lib = info; reason = hidden; path = _ } ->
-              (match db.parent with
-               | None -> Memo.return Status.Not_found
-               | Some db -> find_internal db name)
-              >>= (function
-               | Status.Found _ as x -> Memo.return (Some x)
-               | _ -> instantiate db name info ~hidden:(Some hidden) >>| fun f -> Some f))
-          libs
+        let libs = candidates in
+        Memo.List.filter_map libs ~f:(fun candidate ->
+          let* status = resolve_library_id db candidate in
+          match status with
+          | Ignore -> Memo.return (Some Status.Ignore)
+          | Found lib ->
+            let info = lib.info in
+            let* enabled = Lib_info.enabled info in
+            (match enabled with
+             | Disabled_because_of_enabled_if -> Memo.return None
+             | Normal | Optional ->
+               instantiate db name lib.library_id info ~hidden:None >>| fun f -> Some f)
+          | Invalid e -> Memo.return (Some (Status.Invalid e))
+          | Not_found ->
+            (match db.parent with
+             | None -> Memo.return (Some Status.Not_found)
+             | Some db -> resolve_library_id db candidate >>| fun f -> Some f)
+          | Hidden { lib; reason = hidden; path = _ } ->
+            (match db.parent with
+             | None -> Memo.return Status.Not_found
+             | Some db -> resolve_library_id db candidate)
+            >>= (function
+             | Status.Found _ as x -> Memo.return (Some x)
+             | _ ->
+               let info = lib.info in
+               instantiate db name lib.library_id info ~hidden:(Some hidden)
+               >>| fun f -> Some f))
       in
       (match libs with
        | [] -> assert false
@@ -1207,23 +1246,50 @@ end = struct
               | (Hidden _ | Ignore | Not_found), (Found _ as lib) -> lib
               | ( (Hidden _ | Ignore | Not_found)
                 , (Hidden _ | Ignore | Not_found | Invalid _) ) -> acc)))
+  ;;
+
+  let resolve_dep db (loc, name) ~private_deps : t Resolve.t option Memo.t =
+    let open Memo.O in
+    find_internal db name
+    >>= function
+    | Ignore -> Memo.return None
+    | Found lib ->
+      check_private_deps lib ~loc ~private_deps |> Resolve.Memo.of_result >>| Option.some
+    | Not_found -> Error.not_found ~loc ~name >>| Option.some
+    | Invalid why -> Resolve.Memo.of_result (Error why) >>| Option.some
+    | Hidden h -> Hidden.error h ~loc ~name >>| Option.some
+  ;;
+
+  let resolve_library_id db library_id =
+    let open Memo.O in
+    db.resolve library_id
+    >>= function
+    | Ignore -> Memo.return Status.Ignore
+    | Deprecated_library_name (_, name') -> find_internal db name'
+    | Redirect_in_the_same_db (_, name') -> find_internal db name'
+    | Redirect (db', library_id') -> resolve_library_id db' library_id'
+    | Found info ->
+      let name = Lib_info.name info in
+      instantiate db name library_id info ~hidden:None
     | Invalid e -> Memo.return (Status.Invalid e)
     | Not_found ->
       (match db.parent with
        | None -> Memo.return Status.Not_found
-       | Some db -> find_internal db name)
+       | Some db -> resolve_library_id db library_id)
     | Hidden { lib = info; reason = hidden; path = _ } ->
       (match db.parent with
        | None -> Memo.return Status.Not_found
-       | Some db -> find_internal db name)
+       | Some db -> resolve_library_id db library_id)
       >>= (function
        | Status.Found _ as x -> Memo.return x
-       | _ -> instantiate db name info ~hidden:(Some hidden))
+       | _ ->
+         let name = Lib_info.name info in
+         instantiate db name library_id info ~hidden:(Some hidden))
   ;;
 
-  let available_internal db (name : Lib_name.t) =
+  let available_internal db (library_id : Library.Id.t) =
     let open Memo.O in
-    find_internal db name
+    resolve_library_id db library_id
     >>| function
     | Ignore | Found _ -> true
     | Not_found | Invalid _ | Hidden _ -> false
@@ -1348,7 +1414,12 @@ end = struct
       let+ select =
         Memo.List.find_map choices ~f:(fun { required; forbidden; file } ->
           Lib_name.Set.to_list forbidden
-          |> Memo.List.exists ~f:(available_internal db)
+          |> Memo.List.exists ~f:(fun name ->
+            let* library_id = find_stanza_id_internal db name in
+            match library_id with
+            | [] -> Memo.return false
+            | [ library_id ] -> available_internal db library_id
+            | _libs -> assert false)
           >>= function
           | true -> Memo.return None
           | false ->
@@ -1671,7 +1742,7 @@ end = struct
                | _ ->
                  R.lift
                    (let open Memo.O in
-                    find_internal db lib.name
+                    resolve_library_id db lib.library_id
                     >>= function
                     | Status.Found lib' ->
                       if lib = lib'
@@ -1684,6 +1755,7 @@ end = struct
                         "Unexpected find result"
                         [ "found", Status.to_dyn found
                         ; "lib.name", Lib_name.to_dyn lib.name
+                        ; "lib.library_id", Library.Id.to_dyn lib.library_id
                         ]))
           in
           let* new_stack = R.lift (Dep_stack.push stack ~implements_via lib.unique_id) in
@@ -1847,10 +1919,11 @@ module DB = struct
     let not_found = Not_found
     let redirect db lib = Redirect (db, lib)
     let redirect_in_the_same_db lib = Redirect_in_the_same_db lib
-    let multiple_results libs = Multiple_results libs
+
+    (* let multiple_results libs = Multiple_results libs *)
     let deprecated_library_name lib = Deprecated_library_name lib
 
-    let rec to_dyn x =
+    let (* rec *) to_dyn x =
       let open Dyn in
       match x with
       | Not_found -> variant "Not_found" []
@@ -1858,11 +1931,11 @@ module DB = struct
       | Found lib -> variant "Found" [ Lib_info.to_dyn Path.to_dyn lib ]
       | Hidden h -> variant "Hidden" [ Hidden.to_dyn (Lib_info.to_dyn Path.to_dyn) h ]
       | Ignore -> variant "Ignore" []
-      | Redirect (_, (_, name)) -> variant "Redirect" [ Lib_name.to_dyn name ]
+      | Redirect (_, library_id) -> variant "Redirect" [ Library.Id.to_dyn library_id ]
       | Redirect_in_the_same_db (_, name) ->
         variant "Redirect_in_the_same_db" [ Lib_name.to_dyn name ]
-      | Multiple_results redirects ->
-        variant "Multiple_results" [ (Dyn.list to_dyn) redirects ]
+        (* | Multiple_results redirects -> *)
+        (* variant "Multiple_results" [ (Dyn.list to_dyn) redirects ] *)
       | Deprecated_library_name (_, name) ->
         variant "Deprecated_library_name" [ Lib_name.to_dyn name ]
     ;;
@@ -1870,10 +1943,11 @@ module DB = struct
 
   type t = db
 
-  let create ~parent ~resolve ~all ~lib_config ~instrument_with () =
+  let create ~parent ~find_stanza_id ~resolve ~all ~lib_config ~instrument_with () =
     let rec t =
       lazy
         { parent
+        ; find_stanza_id
         ; resolve
         ; all = Memo.lazy_ all
         ; lib_config
@@ -1884,6 +1958,12 @@ module DB = struct
     Lazy.force t
   ;;
 
+  let to_external_id ~src_dir (t : Dune_package.Deprecated_library_name.t) =
+    let loc, name = t.loc, t.old_public_name
+    and enabled_if = Blang.true_ in
+    Library.Id.external_ ~loc ~src_dir ~enabled_if name
+  ;;
+
   let create_from_findlib =
     let bigarray = Lib_name.of_string "bigarray" in
     fun findlib ~has_bigarray_library ~lib_config ->
@@ -1891,12 +1971,30 @@ module DB = struct
         ()
         ~parent:None
         ~lib_config
-        ~resolve:(fun name ->
+        ~find_stanza_id:(fun name ->
           let open Memo.O in
           Findlib.find findlib name
           >>| function
+          | Ok (Hidden_library pkg | Library pkg) -> [ Dune_package.Lib.library_id pkg ]
+          | Ok (Deprecated_library_name (src_dir, d)) -> [ to_external_id ~src_dir d ]
+          | Error e ->
+            (match e with
+             | Invalid_dune_package _ -> []
+             | Not_found when (not has_bigarray_library) && Lib_name.equal name bigarray
+               ->
+               (* Recent versions of OCaml already include a [bigrray] library,
+                  so we just silently ignore dependencies on it. The more
+                  correct thing to do would be to redirect it to the stdlib,
+                  but the stdlib isn't first class. *)
+               []
+             | Not_found -> []))
+        ~resolve:(fun library_id ->
+          let open Memo.O in
+          let name = Library.Id.name library_id in
+          Findlib.find findlib name
+          >>| function
           | Ok (Library pkg) -> Found (Dune_package.Lib.info pkg)
-          | Ok (Deprecated_library_name d) ->
+          | Ok (Deprecated_library_name (_, d)) ->
             Deprecated_library_name (d.loc, d.new_public_name)
           | Ok (Hidden_library pkg) -> Hidden (Hidden.unsatisfied_exist_if pkg)
           | Error e ->
@@ -1912,7 +2010,7 @@ module DB = struct
              | Not_found -> Not_found))
         ~all:(fun () ->
           let open Memo.O in
-          Findlib.all_packages findlib >>| List.map ~f:Dune_package.Entry.name)
+          Findlib.all_packages findlib >>| List.map ~f:Dune_package.Entry.library_id)
   ;;
 
   let installed (context : Context.t) =
@@ -1926,20 +2024,29 @@ module DB = struct
       ~lib_config:ocaml.lib_config
   ;;
 
-  let find t name =
+  let find t library_id =
     let open Memo.O in
-    Resolve_names.find_internal t name
+    Resolve_names.resolve_library_id t library_id
     >>| function
     | Found t -> Some t
     | Ignore | Not_found | Invalid _ | Hidden _ -> None
   ;;
 
-  let find_even_when_hidden t name =
+  let find_even_when_hidden t library_id =
     let open Memo.O in
-    Resolve_names.find_internal t name
+    Resolve_names.resolve_library_id t library_id
     >>| function
     | Found t | Hidden { lib = t; reason = _; path = _ } -> Some t
     | Ignore | Invalid _ | Not_found -> None
+  ;;
+
+  let find_stanza_id t name =
+    let open Memo.O in
+    Resolve_names.find_stanza_id_internal t name
+    >>| function
+    | [] -> None
+    | [ library_id ] -> Some library_id
+    | _libs -> assert false
   ;;
 
   let resolve_when_exists t (loc, name) =
@@ -1962,17 +2069,17 @@ module DB = struct
     | Some k -> Memo.return k
   ;;
 
-  let available t name = Resolve_names.available_internal t name
+  let available t library_id = Resolve_names.available_internal t library_id
 
-  let get_compile_info t ~allow_overlaps name =
+  let get_compile_info t ~allow_overlaps library_id =
     let open Memo.O in
-    find_even_when_hidden t name
+    find_even_when_hidden t library_id
     >>| function
     | Some lib -> lib, Compile.for_lib ~allow_overlaps t lib
     | None ->
       Code_error.raise
         "Lib.DB.get_compile_info got library that doesn't exist"
-        [ "name", Lib_name.to_dyn name ]
+        [ "library_id", Library.Id.to_dyn library_id ]
   ;;
 
   let resolve_user_written_deps

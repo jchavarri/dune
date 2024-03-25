@@ -19,13 +19,9 @@ the same folder.
 Without any consumers of the libraries
 
   $ dune build
-  File "dune", line 1, characters 0-44:
-  1 | (library
-  2 |  (name foo)
-  3 |  (public_name bar.foo))
-  Error: A library with name "foo" is defined in two folders: _build/default
-  and _build/default. Either change one of the names, or enable them
-  conditionally using the 'enabled_if' field.
+  Error: Multiple rules generated for _build/default/foo.cmxs:
+  - dune:4
+  - dune:1
   [1]
 
 With some consumer
@@ -56,11 +52,4 @@ With some consumer
   library, executable, and executables stanzas in this dune file. Note that
   each module cannot appear in more than one "modules" field - it must belong
   to a single library or executable.
-  File "dune", line 1, characters 0-44:
-  1 | (library
-  2 |  (name foo)
-  3 |  (public_name bar.foo))
-  Error: A library with name "foo" is defined in two folders: _build/default
-  and _build/default. Either change one of the names, or enable them
-  conditionally using the 'enabled_if' field.
   [1]

@@ -157,16 +157,29 @@ let expand_version { scope; _ } ~(source : Dune_lang.Template.Pform.t) s =
              allowed"
         ];
     let open Memo.O in
-    Lib.DB.find (Scope.libs scope) libname
-    >>| (function
-     | Some lib -> value_from_version (Lib_info.version (Lib.info lib))
+    (* TODO(anmonteiro): check *)
+    let db = Scope.libs scope in
+    Lib.DB.find_stanza_id db libname
+    >>= (function
      | None ->
        User_error.raise
          ~loc:source.loc
          [ Pp.textf
              "Package %S doesn't exist in the current project and isn't installed either."
              s
-         ])
+         ]
+     | Some library_id ->
+       Lib.DB.find db library_id
+       >>| (function
+        | Some lib -> value_from_version (Lib_info.version (Lib.info lib))
+        | None ->
+          User_error.raise
+            ~loc:source.loc
+            [ Pp.textf
+                "Package %S doesn't exist in the current project and isn't installed \
+                 either."
+                s
+            ]))
 ;;
 
 let expand_artifact ~source t artifact arg =
@@ -402,7 +415,9 @@ let expand_lib_variable t source ~lib ~file ~lib_exec ~lib_private =
       then Resolve.Memo.map p ~f:(fun _ -> assert false)
       else
         let open Resolve.Memo.O in
-        Lib.DB.available (Scope.libs scope) lib
+        let db = Scope.libs scope in
+        let* library_id = Resolve.Memo.lift_memo (Lib.DB.find_stanza_id db lib) in
+        Lib.DB.available db (Option.value_exn library_id)
         |> Resolve.Memo.lift_memo
         >>= function
         | false ->
@@ -653,7 +668,11 @@ let expand_pform_macro
           (let lib = Lib_name.parse_string_exn (Dune_lang.Template.Pform.loc source, s) in
            let open Memo.O in
            let* scope = t.scope in
-           let+ available = Lib.DB.available (Scope.libs scope) lib in
+           let db = Scope.libs scope in
+           let+ available =
+             let* library_id = Lib.DB.find_stanza_id db lib in
+             Lib.DB.available db (Option.value_exn library_id)
+           in
            available |> string_of_bool |> string))
   | Bin_available ->
     Need_full_expander

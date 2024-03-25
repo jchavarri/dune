@@ -27,7 +27,6 @@ module DB = struct
     type t = private
       | Found of Lib_info.external_
       | Redirect of (Loc.t * Lib_name.t) * Toggle.t Memo.Lazy.t
-      | Many of t list
       | Deprecated_library_name of (Loc.t * Lib_name.t)
 
     val redirect
@@ -36,14 +35,12 @@ module DB = struct
       -> Loc.t * Lib_name.t
       -> Lib_name.t * t
 
-    val many : t list -> t
     val deprecated_library_name : Lib_name.t -> Loc.t * Lib_name.t -> Lib_name.t * t
     val found : Lib_info.external_ -> t
   end = struct
     type t =
       | Found of Lib_info.external_
       | Redirect of (Loc.t * Lib_name.t) * Toggle.t Memo.Lazy.t
-      | Many of t list
       | Deprecated_library_name of (Loc.t * Lib_name.t)
 
     let redirect ~enabled from (loc, to_) =
@@ -51,8 +48,6 @@ module DB = struct
       then Code_error.raise ~loc "Invalid redirect" [ "to_", Lib_name.to_dyn to_ ]
       else from, Redirect ((loc, to_), enabled)
     ;;
-
-    let many x = Many x
 
     let deprecated_library_name from (loc, to_) =
       if Lib_name.equal from to_
@@ -63,79 +58,78 @@ module DB = struct
     let found x = Found x
   end
 
+  let find_stanza_id id_map name =
+    Memo.return
+    @@
+    match Lib_name.Map.find id_map name with
+    | None | Some [] -> []
+    | Some xs -> xs
+  ;;
+
   module Library_related_stanza = struct
     type t =
       | Library of Path.Build.t * Library.t
       | Library_redirect of Path.Build.t * Library_redirect.Local.t
-      | Deprecated_library_name of Deprecated_library_name.t
+      | Deprecated_library_name of Path.Build.t * Deprecated_library_name.t
   end
 
   let create_db_from_stanzas ~instrument_with ~parent ~lib_config stanzas =
-    let map =
-      List.map stanzas ~f:(fun stanza ->
-        match (stanza : Library_related_stanza.t) with
-        | Library_redirect (dir, s) ->
-          let old_public_name = Lib_name.of_local s.old_name.lib_name in
-          let enabled =
-            Memo.lazy_ (fun () ->
-              let open Memo.O in
-              let* expander = Expander0.get ~dir in
-              let+ enabled = Expander0.eval_blang expander s.old_name.enabled in
-              Toggle.of_bool enabled)
-          in
-          Found_or_redirect.redirect ~enabled old_public_name s.new_public_name
-        | Deprecated_library_name s ->
-          let old_public_name = Deprecated_library_name.old_public_name s in
-          Found_or_redirect.deprecated_library_name old_public_name s.new_public_name
-        | Library (dir, (conf : Library.t)) ->
-          let info =
-            let expander = Expander0.get ~dir in
-            Library.to_lib_info conf ~expander ~dir ~lib_config |> Lib_info.of_local
-          in
-          Library.best_name conf, Found_or_redirect.found info)
-      |> Lib_name.Map.of_list_reducei ~f:(fun name (v1 : Found_or_redirect.t) v2 ->
-        let res =
-          match v1, v2 with
-          | Found _, Found _
-          | Found _, Redirect _
-          | Redirect _, Found _
-          | Redirect _, Redirect _ -> Ok (Found_or_redirect.many [ v1; v2 ])
-          | Found info, Deprecated_library_name (loc, _)
-          | Deprecated_library_name (loc, _), Found info -> Error (loc, Lib_info.loc info)
-          | Deprecated_library_name (loc2, lib2), Redirect ((loc1, lib1), _)
-          | Redirect ((loc1, lib1), _), Deprecated_library_name (loc2, lib2) ->
-            if Lib_name.equal lib1 lib2 then Ok v1 else Error (loc1, loc2)
-          | Deprecated_library_name (loc1, lib1), Deprecated_library_name (loc2, lib2) ->
-            if Lib_name.equal lib1 lib2 then Ok v1 else Error (loc1, loc2)
-          | Many _, _ | _, Many _ -> assert false
-        in
-        match res with
-        | Ok x -> x
-        | Error (loc1, loc2) ->
-          let main_message =
-            Pp.textf "Library %s is defined twice:" (Lib_name.to_string name)
-          in
-          let annots =
-            let main = User_message.make ~loc:loc2 [ main_message ] in
-            let related =
-              [ User_message.make ~loc:loc1 [ Pp.text "Already defined here" ] ]
+    let map, id_map =
+      let libs =
+        List.map stanzas ~f:(fun stanza ->
+          match (stanza : Library_related_stanza.t) with
+          | Library_redirect (dir, s) ->
+            let old_public_name = Lib_name.of_local s.old_name.lib_name in
+            let enabled =
+              Memo.lazy_ (fun () ->
+                let open Memo.O in
+                let* expander = Expander0.get ~dir in
+                let+ enabled = Expander0.eval_blang expander s.old_name.enabled in
+                Toggle.of_bool enabled)
             in
-            User_message.Annots.singleton
-              Compound_user_error.annot
-              [ Compound_user_error.make ~main ~related ]
-          in
-          User_error.raise
-            ~annots
-            [ main_message
-            ; Pp.textf "- %s" (Loc.to_file_colon_line loc1)
-            ; Pp.textf "- %s" (Loc.to_file_colon_line loc2)
-            ])
+            let lib_name, redirect =
+              Found_or_redirect.redirect ~enabled old_public_name s.new_public_name
+            in
+            let library_id =
+              let src_dir = Path.drop_optional_build_context_src_exn (Path.build dir) in
+              ( Library.Id.make ~loc:s.loc ~src_dir ~enabled_if:s.old_name.enabled lib_name
+              , redirect )
+            in
+            lib_name, library_id
+          | Deprecated_library_name (dir, s) ->
+            let old_public_name = Deprecated_library_name.old_public_name s in
+            let lib_name, deprecated_lib =
+              Found_or_redirect.deprecated_library_name old_public_name s.new_public_name
+            in
+            let src_dir = Path.drop_optional_build_context_src_exn (Path.build dir) in
+            lib_name, (Deprecated_library_name.to_id ~src_dir s, deprecated_lib)
+          | Library (dir, (conf : Library.t)) ->
+            let info =
+              let expander = Expander0.get ~dir in
+              Library.to_lib_info conf ~expander ~dir ~lib_config |> Lib_info.of_local
+            in
+            let stanza_id =
+              let src_dir = Path.drop_optional_build_context_src_exn (Path.build dir) in
+              Library.Id.of_stanza ~src_dir conf
+            in
+            Library.best_name conf, (stanza_id, Found_or_redirect.found info))
+      in
+      let id_map =
+        let libs = List.map libs ~f:(fun (name, (id, _lib)) -> name, id) in
+        Lib_name.Map.of_list_multi libs
+      and map =
+        let libs = List.map libs ~f:snd in
+        Library.Id.Map.of_list_exn libs
+      in
+      map, id_map
     in
+    let find_stanza_id = find_stanza_id id_map in
     Lib.DB.create
       ()
       ~parent:(Some parent)
-      ~resolve:(fun name ->
-        match Lib_name.Map.find map name with
+      ~find_stanza_id
+      ~resolve:(fun library_id ->
+        match Library.Id.Map.find map library_id with
         | None -> Memo.return Lib.DB.Resolve_result.not_found
         | Some (Redirect (lib, enabled)) ->
           let+ enabled =
@@ -146,42 +140,26 @@ module DB = struct
           then Lib.DB.Resolve_result.redirect_in_the_same_db lib
           else Lib.DB.Resolve_result.not_found
         | Some (Found lib) -> Memo.return (Lib.DB.Resolve_result.found lib)
-        | Some (Many libs) ->
-          let+ results =
-            Memo.List.filter_map
-              ~f:(function
-                | Found_or_redirect.Redirect (lib, enabled) ->
-                  let+ enabled =
-                    let+ toggle = Memo.Lazy.force enabled in
-                    Toggle.enabled toggle
-                  in
-                  if enabled
-                  then Some (Lib.DB.Resolve_result.redirect_in_the_same_db lib)
-                  else None
-                | Found lib -> Memo.return (Some (Lib.DB.Resolve_result.found lib))
-                | Deprecated_library_name lib ->
-                  Memo.return (Some (Lib.DB.Resolve_result.deprecated_library_name lib))
-                | Many _ -> assert false)
-              libs
-          in
-          Lib.DB.Resolve_result.multiple_results results
         | Some (Deprecated_library_name lib) ->
           Memo.return (Lib.DB.Resolve_result.deprecated_library_name lib))
-      ~all:(fun () -> Memo.return @@ Lib_name.Map.keys map)
+      ~all:(fun () -> Memo.return @@ Library.Id.Map.keys map)
       ~lib_config
       ~instrument_with
   ;;
 
   type redirect_to =
-    | Project of Dune_project.t
+    | Project of
+        { project : Dune_project.t
+        ; library_id : Library.Id.t
+        }
     | Name of (Loc.t * Lib_name.t)
 
-  let resolve t public_libs name : Lib.DB.Resolve_result.t =
-    match Lib_name.Map.find public_libs name with
+  let resolve t public_libs library_id : Lib.DB.Resolve_result.t =
+    match Library.Id.Map.find public_libs library_id with
     | None -> Lib.DB.Resolve_result.not_found
-    | Some (Project project) ->
+    | Some (Project { project; library_id }) ->
       let scope = find_by_project (Fdecl.get t) project in
-      Lib.DB.Resolve_result.redirect scope.db (Loc.none, name)
+      Lib.DB.Resolve_result.redirect scope.db library_id
     | Some (Name name) -> Lib.DB.Resolve_result.redirect_in_the_same_db name
   ;;
 
@@ -195,56 +173,97 @@ module DB = struct
 
   (* Create a database from the public libraries defined in the stanzas *)
   let public_libs t ~installed_libs ~lib_config stanzas =
-    let public_libs =
-      match
-        List.filter_map stanzas ~f:(fun (stanza : Library_related_stanza.t) ->
-          match stanza with
-          | Library (_, { project; visibility = Public p; _ }) ->
-            Some (Public_lib.name p, Project project)
-          | Library _ | Library_redirect _ -> None
-          | Deprecated_library_name s ->
-            let old_name = Deprecated_library_name.old_public_name s in
-            Some (old_name, Name s.new_public_name))
-        |> Lib_name.Map.of_list
-      with
-      | Ok x -> x
-      | Error (name, _, _) ->
-        (match
-           List.filter_map stanzas ~f:(fun stanza ->
-             let named p loc = Option.some_if (name = p) loc in
-             match stanza with
-             | Library (_, { buildable = { loc; _ }; visibility = Public p; _ })
-             | Deprecated_library_name { Library_redirect.loc; old_name = p, _; _ } ->
-               named (Public_lib.name p) loc
-             | _ -> None)
-         with
-         | [] | [ _ ] -> assert false
-         | loc1 :: loc2 :: _ ->
-           let main_message =
-             Pp.textf "Public library %s is defined twice:" (Lib_name.to_string name)
-           in
-           let annots =
-             let main = User_message.make ~loc:loc2 [ main_message ] in
-             let related =
-               [ User_message.make ~loc:loc1 [ Pp.text "Already defined here" ] ]
+    let public_libs, public_ids =
+      let public_libs, public_ids =
+        let libs =
+          List.filter_map stanzas ~f:(fun (stanza : Library_related_stanza.t) ->
+            match stanza with
+            | Library (dir, ({ project; visibility = Public p; _ } as conf)) ->
+              let library_id =
+                let src_dir = Path.drop_optional_build_context_src_exn (Path.build dir) in
+                Library.Id.of_stanza ~src_dir conf
+              in
+              Some (Public_lib.name p, Project { project; library_id }, library_id)
+            | Library _ | Library_redirect _ -> None
+            | Deprecated_library_name (dir, s) ->
+              let old_name = Deprecated_library_name.old_public_name s in
+              let src_dir = Path.drop_optional_build_context_src_exn (Path.build dir) in
+              Some
+                ( old_name
+                , Name s.new_public_name
+                , Deprecated_library_name.to_id ~src_dir s ))
+        in
+        List.fold_left
+          libs
+          ~init:([], [])
+          ~f:(fun (public_libs, public_ids) (name, redirect_to, id) ->
+            (id, redirect_to) :: public_libs, (name, id) :: public_ids)
+      in
+      let public_ids = Lib_name.Map.of_list_multi public_ids
+      and public_libs =
+        match Library.Id.Map.of_list public_libs with
+        | Ok x -> x
+        | Error (library_id, _, _) ->
+          (match
+             List.filter_map stanzas ~f:(fun stanza ->
+               let named p ~lib_id loc =
+                 Option.some_if
+                   (Library.Id.equal library_id lib_id)
+                   (Public_lib.name p, loc)
+               in
+               match stanza with
+               | Library
+                   (dir, ({ buildable = { loc; _ }; visibility = Public p; _ } as conf))
+                 ->
+                 let library_id =
+                   let src_dir =
+                     Path.drop_optional_build_context_src_exn (Path.build dir)
+                   in
+                   Library.Id.of_stanza ~src_dir conf
+                 in
+                 named p ~lib_id:library_id loc
+               | Deprecated_library_name
+                   (dir, ({ Library_redirect.loc; old_name = p, _; _ } as conf)) ->
+                 let library_id =
+                   let src_dir =
+                     Path.drop_optional_build_context_src_exn (Path.build dir)
+                   in
+                   Deprecated_library_name.to_id ~src_dir conf
+                 in
+                 named p ~lib_id:library_id loc
+               | _ -> None)
+           with
+           | [] | [ _ ] -> assert false
+           | (name, loc1) :: (_, loc2) :: _ ->
+             let main_message =
+               Pp.textf "Public library %s is defined twice:" (Lib_name.to_string name)
              in
-             User_message.Annots.singleton
-               Compound_user_error.annot
-               [ Compound_user_error.make ~main ~related ]
-           in
-           User_error.raise
-             ~annots
-             ~loc:loc2
-             [ Pp.textf "Public library %s is defined twice:" (Lib_name.to_string name)
-             ; Pp.textf "- %s" (Loc.to_file_colon_line loc1)
-             ; Pp.textf "- %s" (Loc.to_file_colon_line loc2)
-             ])
+             let annots =
+               let main = User_message.make ~loc:loc2 [ main_message ] in
+               let related =
+                 [ User_message.make ~loc:loc1 [ Pp.text "Already defined here" ] ]
+               in
+               User_message.Annots.singleton
+                 Compound_user_error.annot
+                 [ Compound_user_error.make ~main ~related ]
+             in
+             User_error.raise
+               ~annots
+               ~loc:loc2
+               [ Pp.textf "Public library %s is defined twice:" (Lib_name.to_string name)
+               ; Pp.textf "- %s" (Loc.to_file_colon_line loc1)
+               ; Pp.textf "- %s" (Loc.to_file_colon_line loc2)
+               ])
+      in
+      public_libs, public_ids
     in
-    let resolve lib = Memo.return (resolve t public_libs lib) in
+    let resolve lib = Memo.return (resolve t public_libs lib)
+    and find_stanza_id = find_stanza_id public_ids in
     Lib.DB.create
       ~parent:(Some installed_libs)
+      ~find_stanza_id
       ~resolve
-      ~all:(fun () -> Lib_name.Map.keys public_libs |> Memo.return)
+      ~all:(fun () -> Library.Id.Map.keys public_libs |> Memo.return)
       ~lib_config
       ()
   ;;
@@ -293,7 +312,7 @@ module DB = struct
           match stanza with
           | Library (_, lib) -> lib.project
           | Library_redirect (_, x) -> x.project
-          | Deprecated_library_name x -> x.project
+          | Deprecated_library_name (_, x) -> x.project
         in
         Dune_project.root project, stanza)
       |> Path.Source.Map.of_list_multi
@@ -377,7 +396,9 @@ module DB = struct
           | Library.T lib ->
             let ctx_dir = Path.Build.append_source build_dir (Dune_file.dir dune_file) in
             Library_related_stanza.Library (ctx_dir, lib) :: acc, coq_acc
-          | Deprecated_library_name.T d -> Deprecated_library_name d :: acc, coq_acc
+          | Deprecated_library_name.T d ->
+            let ctx_dir = Path.Build.append_source build_dir (Dune_file.dir dune_file) in
+            Deprecated_library_name (ctx_dir, d) :: acc, coq_acc
           | Library_redirect.Local.T d ->
             let ctx_dir = Path.Build.append_source build_dir (Dune_file.dir dune_file) in
             Library_redirect (ctx_dir, d) :: acc, coq_acc
@@ -425,11 +446,11 @@ module DB = struct
 
   module Lib_entry = struct
     type t =
-      | Library of Lib.Local.t
+      | Library of Library.Id.t * Lib.Local.t
       | Deprecated_library_name of Deprecated_library_name.t
 
     let name = function
-      | Library lib -> Lib.Local.to_lib lib |> Lib.name
+      | Library (_, lib) -> Lib.Local.to_lib lib |> Lib.name
       | Deprecated_library_name { old_name = old_public_name, _; _ } ->
         Public_lib.name old_public_name
     ;;
@@ -441,29 +462,37 @@ module DB = struct
         Dune_file.Memo_fold.fold_static_stanzas stanzas ~init:[] ~f:(fun d stanza acc ->
           match Stanza.repr stanza with
           | Library.T ({ visibility = Private (Some pkg); _ } as lib) ->
+            let src_dir = Dune_file.dir d in
+            let library_id = Library.Id.of_stanza ~src_dir lib in
             let+ lib =
-              let* scope =
-                find_by_dir (Path.Build.append_source build_dir (Dune_file.dir d))
-              in
-              let db = libs scope in
-              Lib.DB.find db (Library.best_name lib)
+              let* scope = find_by_dir (Path.Build.append_source build_dir src_dir) in
+              Lib.DB.find (libs scope) library_id
             in
             (match lib with
              | None -> acc
              | Some lib ->
                let name = Package.name pkg in
-               (name, Lib_entry.Library (Lib.Local.of_lib_exn lib)) :: acc)
-          | Library.T { visibility = Public pub; _ } ->
-            let+ lib = Lib.DB.find public_libs (Public_lib.name pub) in
+               (name, Lib_entry.Library (library_id, Lib.Local.of_lib_exn lib)) :: acc)
+          | Library.T ({ visibility = Public pub; _ } as conf) ->
+            let library_id =
+              let src_dir = Dune_file.dir d in
+              Library.Id.of_stanza ~src_dir conf
+            in
+            let* lib = Lib.DB.find_stanza_id public_libs (Public_lib.name pub) in
             (match lib with
              | None ->
                (* Skip hidden or unavailable libraries. TODO we should assert
                   that the library name is always found somehow *)
-               acc
-             | Some lib ->
-               let package = Public_lib.package pub in
-               let name = Package.name package in
-               (name, Lib_entry.Library (Lib.Local.of_lib_exn lib)) :: acc)
+               Memo.return acc
+             | Some lib_id ->
+               let+ lib = Lib.DB.find public_libs lib_id in
+               (match lib with
+                | None -> acc
+                | Some lib ->
+                  let package = Public_lib.package pub in
+                  let name = Package.name package in
+                  let local_lib = Lib.Local.of_lib_exn lib in
+                  (name, Lib_entry.Library (library_id, local_lib)) :: acc))
           | Deprecated_library_name.T ({ old_name = old_public_name, _; _ } as d) ->
             let package = Public_lib.package old_public_name in
             let name = Package.name package in

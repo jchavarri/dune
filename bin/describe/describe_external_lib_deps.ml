@@ -68,13 +68,17 @@ type dep =
 
 let is_external db name =
   let open Memo.O in
-  let+ lib = Dune_rules.Lib.DB.find_even_when_hidden db name in
-  match lib with
-  | None -> true
-  | Some t ->
-    (match Dune_rules.Lib_info.status (Dune_rules.Lib.info t) with
-     | Installed_private | Public _ | Private _ -> false
-     | Installed -> true)
+  Dune_rules.Lib.DB.find_stanza_id db name
+  >>= function
+  | None -> Memo.return true
+  | Some library_id ->
+    let+ lib = Dune_rules.Lib.DB.find_even_when_hidden db library_id in
+    (match lib with
+     | None -> true
+     | Some t ->
+       (match Dune_rules.Lib_info.status (Dune_rules.Lib.info t) with
+        | Installed_private | Public _ | Private _ -> false
+        | Installed -> true))
 ;;
 
 let resolve_lib db name kind =

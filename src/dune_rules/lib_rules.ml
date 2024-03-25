@@ -285,8 +285,11 @@ let build_stubs lib ~cctx ~dir ~expander ~requires ~dir_contents ~vlib_stubs_o_f
   let sctx = Compilation_context.super_context cctx in
   let* foreign_sources =
     let+ foreign_sources = Dir_contents.foreign_sources dir_contents in
-    let name = Library.best_name lib in
-    Foreign_sources.for_lib foreign_sources ~name
+    let library_id =
+      let src_dir = Path.drop_optional_build_context_src_exn (Path.build dir) in
+      Library.Id.of_stanza ~src_dir lib
+    in
+    Foreign_sources.for_lib foreign_sources ~library_id
   in
   let* o_files =
     let lib_foreign_o_files =
@@ -644,17 +647,20 @@ let library_rules
 
 let rules (lib : Library.t) ~sctx ~dir_contents ~dir ~expander ~scope =
   let buildable = lib.buildable in
+  let library_id =
+    let src_dir = Path.Build.drop_build_context_exn dir in
+    Library.Id.of_stanza ~src_dir lib
+  in
   let* local_lib, compile_info =
     Lib.DB.get_compile_info
       (Scope.libs scope)
-      (Library.best_name lib)
+      library_id
       ~allow_overlaps:buildable.allow_overlapping_dependencies
   in
   let local_lib = Lib.Local.of_lib_exn local_lib in
   let f () =
     let* source_modules =
-      Dir_contents.ocaml dir_contents
-      >>| Ml_sources.modules ~for_:(Library (Library.best_name lib))
+      Dir_contents.ocaml dir_contents >>| Ml_sources.modules ~for_:(Library library_id)
     in
     let* cctx = cctx lib ~sctx ~source_modules ~dir ~scope ~expander ~compile_info in
     let* () =

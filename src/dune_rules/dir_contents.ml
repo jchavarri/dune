@@ -259,9 +259,9 @@ end = struct
           in
           let stanzas = Dune_file.stanzas d in
           let project = Dune_file.project d in
+          let src_dir = Dune_file.dir d in
           let+ files, rules =
             Rules.collect (fun () ->
-              let src_dir = Dune_file.dir d in
               stanzas >>= load_text_files sctx st_dir ~src_dir ~dir)
           in
           let dirs = [ { Source_file_dir.dir; path_to_root = []; files } ] in
@@ -292,7 +292,7 @@ end = struct
               ; foreign_sources =
                   Memo.lazy_ (fun () ->
                     let dune_version = Dune_project.dune_version project in
-                    stanzas >>| Foreign_sources.make ~dune_version ~dirs)
+                    stanzas >>| Foreign_sources.make ~src_dir ~dune_version ~dirs)
               ; coq =
                   Memo.lazy_ (fun () ->
                     stanzas >>| Coq_sources.of_dir ~dir ~include_subdirs ~dirs)
@@ -321,16 +321,11 @@ end = struct
           let ctx = Super_context.context sctx in
           let stanzas = Dune_file.stanzas dune_file in
           let project = Dune_file.project dune_file in
+          let src_dir = Dune_file.dir dune_file in
           let+ (files, subdirs), rules =
             Rules.collect (fun () ->
               Memo.fork_and_join
-                (fun () ->
-                  stanzas
-                  >>= load_text_files
-                        sctx
-                        source_dir
-                        ~src_dir:(Dune_file.dir dune_file)
-                        ~dir)
+                (fun () -> stanzas >>= load_text_files sctx source_dir ~src_dir ~dir)
                 (fun () ->
                   Memo.parallel_map
                     components
@@ -370,7 +365,7 @@ end = struct
           let foreign_sources =
             Memo.lazy_ (fun () ->
               let dune_version = Dune_project.dune_version project in
-              stanzas >>| Foreign_sources.make ~dune_version ~dirs)
+              stanzas >>| Foreign_sources.make ~src_dir ~dune_version ~dirs)
           in
           let coq =
             Memo.lazy_ (fun () ->
@@ -456,8 +451,11 @@ let modules_of_local_lib sctx lib =
     let dir = Lib_info.src_dir info in
     get sctx ~dir
   in
-  let name = Lib_info.name info in
-  ocaml t >>| Ml_sources.modules ~for_:(Library name)
+  let library_id =
+    let lib = Lib.Local.to_lib lib in
+    Lib.library_id lib
+  in
+  ocaml t >>| Ml_sources.modules ~for_:(Library library_id)
 ;;
 
 let modules_of_lib sctx lib =

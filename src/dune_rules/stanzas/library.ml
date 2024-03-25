@@ -579,3 +579,72 @@ include Stanza.Make (struct
 
     include Poly
   end)
+
+module Id = struct
+  type stanza = t
+
+  module T = struct
+    type t =
+      { name : Lib_name.t
+      ; loc : Loc.t
+      ; src_dir : Path.t
+      ; enabled_if : Blang.t
+      }
+
+    let compare a b =
+      match Lib_name.compare a.name b.name with
+      | Eq ->
+        (match Path.compare a.src_dir b.src_dir with
+         | Eq ->
+           (match Loc.compare a.loc b.loc with
+            | Eq ->
+              assert (Blang.equal a.enabled_if b.enabled_if);
+              Eq
+            | o -> o)
+         | o -> o)
+      | x -> x
+    ;;
+
+    let to_dyn { name; loc; enabled_if; src_dir } =
+      let open Dyn in
+      record
+        [ "name", Lib_name.to_dyn name
+        ; "loc", Loc.to_dyn_hum loc
+        ; "src_dir", Path.to_dyn src_dir
+        ; "enabled_if", Blang.to_dyn enabled_if
+        ]
+    ;;
+
+    let equal a b =
+      match compare a b with
+      | Eq -> true
+      | Lt | Gt -> false
+    ;;
+  end
+
+  module O = Comparable.Make (T)
+  module Map = O.Map
+  include T
+
+  let external_ ~loc ~src_dir ~enabled_if name = { name; loc; enabled_if; src_dir }
+
+  let make ~loc ~src_dir ~enabled_if name =
+    let src_dir = Path.source src_dir in
+    { name; loc; enabled_if; src_dir }
+  ;;
+
+  let name { name; _ } = name
+  let loc { loc; _ } = loc
+  (* let src_dir { src_dir; _ } = src_dir *)
+
+  let of_stanza ~src_dir (lib : stanza) =
+    let loc, name =
+      let ((loc, _) as name) = lib.name in
+      loc, Lib_name.of_local name
+    in
+    let enabled_if = lib.enabled_if in
+    make ~loc ~src_dir ~enabled_if name
+  ;;
+
+  (* val of_stanza : Library.t -> t *)
+end

@@ -23,10 +23,11 @@ end
 let builtin_for_dune : Dune_package.t =
   let entry =
     Dune_package.Entry.Deprecated_library_name
-      { loc = Loc.of_pos __POS__
-      ; old_public_name = Lib_name.of_string "dune.configurator"
-      ; new_public_name = Lib_name.of_string "dune-configurator"
-      }
+      ( Path.external_ Path.External.initial_cwd
+      , { loc = Loc.of_pos __POS__
+        ; old_public_name = Lib_name.of_string "dune.configurator"
+        ; new_public_name = Lib_name.of_string "dune-configurator"
+        } )
   in
   { name = Opam_package.Name.of_string "dune"
   ; entries = Lib_name.Map.singleton (Dune_package.Entry.name entry) entry

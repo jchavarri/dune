@@ -9,12 +9,12 @@ open Import
    Furthermore, this module is also responsible for details such as handling file
    extensions and validating filenames. *)
 type t =
-  { libraries : Foreign.Sources.t Lib_name.Map.t
+  { libraries : Foreign.Sources.t Library.Id.Map.t
   ; archives : Foreign.Sources.t Foreign.Archive.Name.Map.t
   ; executables : Foreign.Sources.t String.Map.t
   }
 
-let for_lib t ~name = Lib_name.Map.find_exn t.libraries name
+let for_lib t ~library_id = Library.Id.Map.find_exn t.libraries library_id
 
 let for_archive t ~archive_name =
   Foreign.Archive.Name.Map.find_exn t.archives archive_name
@@ -23,7 +23,7 @@ let for_archive t ~archive_name =
 let for_exes t ~first_exe = String.Map.find_exn t.executables first_exe
 
 let empty =
-  { libraries = Lib_name.Map.empty
+  { libraries = Library.Id.Map.empty
   ; archives = Foreign.Archive.Name.Map.empty
   ; executables = String.Map.empty
   }
@@ -165,7 +165,7 @@ let eval_foreign_stubs
         ~paths:Foreign.Source.[ path src1; path src2 ]))
 ;;
 
-let make stanzas ~(sources : Foreign.Sources.Unresolved.t) ~dune_version =
+let make stanzas ~src_dir ~(sources : Foreign.Sources.Unresolved.t) ~dune_version =
   let libs, foreign_libs, exes =
     let libs, foreign_libs, exes =
       List.fold_left
@@ -245,14 +245,17 @@ let make stanzas ~(sources : Foreign.Sources.Unresolved.t) ~dune_version =
     String.Map.of_list_map_exn exes ~f:(fun (exes, m) -> snd (List.hd exes.names), m)
   in
   let libraries =
-    match Lib_name.Map.of_list_map libs ~f:(fun (lib, m) -> Library.best_name lib, m) with
+    match
+      Library.Id.Map.of_list_map libs ~f:(fun (lib, m) ->
+        Library.Id.of_stanza ~src_dir lib, m)
+    with
     | Ok x -> x
-    | Error (name, _, (lib2, _)) ->
+    | Error (library_id, _, (lib2, _)) ->
       User_error.raise
         ~loc:lib2.buildable.loc
         [ Pp.textf
             "Library %S appears for the second time in this directory"
-            (Lib_name.to_string name)
+            (Lib_name.to_string (Library.Id.name library_id))
         ]
   in
   let archives =
@@ -286,7 +289,7 @@ let make stanzas ~(sources : Foreign.Sources.Unresolved.t) ~dune_version =
   { libraries; archives; executables }
 ;;
 
-let make stanzas ~dune_version ~dirs =
+let make stanzas ~src_dir ~dune_version ~dirs =
   let init = String.Map.empty in
   let sources =
     List.fold_left
@@ -296,5 +299,5 @@ let make stanzas ~dune_version ~dirs =
         let sources = Foreign.Sources.Unresolved.load ~dir ~dune_version ~files in
         String.Map.Multi.rev_union sources acc)
   in
-  make stanzas ~dune_version ~sources
+  make ~src_dir stanzas ~dune_version ~sources
 ;;

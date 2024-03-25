@@ -25,7 +25,7 @@ module Modules = struct
   type component = Modules.t * Path.Build.t Obj_dir.t
 
   type t =
-    { libraries : component Lib_name.Map.t
+    { libraries : component Library.Id.Map.t
     ; executables : component String.Map.t
     ; melange_emits : component String.Map.t
     ; (* Map from modules to the origin they are part of *)
@@ -33,7 +33,7 @@ module Modules = struct
     }
 
   let empty =
-    { libraries = Lib_name.Map.empty
+    { libraries = Library.Id.Map.empty
     ; executables = String.Map.empty
     ; melange_emits = String.Map.empty
     ; rev_map = Module_name.Path.Map.empty
@@ -53,19 +53,23 @@ module Modules = struct
     ; melange_emits : Melange_stanzas.Emit.t group_part list
     }
 
-  let make { libraries = libs; executables = exes; melange_emits = emits } =
+  let make ~dir { libraries = libs; executables = exes; melange_emits = emits } =
     let libraries =
       match
-        Lib_name.Map.of_list_map libs ~f:(fun part ->
-          Library.best_name part.stanza, (part.modules, part.obj_dir))
+        Library.Id.Map.of_list_map libs ~f:(fun part ->
+          let library_id =
+            let src_dir = Path.drop_optional_build_context_src_exn (Path.build dir) in
+            Library.Id.of_stanza ~src_dir part.stanza
+          in
+          library_id, (part.modules, part.obj_dir))
       with
       | Ok x -> x
-      | Error (name, _, part) ->
+      | Error (lib, _, part) ->
         User_error.raise
           ~loc:part.stanza.buildable.loc
           [ Pp.textf
               "Library %S appears for the second time in this directory"
-              (Lib_name.to_string name)
+              (Lib_name.to_string (Library.Id.name lib))
           ]
     in
     let executables =
@@ -214,14 +218,14 @@ let modules_of_files ~path ~dialects ~dir ~files =
 ;;
 
 type for_ =
-  | Library of Lib_name.t
+  | Library of Library.Id.t
   | Exe of { first_exe : string }
   | Melange of { target : string }
 
 let dyn_of_for_ =
   let open Dyn in
   function
-  | Library n -> variant "Library" [ Lib_name.to_dyn n ]
+  | Library n -> variant "Library" [ Library.Id.to_dyn n ]
   | Exe { first_exe } -> variant "Exe" [ record [ "first_exe", string first_exe ] ]
   | Melange { target } -> variant "Melange" [ record [ "target", string target ] ]
 ;;
@@ -229,7 +233,7 @@ let dyn_of_for_ =
 let modules_and_obj_dir t ~for_ =
   match
     match for_ with
-    | Library name -> Lib_name.Map.find t.modules.libraries name
+    | Library library_id -> Library.Id.Map.find t.modules.libraries library_id
     | Exe { first_exe } -> String.Map.find t.modules.executables first_exe
     | Melange { target } -> String.Map.find t.modules.melange_emits target
   with
@@ -237,7 +241,7 @@ let modules_and_obj_dir t ~for_ =
   | None ->
     let map =
       match for_ with
-      | Library _ -> Lib_name.Map.keys t.modules.libraries |> Dyn.list Lib_name.to_dyn
+      | Library _ -> Library.Id.Map.keys t.modules.libraries |> Dyn.list Library.Id.to_dyn
       | Exe _ -> String.Map.keys t.modules.executables |> Dyn.(list string)
       | Melange _ -> String.Map.keys t.modules.melange_emits |> Dyn.(list string)
     in
@@ -257,7 +261,7 @@ let virtual_modules ~lookup_vlib vlib =
     | Local ->
       let src_dir = Lib_info.src_dir info |> Path.as_in_build_dir_exn in
       let+ t = lookup_vlib ~dir:src_dir in
-      modules t ~for_:(Library (Lib.name vlib))
+      modules t ~for_:(Library (Lib.library_id vlib))
   in
   let existing_virtual_modules = Modules_group.virtual_module_names modules in
   let allow_new_public_modules =
@@ -307,8 +311,11 @@ let make_lib_modules
       let open Memo.O in
       let* resolved =
         let* libs = libs in
-        Library.best_name lib
-        |> Lib.DB.find_even_when_hidden libs
+        let library_id =
+          let src_dir = Path.drop_optional_build_context_src_exn (Path.build dir) in
+          Library.Id.of_stanza ~src_dir lib
+        in
+        Lib.DB.find_even_when_hidden libs library_id
         (* can't happen because this library is defined using the current
            stanza *)
         >>| Option.value_exn
@@ -564,7 +571,7 @@ let make
       ~modules
       ~include_subdirs:(loc_include_subdirs, include_subdirs)
   in
-  let modules = Modules.make modules_of_stanzas in
+  let modules = Modules.make ~dir modules_of_stanzas in
   let artifacts =
     Memo.lazy_ (fun () ->
       let libs =

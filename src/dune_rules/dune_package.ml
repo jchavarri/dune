@@ -311,6 +311,14 @@ module Lib = struct
   let info dp = dp.info
   let external_location dp = dp.external_location
 
+  let library_id dp =
+    let info = info dp in
+    let loc = Lib_info.loc info
+    and name = Lib_info.name info
+    and src_dir = Lib_info.src_dir info in
+    Library.Id.external_ ~loc ~src_dir ~enabled_if:Blang.true_ name
+  ;;
+
   let to_dyn { info; main_module_name; external_location } =
     let open Dyn in
     record
@@ -358,12 +366,12 @@ end
 module Entry = struct
   type t =
     | Library of Lib.t
-    | Deprecated_library_name of Deprecated_library_name.t
+    | Deprecated_library_name of Path.t * Deprecated_library_name.t
     | Hidden_library of Lib.t
 
   let name = function
     | Library lib | Hidden_library lib -> Lib_info.name (Lib.info lib)
-    | Deprecated_library_name d -> d.old_public_name
+    | Deprecated_library_name (_, d) -> d.old_public_name
   ;;
 
   let version = function
@@ -373,7 +381,17 @@ module Entry = struct
 
   let loc = function
     | Library lib | Hidden_library lib -> Lib_info.loc (Lib.info lib)
-    | Deprecated_library_name d -> d.loc
+    | Deprecated_library_name (_, d) -> d.loc
+  ;;
+
+  let library_id = function
+    | Library lib | Hidden_library lib ->
+      let info = Lib.info lib in
+      let loc = Lib_info.loc info
+      and name = Lib_info.name info
+      and src_dir = Lib_info.src_dir info in
+      Library.Id.external_ ~loc ~src_dir ~enabled_if:Blang.true_ name
+    | Deprecated_library_name _ -> assert false
   ;;
 
   let cstrs ~lang ~dir =
@@ -383,7 +401,7 @@ module Entry = struct
         Library lib )
     ; ( "deprecated_library_name"
       , let+ x = Deprecated_library_name.decode in
-        Deprecated_library_name x )
+        Deprecated_library_name (dir, x) )
     ]
   ;;
 
@@ -391,7 +409,7 @@ module Entry = struct
     let open Dyn in
     match x with
     | Library lib -> variant "Library" [ Lib.to_dyn lib ]
-    | Deprecated_library_name lib ->
+    | Deprecated_library_name (_, lib) ->
       variant "Deprecated_library_name" [ Deprecated_library_name.to_dyn lib ]
     | Hidden_library lib -> variant "Hidden_library" [ Lib.to_dyn lib ]
   ;;
@@ -516,7 +534,7 @@ let encode ~dune_version { entries; name; version; dir; sections; sites; files }
       match e with
       | Entry.Library lib ->
         list (Dune_lang.atom "library" :: Lib.encode lib ~package_root:dir ~stublibs)
-      | Deprecated_library_name d ->
+      | Deprecated_library_name (_, d) ->
         list (Dune_lang.atom "deprecated_library_name" :: Deprecated_library_name.encode d)
       | Hidden_library lib ->
         Code_error.raise

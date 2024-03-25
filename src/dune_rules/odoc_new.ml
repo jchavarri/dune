@@ -15,7 +15,8 @@ type ext_loc_maps =
 
 let stdlib_lib ctx =
   let* public_libs = Scope.DB.public_libs ctx in
-  Lib.DB.find public_libs (Lib_name.of_string "stdlib")
+  let* library_id = Lib.DB.find_stanza_id public_libs (Lib_name.of_string "stdlib") in
+  Lib.DB.find public_libs (Option.value_exn library_id)
 ;;
 
 let lib_equal l1 l2 = Lib.compare l1 l2 |> Ordering.is_eq
@@ -265,8 +266,9 @@ let libs_maps_def =
          | Some location ->
            let info = Dune_package.Lib.info l in
            let name = Lib_info.name info in
+           let lib_id = Dune_package.Lib.library_id l in
            let pkg = Lib_info.package info in
-           Lib.DB.find db name
+           Lib.DB.find db lib_id
            >>| (function
             | None -> maps
             | Some lib ->

@@ -23,6 +23,7 @@ module Lib : sig
   val dir_of_name : Lib_name.t -> Path.Local.t
   val wrapped : t -> Wrapped.t option
   val info : t -> Path.t Lib_info.t
+  val library_id : t -> Library.Id.t
   val external_location : t -> External_location.t option
   val of_findlib : Path.t Lib_info.t -> External_location.t -> t
   val of_dune_lib : info:Path.t Lib_info.t -> main_module_name:Module_name.t option -> t
@@ -42,7 +43,7 @@ end
 module Entry : sig
   type t =
     | Library of Lib.t
-    | Deprecated_library_name of Deprecated_library_name.t
+    | Deprecated_library_name of Path.t * Deprecated_library_name.t
     | Hidden_library of Lib.t
     (** Only for external libraries that:
 
@@ -55,6 +56,7 @@ module Entry : sig
   val name : t -> Lib_name.t
   val version : t -> Package_version.t option
   val loc : t -> Loc.t
+  val library_id : t -> Library.Id.t
   val to_dyn : t Dyn.builder
 end
 
