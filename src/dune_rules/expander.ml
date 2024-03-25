@@ -417,22 +417,32 @@ let expand_lib_variable t source ~lib ~file ~lib_exec ~lib_private =
         let open Resolve.Memo.O in
         let db = Scope.libs scope in
         let* library_id = Resolve.Memo.lift_memo (Lib.DB.find_stanza_id db lib) in
-        Lib.DB.available db (Option.value_exn library_id)
-        |> Resolve.Memo.lift_memo
-        >>= function
-        | false ->
-          let+ (_ : Path.t) = p in
-          assert false
-        | true ->
+        match library_id with
+        | None ->
           Resolve.Memo.fail
             (User_error.make
                ~loc
-               [ Pp.textf
-                   "The library %S is not public. The variable \"lib%s\" expands to the \
-                    file's installation path which is not defined for private libraries."
-                   (Lib_name.to_string lib)
-                   (if lib_exec then "exec" else "")
-               ]))
+               [ Pp.textf "Library %S not found." (Lib_name.to_string lib) ]
+               ~annots:
+                 (User_message.Annots.singleton User_message.Annots.needs_stack_trace ()))
+        | Some library_id ->
+          Lib.DB.available db library_id
+          |> Resolve.Memo.lift_memo
+          >>= (function
+           | false ->
+             let+ (_ : Path.t) = p in
+             assert false
+           | true ->
+             Resolve.Memo.fail
+               (User_error.make
+                  ~loc
+                  [ Pp.textf
+                      "The library %S is not public. The variable \"lib%s\" expands to \
+                       the file's installation path which is not defined for private \
+                       libraries."
+                      (Lib_name.to_string lib)
+                      (if lib_exec then "exec" else "")
+                  ])))
      |> Resolve.Memo.read)
   |> Action_builder.of_memo_join
 ;;
@@ -667,13 +677,16 @@ let expand_pform_macro
         Without
           (let lib = Lib_name.parse_string_exn (Dune_lang.Template.Pform.loc source, s) in
            let open Memo.O in
-           let* scope = t.scope in
-           let db = Scope.libs scope in
-           let+ available =
-             let* library_id = Lib.DB.find_stanza_id db lib in
-             Lib.DB.available db (Option.value_exn library_id)
+           let* db =
+             let+ scope = t.scope in
+             Scope.libs scope
            in
-           available |> string_of_bool |> string))
+           let* library_id = Lib.DB.find_stanza_id db lib in
+           match library_id with
+           | None -> Memo.return (false |> string_of_bool |> string)
+           | Some library_id ->
+             let+ available = Lib.DB.available db library_id in
+             available |> string_of_bool |> string))
   | Bin_available ->
     Need_full_expander
       (fun t ->
