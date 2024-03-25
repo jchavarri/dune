@@ -55,22 +55,26 @@ module Modules = struct
 
   let make ~dir { libraries = libs; executables = exes; melange_emits = emits } =
     let libraries =
-      match
-        Library.Id.Map.of_list_map libs ~f:(fun part ->
-          let library_id =
-            let src_dir = Path.drop_optional_build_context_src_exn (Path.build dir) in
-            Library.Id.of_stanza ~src_dir part.stanza
-          in
-          library_id, (part.modules, part.obj_dir))
-      with
-      | Ok x -> x
-      | Error (lib, _, part) ->
-        User_error.raise
-          ~loc:part.stanza.buildable.loc
-          [ Pp.textf
-              "Library %S appears for the second time in this directory"
-              (Lib_name.to_string (Library.Id.name lib))
-          ]
+      let (_ : (Modules_group.t * Path.Build.t Obj_dir.t) Lib_name.Map.t) =
+        match
+          Lib_name.Map.of_list_map libs ~f:(fun part ->
+            Library.best_name part.stanza, (part.modules, part.obj_dir))
+        with
+        | Ok x -> x
+        | Error (name, _, part2) ->
+          User_error.raise
+            ~loc:part2.stanza.buildable.loc
+            [ Pp.textf
+                "Library %S appears for the second time in this directory"
+                (Lib_name.to_string name)
+            ]
+      in
+      Library.Id.Map.of_list_map_exn libs ~f:(fun part ->
+        let library_id =
+          let src_dir = Path.drop_optional_build_context_src_exn (Path.build dir) in
+          Library.Id.of_stanza ~src_dir part.stanza
+        in
+        library_id, (part.modules, part.obj_dir))
     in
     let executables =
       match
