@@ -114,6 +114,48 @@ module DB = struct
             in
             Library.best_name conf, (stanza_id, Found_or_redirect.found info))
       in
+      let (_ : (Library.Id.t * Found_or_redirect.t) Lib_name.Map.t) =
+        libs
+        |> Lib_name.Map.of_list_reducei
+             ~f:(fun name (v1 : Library.Id.t * Found_or_redirect.t) v2 ->
+               let res =
+                 match snd v1, snd v2 with
+                 | Found _, Found _
+                 | Found _, Redirect _
+                 | Redirect _, Found _
+                 | Redirect _, Redirect _ -> Ok v1
+                 | Found info, Deprecated_library_name (loc, _)
+                 | Deprecated_library_name (loc, _), Found info ->
+                   Error (loc, Lib_info.loc info)
+                 | Deprecated_library_name (loc2, lib2), Redirect ((loc1, lib1), _)
+                 | Redirect ((loc1, lib1), _), Deprecated_library_name (loc2, lib2) ->
+                   if Lib_name.equal lib1 lib2 then Ok v1 else Error (loc1, loc2)
+                 | ( Deprecated_library_name (loc1, lib1)
+                   , Deprecated_library_name (loc2, lib2) ) ->
+                   if Lib_name.equal lib1 lib2 then Ok v1 else Error (loc1, loc2)
+               in
+               match res with
+               | Ok x -> x
+               | Error (loc1, loc2) ->
+                 let main_message =
+                   Pp.textf "Library %s is defined twice:" (Lib_name.to_string name)
+                 in
+                 let annots =
+                   let main = User_message.make ~loc:loc2 [ main_message ] in
+                   let related =
+                     [ User_message.make ~loc:loc1 [ Pp.text "Already defined here" ] ]
+                   in
+                   User_message.Annots.singleton
+                     Compound_user_error.annot
+                     [ Compound_user_error.make ~main ~related ]
+                 in
+                 User_error.raise
+                   ~annots
+                   [ main_message
+                   ; Pp.textf "- %s" (Loc.to_file_colon_line loc1)
+                   ; Pp.textf "- %s" (Loc.to_file_colon_line loc2)
+                   ])
+      in
       let id_map =
         let libs = List.map libs ~f:(fun (name, (id, _lib)) -> name, id) in
         Lib_name.Map.of_list_multi libs
