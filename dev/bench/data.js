@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1711450094693,
+  "lastUpdate": 1711450245122,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -3711,6 +3711,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "25.00885207528667",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@emillon.org",
+            "name": "Etienne Millon",
+            "username": "emillon"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f1d822357e7890d5b577b396777ac2e5f97d763c",
+          "message": "doc: remove \"files\" layer (#10299)\n\nThis nests the pages too deeply and requires extra clicks. Instead we\r\nput this directly in the reference hierarchy and will highlight them in\r\na separate section when using cards.\r\n\r\nSigned-off-by: Etienne Millon <me@emillon.org>",
+          "timestamp": "2024-03-25T12:59:36+01:00",
+          "tree_id": "a516559e6a0640ce309a488976388211eaa989bd",
+          "url": "https://github.com/jchavarri/dune/commit/f1d822357e7890d5b577b396777ac2e5f97d763c"
+        },
+        "date": 1711450244487,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "21.979319513286665",
             "unit": "seconds"
           }
         ]
