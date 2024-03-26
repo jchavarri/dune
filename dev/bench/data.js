@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1711460136639,
+  "lastUpdate": 1711460353046,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -9252,6 +9252,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (warm, Linux)",
             "value": "1.1425030794200002",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "bcc00dcc9b310d0a02afc91c2ac7c8780c8e0538",
+          "message": "test: add eif library cycle test (#10298)\n\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>",
+          "timestamp": "2024-03-26T11:55:07+01:00",
+          "tree_id": "6b5524dda4b81c3a2486af50edc54885fb572c2f",
+          "url": "https://github.com/jchavarri/dune/commit/bcc00dcc9b310d0a02afc91c2ac7c8780c8e0538"
+        },
+        "date": 1711460352038,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (cold, Linux)",
+            "value": "42.44505454767333",
             "unit": "seconds"
           }
         ]
