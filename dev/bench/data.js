@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1711621657310,
+  "lastUpdate": 1711621868684,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -9339,6 +9339,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (warm, Linux)",
             "value": "1.2376624797066667",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "stephen@sherra.tt",
+            "name": "Stephen Sherratt",
+            "username": "gridbugs"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9265e2c584b8c9e9e3333da83a5c37a162dd8d28",
+          "message": "pkg: Set OCAMLFIND_DESTDIR for actions (#10267)\n\nIf a package uses ocamlfind to install its files then ocamlfind will\r\nconsult its config file to determine where in the filesystem the\r\ninstalled files ought to go. In dune, each package is built in an\r\nisolated sandbox, and so by default ocamlfind won't install files to the\r\ncorrect location. The OCAMLFIND_DESTDIR environment variable can be used\r\nto override ocamlfind's default behaviour for determining where to\r\ninstall files.\r\n\r\nThis change sets the OCAMLFIND_DESTDIR variable to the \"target/lib\"\r\ndirectory within a package's build sandbox when executing a package's\r\nbuild and install commands.\r\n\r\nSigned-off-by: Stephen Sherratt <stephen@sherra.tt>",
+          "timestamp": "2024-03-28T11:20:50+11:00",
+          "tree_id": "1de2f95e0a892fdfd0c6fa206bf06b3f3aea1a9f",
+          "url": "https://github.com/jchavarri/dune/commit/9265e2c584b8c9e9e3333da83a5c37a162dd8d28"
+        },
+        "date": 1711621867853,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (cold, Linux)",
+            "value": "41.677248780086664",
             "unit": "seconds"
           }
         ]
