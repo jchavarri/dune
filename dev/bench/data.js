@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1711621876702,
+  "lastUpdate": 1711634890926,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -11951,6 +11951,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "13.804268615360002",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a5e6f97f2399cefd18ff38449d61030fc9f651ec",
+          "message": "refactor: remove pointless conversion in [Command.t] (#10278)\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2024-03-28T11:28:14Z",
+          "tree_id": "92fa3598aa8df780060f3017682b7089ad0b49a1",
+          "url": "https://github.com/jchavarri/dune/commit/a5e6f97f2399cefd18ff38449d61030fc9f651ec"
+        },
+        "date": 1711634889210,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "13.872158287413335",
             "unit": "seconds"
           }
         ]
