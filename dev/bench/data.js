@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1711959925657,
+  "lastUpdate": 1711960077711,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -3827,6 +3827,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "22.647470030526666",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "anmonteiro@gmail.com",
+            "name": "Antonio Nuno Monteiro",
+            "username": "anmonteiro"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "5e29c5ca6a6b95b1f9bfedc75216ba2a562f5939",
+          "message": "chore(melange): move useless comment to where it belongs (#10345)\n\nSigned-off-by: Antonio Nuno Monteiro <anmonteiro@gmail.com>",
+          "timestamp": "2024-03-31T23:46:40-07:00",
+          "tree_id": "53810196e5d5cb437aee59ee34a2c1b4e2f8faba",
+          "url": "https://github.com/jchavarri/dune/commit/5e29c5ca6a6b95b1f9bfedc75216ba2a562f5939"
+        },
+        "date": 1711960076942,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "22.059247717420003",
             "unit": "seconds"
           }
         ]
