@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1712046476899,
+  "lastUpdate": 1712046629892,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -3885,6 +3885,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "22.106971634000004",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@emillon.org",
+            "name": "Etienne Millon",
+            "username": "emillon"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d65d10e27610483e5cf5a2dba4b24b01fef5dc02",
+          "message": "refactor: invert control in install_uninstall (#10302)\n\nInstead of returning a `load_special_file_result`, we change the API so\r\nthat functions get a `~get_version` and `oc` argument and use them.\r\n\r\nSigned-off-by: Etienne Millon <me@emillon.org>",
+          "timestamp": "2024-04-02T10:12:35+02:00",
+          "tree_id": "d4a4451f19e502e8fe209634619786f34dafa302",
+          "url": "https://github.com/jchavarri/dune/commit/d65d10e27610483e5cf5a2dba4b24b01fef5dc02"
+        },
+        "date": 1712046628840,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "22.329038471679997",
             "unit": "seconds"
           }
         ]
