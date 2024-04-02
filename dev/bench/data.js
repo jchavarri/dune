@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1712039173795,
+  "lastUpdate": 1712039386758,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -9600,6 +9600,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (warm, Linux)",
             "value": "1.14195374312",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "stephen@sherra.tt",
+            "name": "Stephen Sherratt",
+            "username": "gridbugs"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d7d1d9892d663790d3d93797079d9f1ce864aaff",
+          "message": "Add repro for gh10232 (#10233)\n\nSigned-off-by: Stephen Sherratt <stephen@sherra.tt>",
+          "timestamp": "2024-04-02T11:32:01+11:00",
+          "tree_id": "af4edfaae62c4378661f8f6b21329ba9f9be7248",
+          "url": "https://github.com/jchavarri/dune/commit/d7d1d9892d663790d3d93797079d9f1ce864aaff"
+        },
+        "date": 1712039385725,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (cold, Linux)",
+            "value": "41.64005451951334",
             "unit": "seconds"
           }
         ]
