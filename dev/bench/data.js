@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1712046854711,
+  "lastUpdate": 1712754744690,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -12415,6 +12415,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "14.134697059373332",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "marek@tarides.com",
+            "name": "Marek Kubica",
+            "username": "Leonidas-from-XIV"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ec4081d6596321e1044719564655f620b3372abd",
+          "message": "fix(doc): Correct `versionadded` reference for `subst` (#10406)\n\nSigned-off-by: Marek Kubica <marek@tarides.com>",
+          "timestamp": "2024-04-10T11:54:31+02:00",
+          "tree_id": "d3f4d19c47700035537c31ad4ab78e45cc232121",
+          "url": "https://github.com/jchavarri/dune/commit/ec4081d6596321e1044719564655f620b3372abd"
+        },
+        "date": 1712754743675,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "13.867355604866667",
             "unit": "seconds"
           }
         ]
