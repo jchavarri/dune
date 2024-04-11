@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1712856811643,
+  "lastUpdate": 1712856819196,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -9890,6 +9890,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (cold, Linux)",
             "value": "41.70445278261333",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@emillon.org",
+            "name": "Etienne Millon",
+            "username": "emillon"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c2a00c9168ed7ff015b6aba2adb5f955a8a6507d",
+          "message": "fix: update link in dune init (#10396)\n\nSigned-off-by: Etienne Millon <me@emillon.org>",
+          "timestamp": "2024-04-11T12:40:50+02:00",
+          "tree_id": "950dc24da265e5dc5585b23167c920ce856ae61d",
+          "url": "https://github.com/jchavarri/dune/commit/c2a00c9168ed7ff015b6aba2adb5f955a8a6507d"
+        },
+        "date": 1712856818589,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (warm, Linux)",
+            "value": "1.1626767163933334",
             "unit": "seconds"
           }
         ]
