@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1712856819196,
+  "lastUpdate": 1713162235334,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -12647,6 +12647,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "14.060324709633333",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "anmonteiro@gmail.com",
+            "name": "Antonio Nuno Monteiro",
+            "username": "anmonteiro"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "497871a88b5b64392bebd048e1a507ec110fb6c6",
+          "message": "test(melange): augment a test case for ocaml-flags (#10421)\n\n* test(melange): replace wrong test description\r\n\r\nwas fixed in https://github.com/ocaml/dune/pull/6953\r\n\r\nSigned-off-by: Antonio Nuno Monteiro <anmonteiro@gmail.com>\r\n\r\n* test(melange): add an extra test case to ocaml-flags.t\r\n\r\nSigned-off-by: Antonio Nuno Monteiro <anmonteiro@gmail.com>\r\n\r\n---------\r\n\r\nSigned-off-by: Antonio Nuno Monteiro <anmonteiro@gmail.com>",
+          "timestamp": "2024-04-13T02:31:02Z",
+          "tree_id": "5aa8284f40b7d30cec1eeba10a820c1d178a3bda",
+          "url": "https://github.com/jchavarri/dune/commit/497871a88b5b64392bebd048e1a507ec110fb6c6"
+        },
+        "date": 1713162233649,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "14.43894655928",
             "unit": "seconds"
           }
         ]
