@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1713162617327,
+  "lastUpdate": 1713428508045,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -12763,6 +12763,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "14.43894655928",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@emillon.org",
+            "name": "Etienne Millon",
+            "username": "emillon"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d6a0e9c54b89b0008c5e9d518cbc8846fe8112b5",
+          "message": "fix(spawn): update spawn for gcc 4.8.5 (#10428)\n\nUpdated to a version that contains janestreet/spawn#62.\r\n\r\nSigned-off-by: Etienne Millon <me@emillon.org>",
+          "timestamp": "2024-04-17T09:33:11+02:00",
+          "tree_id": "45f12741f2233f67011552c95633fa85fc26b62d",
+          "url": "https://github.com/jchavarri/dune/commit/d6a0e9c54b89b0008c5e9d518cbc8846fe8112b5"
+        },
+        "date": 1713428506822,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "13.954761031513334",
             "unit": "seconds"
           }
         ]
