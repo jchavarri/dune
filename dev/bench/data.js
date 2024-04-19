@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1713541814400,
+  "lastUpdate": 1713541966249,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -4030,6 +4030,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "22.1373100168",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "stephen@sherra.tt",
+            "name": "Stephen Sherratt",
+            "username": "gridbugs"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1d5f97cadadb14bad714bbaef56bb312654d1937",
+          "message": "Add repro of gh10440 (#10441)\n\nSigned-off-by: Stephen Sherratt <stephen@sherra.tt>",
+          "timestamp": "2024-04-19T10:14:43+10:00",
+          "tree_id": "a9109e7f10591857bdcb5af18f0622289ca2f442",
+          "url": "https://github.com/jchavarri/dune/commit/1d5f97cadadb14bad714bbaef56bb312654d1937"
+        },
+        "date": 1713541965581,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "22.217854882366666",
             "unit": "seconds"
           }
         ]
