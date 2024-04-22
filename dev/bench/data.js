@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1713789795682,
+  "lastUpdate": 1713789948664,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -4059,6 +4059,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "22.217854882366666",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@emillon.org",
+            "name": "Etienne Millon",
+            "username": "emillon"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ac0eca33eb66fd41a99177a60aa2cfd0baed9beb",
+          "message": "doc: tour of the dune codebase (#10379)\n\nThis is a new document (well, group of documents) where we go through\r\nvarious places of the code base. The main path goes from the CLI, to\r\ndecoding, to rule generation, to the engine (of which we don't say\r\nmuch); and then a detour by the libraries and tests.\r\n\r\nSigned-off-by: Etienne Millon <me@emillon.org>\r\nCo-authored-by: Antonio Nuno Monteiro <anmonteiro@gmail.com>\r\nCo-authored-by: Christine Rose <professor.rose@gmail.com>",
+          "timestamp": "2024-04-22T13:54:24+02:00",
+          "tree_id": "ecf2f2e96733fa6cd5d4c7b149687ddd26e849bd",
+          "url": "https://github.com/jchavarri/dune/commit/ac0eca33eb66fd41a99177a60aa2cfd0baed9beb"
+        },
+        "date": 1713789947914,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "22.116357191786665",
             "unit": "seconds"
           }
         ]
