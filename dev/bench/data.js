@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1713863082184,
+  "lastUpdate": 1713863298828,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -10296,6 +10296,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (warm, Linux)",
             "value": "1.22824864874",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "stephen@sherra.tt",
+            "name": "Stephen Sherratt",
+            "username": "gridbugs"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "62a79b205d9d3516175d89c2cccde9dd9f9094a6",
+          "message": "Fix gh10408 (#10444)\n\nWhen updating the PATH variable with the `withenv` action, dune would\r\npreviously clobber the existing PATH from the environment rather than\r\nupdating it. Withenv applies environment updates iteratively starting\r\nfrom some base environment. Prior to this change, the base environment\r\ndid not include the global environment, so as far as withenv knew the\r\nPATH was originally empty. The fix is to start withenv with an\r\nenvironment which includes the global environment.\r\n\r\nSigned-off-by: Stephen Sherratt <stephen@sherra.tt>",
+          "timestamp": "2024-04-23T12:55:55+10:00",
+          "tree_id": "129fc482599e778e70e52dc9858f641fe1b227e8",
+          "url": "https://github.com/jchavarri/dune/commit/62a79b205d9d3516175d89c2cccde9dd9f9094a6"
+        },
+        "date": 1713863297718,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (cold, Linux)",
+            "value": "42.65223744674",
             "unit": "seconds"
           }
         ]
