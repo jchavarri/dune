@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1714116134395,
+  "lastUpdate": 1714116142390,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -10412,6 +10412,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (cold, Linux)",
             "value": "42.396858988746665",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "philipwhite@cedarville.edu",
+            "name": "pmwhite",
+            "username": "pmwhite"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6f878dd002bb5454ddc5e71f7fb9545609dd2a81",
+          "message": "Remove action runner commands. (#10456)\n\nRight now this is only a useful feature for Jane Street. Removing it to\r\navoid adding extra maintenance burden to external Dune. (motivated by\r\n\r\nSigned-off-by: Philip White <code@trailingwhite.space>\r\nCo-authored-by: Philip White <code@trailingwhite.space>",
+          "timestamp": "2024-04-25T23:29:08+01:00",
+          "tree_id": "5de222f4bc3cdfa4cd5102fc093bf0cbbc4fc6fa",
+          "url": "https://github.com/jchavarri/dune/commit/6f878dd002bb5454ddc5e71f7fb9545609dd2a81"
+        },
+        "date": 1714116141649,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (warm, Linux)",
+            "value": "1.2052759195",
             "unit": "seconds"
           }
         ]
