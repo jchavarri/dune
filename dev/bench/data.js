@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1714376900276,
+  "lastUpdate": 1714377052163,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -4146,6 +4146,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "22.457547060219998",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "e+git@x80.org",
+            "name": "Emilio Jesús Gallego Arias",
+            "username": "ejgallego"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "5554158af27ead066fbb3c009e780c930958613c",
+          "message": "Merge pull request #10429 from ejgallego/per_file_flags_coq\n\n[coq] Add support for per-file flags.",
+          "timestamp": "2024-04-27T15:46:06+02:00",
+          "tree_id": "ea00b2ab5eaca6704b4ecba9b595c2f60183664e",
+          "url": "https://github.com/jchavarri/dune/commit/5554158af27ead066fbb3c009e780c930958613c"
+        },
+        "date": 1714377051598,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "22.127418305693336",
             "unit": "seconds"
           }
         ]
