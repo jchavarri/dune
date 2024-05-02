@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1714634863130,
+  "lastUpdate": 1714635013787,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -4175,6 +4175,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "22.127418305693336",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "stephen@sherra.tt",
+            "name": "Stephen Sherratt",
+            "username": "gridbugs"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e0e23eabe89de307e15bcc9b678e967e2129e729",
+          "message": "pkg: Undo change reversing order of env updates (#10474)\n\nIn 3ea5444cd the order of env updates performed by packages was\nreversed. This brought the behaviour of dune closer to opam but\nintroduced a regression which prevents ocamlfind from building with\ndune package management.\n\nHere's an issue for tracking investigating why this change caused the\nregression: https://github.com/ocaml/dune/issues/10473\n\nSigned-off-by: Stephen Sherratt <stephen@sherra.tt>",
+          "timestamp": "2024-05-02T14:25:15+10:00",
+          "tree_id": "709a2ca886264f0ac820ae1728604ff9af8cc268",
+          "url": "https://github.com/jchavarri/dune/commit/e0e23eabe89de307e15bcc9b678e967e2129e729"
+        },
+        "date": 1714635013259,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "21.859286297819995",
             "unit": "seconds"
           }
         ]
