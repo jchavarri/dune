@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1715006991100,
+  "lastUpdate": 1715007206451,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -10644,6 +10644,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (warm, Linux)",
             "value": "1.1782618435133334",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "0471f45579632e29dbac4c93cf7d93c248d9a73c",
+          "message": "merlin: add new contexts commands (#10324)\n\n* merlin: add rules regardless of (merlin)\r\n\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\n\r\n* merlin: update tests\r\n\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\n\r\n* merlin: add GetContexts command\r\n\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\n\r\n* merlin: add SetContexts (wip)\r\n\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\n\r\n* better tests\r\n\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\n\r\n* merlin: simpler get-set-contexts test\r\n\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\n\r\n* Revert \"merlin: add rules regardless of (merlin)\"\r\n\r\nThis reverts commit 3d3c97ff3d4aa231c55ce02528f1a5c39dd50752.\r\n\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\n\r\n* merlin: introduce generate_merlin_rules\r\n\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\n\r\n* add docs and changelog\r\n\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\n\r\n* merlin: roll back changes in default-based-context test\r\n\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\n\r\n* merlin: update get-set-contexts test\r\n\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\n\r\n* update changes\r\n\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\n\r\n* rename Standard to Default\r\n\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\n\r\n* merlin: rename Nothing to Not_selected\r\n\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\n\r\n* merlin: fix tests\r\n\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\n\r\n* describe: add contexts subcommand\r\n\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\n\r\n* merlin: replace get/set context with flag\r\n\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\n\r\n* merlin: cleanup\r\n\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\n\r\n* cleanup\r\n\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\n\r\n* merlin: remove context check\r\n\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\n\r\n* apply suggestions from code review\r\n\r\nCo-authored-by: Antonio Nuno Monteiro <anmonteiro@gmail.com>\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\n\r\n* gate generate_merlin_rules to 3.16\r\n\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\n\r\n* merlin: add --context to dump_dot_merlin\r\n\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\n\r\n* apply suggestions from code review\r\n\r\nCo-authored-by: Antonio Nuno Monteiro <anmonteiro@gmail.com>\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\n\r\n* merlin: add Select_context.conv\r\n\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\n\r\n* fix: promote tests after rebase\r\n\r\nSigned-off-by: Antonio Nuno Monteiro <anmonteiro@gmail.com>\r\n\r\n* refactor: remove `Selected_context.t`, reuse the context arg, use it in dump\r\n\r\nSigned-off-by: Antonio Nuno Monteiro <anmonteiro@gmail.com>\r\n\r\n---------\r\n\r\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>\r\nSigned-off-by: Antonio Nuno Monteiro <anmonteiro@gmail.com>\r\nCo-authored-by: Antonio Nuno Monteiro <anmonteiro@gmail.com>",
+          "timestamp": "2024-05-05T18:30:02-07:00",
+          "tree_id": "c21843d38462c7bf785493ee8c7f2bbaa3657252",
+          "url": "https://github.com/jchavarri/dune/commit/0471f45579632e29dbac4c93cf7d93c248d9a73c"
+        },
+        "date": 1715007205714,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (cold, Linux)",
+            "value": "42.38796332464667",
             "unit": "seconds"
           }
         ]
