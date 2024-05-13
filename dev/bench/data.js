@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1715007214667,
+  "lastUpdate": 1715615034269,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -13691,6 +13691,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "14.064062019573333",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "793162ac2b6e02f967b0f2bbd26cd4161212a0c6",
+          "message": "refactor(pkg): remove some copy pasting (#10499)\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2024-05-13T16:15:21+01:00",
+          "tree_id": "07cd7dbd61ca951aa652f13660e355add02b5eda",
+          "url": "https://github.com/jchavarri/dune/commit/793162ac2b6e02f967b0f2bbd26cd4161212a0c6"
+        },
+        "date": 1715615032722,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "14.144218744120002",
             "unit": "seconds"
           }
         ]
