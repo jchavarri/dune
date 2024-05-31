@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1715615413764,
+  "lastUpdate": 1717159969648,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -13807,6 +13807,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "14.144218744120002",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "anmonteiro@gmail.com",
+            "name": "Antonio Nuno Monteiro",
+            "username": "anmonteiro"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "034e352f5cde97e6866e44e29815da917d022e16",
+          "message": "fix(mdx): link mdx binary with byte_complete (#10586)\n\nSigned-off-by: Antonio Nuno Monteiro <anmonteiro@gmail.com>\r\nSigned-off-by: Etienne Millon <me@emillon.org>\r\nCo-authored-by: Etienne Millon <me@emillon.org>",
+          "timestamp": "2024-05-31T11:45:52+02:00",
+          "tree_id": "40ee27e90276d3f55cac4660d33f9c730eec4486",
+          "url": "https://github.com/jchavarri/dune/commit/034e352f5cde97e6866e44e29815da917d022e16"
+        },
+        "date": 1717159968410,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "14.072597386293333",
             "unit": "seconds"
           }
         ]
