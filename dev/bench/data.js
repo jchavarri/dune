@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1718381368839,
+  "lastUpdate": 1718381527118,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -4291,6 +4291,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "pupilfirst build time (Linux)",
             "value": "21.55351402448",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "122800536+MA0010@users.noreply.github.com",
+            "name": "HasanA",
+            "username": "MA0010"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "987e1f16b3e6a9d43ec7e3cb130fe52ec86fceca",
+          "message": "Bump dune `lang` version to 3.17 + add unix deps to vendor (#10645)\n\nSigned-off-by: HasanA <mhmd_alameen1023@outlook.com>",
+          "timestamp": "2024-06-13T09:31:55+02:00",
+          "tree_id": "6c343fa062173e04ed900e20f1c13886a3bdf060",
+          "url": "https://github.com/jchavarri/dune/commit/987e1f16b3e6a9d43ec7e3cb130fe52ec86fceca"
+        },
+        "date": 1718381526206,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pupilfirst build time (Linux)",
+            "value": "22.380346426166668",
             "unit": "seconds"
           }
         ]
