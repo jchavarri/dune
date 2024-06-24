@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1719221593782,
+  "lastUpdate": 1719221812115,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -10992,6 +10992,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (warm, Linux)",
             "value": "1.2321581569266666",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "47a7fe7b4e7b866012c296d99c278bbf58ac913c",
+          "message": "test(dune-rpc-lwt): set XDG_STATE_HOME (#10667)\n\nto make sure the tests don't register themselves globally\r\n\r\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2024-06-22T20:05:50+01:00",
+          "tree_id": "9d6477f14aa86790b73a4d96f330d0e11704d077",
+          "url": "https://github.com/jchavarri/dune/commit/47a7fe7b4e7b866012c296d99c278bbf58ac913c"
+        },
+        "date": 1719221811244,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (cold, Linux)",
+            "value": "42.70540510734666",
             "unit": "seconds"
           }
         ]
