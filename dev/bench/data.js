@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1725800678133,
+  "lastUpdate": 1725800815069,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -14184,6 +14184,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic watch build time (warm, Linux)",
             "value": "15.842724405813334",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "committer": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "distinct": true,
+          "id": "b0afc0a77664164f1e694ce490d95a83ebfab41b",
+          "message": "ci bench: use 5.1\n\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>",
+          "timestamp": "2024-09-08T13:00:21Z",
+          "tree_id": "bd6cc9d61a7f4aabe11a61b52a8c0af85d06491d",
+          "url": "https://github.com/jchavarri/dune/commit/b0afc0a77664164f1e694ce490d95a83ebfab41b"
+        },
+        "date": 1725800814127,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic watch build time (warm, Linux)",
+            "value": "15.660687478239998",
             "unit": "seconds"
           }
         ]
