@@ -34,6 +34,7 @@ let local_libraries =
     None)
   ; ("src/dune_util", Some "Dune_util", false, None)
   ; ("src/dune_metrics", Some "Dune_metrics", false, None)
+  ; ("vendor/xxh", Some "Dune_xxh", false, None)
   ; ("src/dune_digest", Some "Dune_digest", false, None)
   ; ("src/predicate_lang", Some "Predicate_lang", false, None)
   ; ("otherlibs/dune-private-libs/section", Some "Dune_section", false, None)
