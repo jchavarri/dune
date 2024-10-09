@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1728485650305,
+  "lastUpdate": 1728485893840,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -11253,6 +11253,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (warm, Linux)",
             "value": "0.9529090866533334",
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "moyodiallo@gmail.com",
+            "name": "Alpha Issiaga DIALLO",
+            "username": "moyodiallo"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "412a0f5054e6018f724fd6179f8bf53eacc121bf",
+          "message": "test(pkg): Reproduce depexts message bug (#11004)\n\nSigned-off-by: Alpha DIALLO <moyodiallo@gmail.com>",
+          "timestamp": "2024-10-08T20:08:41+01:00",
+          "tree_id": "2e1fab8e5ca03660678ad6dd5615ccb28292dc8c",
+          "url": "https://github.com/jchavarri/dune/commit/412a0f5054e6018f724fd6179f8bf53eacc121bf"
+        },
+        "date": 1728485892825,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (cold, Linux)",
+            "value": "47.80454600247334",
             "unit": "seconds"
           }
         ]
