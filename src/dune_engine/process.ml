@@ -6,6 +6,9 @@ module Timestamp = Event.Timestamp
 module Action_output_on_success = Execution_parameters.Action_output_on_success
 module Action_output_limit = Execution_parameters.Action_output_limit
 
+let dune_start_time = Unix.gettimeofday ()
+let ongoing_jobs = ref 0
+
 let with_directory_annot =
   User_message.Annots.Key.create ~name:"with-directory" Path.to_dyn
 ;;
@@ -1011,6 +1014,16 @@ let run_internal
     let t =
       spawn ?dir ?env ~stdout:stdout_to ~stderr:stderr_to ~stdin:stdin_from ~prog ~args ()
     in
+    let start_time = Unix.gettimeofday () in
+    let start_time_relative = (start_time -. dune_start_time) *. 1000.0 in
+    let desc_string =
+      match metadata.purpose with
+      | Internal_job -> "(internal)"
+      | Build_job None -> "(no targets)"
+      | Build_job (Some target) ->
+        Targets.Validated.head target |> Path.Build.to_string_maybe_quoted
+    in
+    ongoing_jobs := !ongoing_jobs + 1;
     let* () =
       let description =
         (* CR-soon amokhov: What happens with actions attached to aliases? Do they go into
@@ -1027,6 +1040,20 @@ let run_internal
     in
     let* process_info, termination_reason = await t in
     let+ () = Running_jobs.stop id in
+    let end_time = Unix.gettimeofday () in
+    let end_time_relative = (end_time -. dune_start_time) *. 1000.0 in
+    let log_file = "_build/job_log" in
+    let oc = Stdlib.open_out_gen [ Open_creat; Open_append; Open_text ] 0o666 log_file in
+    (* Log job information *)
+    Printf.fprintf
+      oc
+      "%.0f\t%.0f\t%s\t%d\n"
+      start_time_relative
+      end_time_relative
+      desc_string
+      !ongoing_jobs;
+    close_out oc;
+    ongoing_jobs := !ongoing_jobs - 1;
     let result = Result.make t process_info fail_mode in
     let times =
       { Proc.Times.elapsed_time = process_info.end_time -. t.started_at
