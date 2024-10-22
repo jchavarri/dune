@@ -42,11 +42,20 @@ module Group = struct
 end
 
 let deps_of_lib (lib : Lib.t) ~groups =
-  let obj_dir = Lib.info lib |> Lib_info.obj_dir in
-  List.map groups ~f:(fun g ->
-    let dir = Group.obj_dir g obj_dir in
-    Group.to_glob g |> File_selector.of_glob ~dir |> Dep.file_selector)
-  |> Dep.Set.of_list
+  let info = Lib.info lib in
+  let status = info |> Lib_info.status in
+  (* unclear if this is the right place to branch per `status`, as
+     Lib_file_deps.deps is called from `foreign_rules.ml` to get headers *)
+  match status with
+  | Private _ ->
+    (* private libs will set deps more granularly using ocamldep -map *)
+    Dep.Set.empty
+  | Installed_private | Installed | Public _ ->
+    let obj_dir = info |> Lib_info.obj_dir in
+    List.map groups ~f:(fun g ->
+      let dir = Group.obj_dir g obj_dir in
+      Group.to_glob g |> File_selector.of_glob ~dir |> Dep.file_selector)
+    |> Dep.Set.of_list
 ;;
 
 let deps_with_exts = Dep.Set.union_map ~f:(fun (lib, groups) -> deps_of_lib lib ~groups)
