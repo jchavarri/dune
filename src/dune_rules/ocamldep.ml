@@ -109,6 +109,8 @@ let deps_of
          ~stdout_to:ocamldep_output
          [ A "-modules"
          ; Command.Args.dyn flags
+         ; A "-ml-synonym"
+         ; A ".ml-gen"
          ; Command.Ml_kind.flag ml_kind
          ; Dep (Module.File.path source)
          ]
@@ -133,6 +135,9 @@ let deps_of
         (let+ sources, extras =
            Action_builder.dyn_paths
              (let+ sources, extras = paths in
+              print_endline
+                ("sources: " ^ String.concat ~sep:"," (List.map ~f:Path.to_string sources));
+              print_endline ("extras: " ^ String.concat ~sep:"," extras);
               (sources, extras), sources)
          in
          Action.Merge_files_into (sources, extras, all_deps_file))

@@ -33,12 +33,12 @@ Comparison of exe+lib builds betweeen dune and o2
   > EOF
 
   $ dune build --verbose 2>&1 | grep "Running"
-  Running[1]: (cd _build/default && /home/me/code/dune/_opam/bin/ocamldep.opt -modules -impl exe/main.ml) > _build/default/exe/.main.objs/main.impl.d
+  Running[1]: (cd _build/default && /home/me/code/dune/_opam/bin/ocamldep.opt -modules -ml-synonym .ml-gen -impl exe/main.ml) > _build/default/exe/.main.objs/main.impl.d
   Running[2]: (cd _build/default && /home/me/code/dune/_opam/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -49 -nopervasives -nostdlib -g -bin-annot -I exe/.main.objs/byte -no-alias-deps -opaque -o exe/.main.objs/byte/main__.cmo -c -impl exe/main__.ml-gen)
-  Running[3]: (cd _build/default && /home/me/code/dune/_opam/bin/ocamldep.opt -modules -impl exe/foo.ml) > _build/default/exe/.main.objs/main__Foo.impl.d
+  Running[3]: (cd _build/default && /home/me/code/dune/_opam/bin/ocamldep.opt -modules -ml-synonym .ml-gen -impl exe/foo.ml) > _build/default/exe/.main.objs/main__Foo.impl.d
   Running[4]: (cd _build/default && /home/me/code/dune/_opam/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -49 -nopervasives -nostdlib -g -bin-annot -I lib/.mylib.objs/byte -no-alias-deps -opaque -o lib/.mylib.objs/byte/mylib.cmo -c -impl lib/mylib.ml-gen)
-  Running[5]: (cd _build/default && /home/me/code/dune/_opam/bin/ocamldep.opt -modules -impl lib/bar.ml) > _build/default/lib/.mylib.objs/mylib__Bar.impl.d
-  Running[6]: (cd _build/default && /home/me/code/dune/_opam/bin/ocamldep.opt -modules -impl lib/foo.ml) > _build/default/lib/.mylib.objs/mylib__Foo.impl.d
+  Running[5]: (cd _build/default && /home/me/code/dune/_opam/bin/ocamldep.opt -modules -ml-synonym .ml-gen -impl lib/bar.ml) > _build/default/lib/.mylib.objs/mylib__Bar.impl.d
+  Running[6]: (cd _build/default && /home/me/code/dune/_opam/bin/ocamldep.opt -modules -ml-synonym .ml-gen -impl lib/foo.ml) > _build/default/lib/.mylib.objs/mylib__Foo.impl.d
   Running[7]: (cd _build/default && /home/me/code/dune/_opam/bin/ocamlopt.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -49 -nopervasives -nostdlib -g -I exe/.main.objs/byte -I exe/.main.objs/native -intf-suffix .ml-gen -no-alias-deps -opaque -o exe/.main.objs/native/main__.cmx -c -impl exe/main__.ml-gen)
   Running[8]: (cd _build/default && /home/me/code/dune/_opam/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I exe/.main.objs/byte -I lib/.mylib.objs/byte -no-alias-deps -opaque -open Main__ -o exe/.main.objs/byte/main.cmo -c -impl exe/main.ml)
   Running[9]: (cd _build/default && /home/me/code/dune/_opam/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I exe/.main.objs/byte -I lib/.mylib.objs/byte -no-alias-deps -opaque -open Main__ -o exe/.main.objs/byte/main__Foo.cmo -c -impl exe/foo.ml)
@@ -53,6 +53,28 @@ Comparison of exe+lib builds betweeen dune and o2
   Running[18]: (cd _build/default && /home/me/code/dune/_opam/bin/ocamlopt.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -shared -linkall -I lib -o lib/mylib.cmxs lib/mylib.cmxa)
 
   $ dune rules -r
+  .ml-gen
+  fakeee
+  { source =
+      { path = [ "Mylib" ]
+      ; files =
+          { impl =
+              Some
+                { path = In_build_dir "default/lib/mylib.ml-gen"
+                ; original_path = In_build_dir "default/lib/mylib.ml-gen"
+                ; dialect = "ocaml"
+                }
+          ; intf = None
+          }
+      }
+  ; obj_name = "mylib"
+  ; pp = None
+  ; visibility = "public"
+  ; kind = Alias []
+  ; install_as = Some "mylib.ml"
+  }
+  Mylib
+  mylib
   sources: 
   extras: 
   sources: 
@@ -762,6 +784,9 @@ Comparison of exe+lib builds betweeen dune and o2
       lib/mylib.cmxs
       lib/mylib.cmxa))))
 
+  $ cat _build/default/exe/.main.objs/main.impl.d
+  exe/main.ml: Mylib
+
   $ cd _build/default && /home/me/code/dune/_opam/bin/ocamldep.opt -modules -impl exe/main.ml
   exe/main.ml: Mylib
 
@@ -779,10 +804,6 @@ Comparison of exe+lib builds betweeen dune and o2
   [2]
 
   $ ocamldep.opt -modules -ml-synonym .ml-gen -map lib/mylib.ml-gen -impl exe/main.ml
-  exe/main.ml: Mylib Mylib__Foo
-
-  $ mv lib/mylib.ml-gen lib/mylib.ml
-  $ ocamldep.opt -modules -map lib/mylib.ml -impl exe/main.ml
   exe/main.ml: Mylib Mylib__Foo
 
   $ cat exe/.main.objs/main.impl.all-deps

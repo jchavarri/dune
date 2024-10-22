@@ -169,6 +169,51 @@ let create
     ; stdlib
     }
   in
+  let* () =
+    let* r =
+      let open Resolve.Memo.O in
+      let* libs = requires_compile in
+      Resolve.Memo.List.iter
+        ~f:(fun (l : Lib.t) ->
+          let* main = Lib.main_module_name l in
+          let+ mods =
+            match Lib_info.entry_modules (Lib.info l) with
+            | External _d -> Resolve.Memo.return []
+            | Local ->
+              let open Memo.O in
+              let+ modules = Dir_contents.modules_of_lib super_context l in
+              let modules = Option.value_exn modules in
+              Resolve.return (Modules.With_vlib.entry_modules modules)
+          in
+          (* let intf = Modules.With_vlib.lib_interface mods in *)
+          let () =
+            match mods with
+            | [ wrap ] ->
+              (match Module.source ~ml_kind:Ml_kind.Impl wrap with
+               | None -> ()
+               | Some m ->
+                 print_endline (Path.extension (Module.File.path m));
+                 (match Path.extension (Module.File.path m) with
+                  | ".ml-gen" -> print_endline "fakeee"
+                  | _ -> ()))
+            | _ -> ()
+          in
+          let () =
+            print_endline
+              (String.concat
+                 ~sep:","
+                 (List.map ~f:(fun m -> Dyn.to_string (Module.to_dyn m)) mods))
+          in
+          let () =
+            match main with
+            | Some m -> print_endline (Module_name.to_string m)
+            | None -> print_endline "NONE"
+          in
+          print_endline (Lib_name.to_string (Lib.name l)))
+        libs
+    in
+    Resolve.read_memo r
+  in
   let+ dep_graphs = Dep_rules.rules ocamldep_modules_data
   and+ bin_annot =
     match bin_annot with

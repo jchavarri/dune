@@ -16,6 +16,7 @@ module Modules_data : sig
     ; modules : Modules.With_vlib.t
     ; stdlib : Ocaml_stdlib.t option
     ; sandbox : Sandbox_config.t
+    (* ; libs *)
     }
 end
 

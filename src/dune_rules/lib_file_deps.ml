@@ -43,6 +43,7 @@ end
 
 let deps_of_lib (lib : Lib.t) ~groups =
   let info = Lib.info lib in
+  (* should use Lib.is_local instead of checking status? *)
   let status = info |> Lib_info.status in
   (* unclear if this is the right place to branch per `status`, as
      Lib_file_deps.deps is called from `foreign_rules.ml` to get headers *)
