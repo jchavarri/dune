@@ -139,7 +139,7 @@ let create
   =
   let open Memo.O in
   let project = Scope.project scope in
-  let requires_compile =
+  let requires_compile : Lib.t list Resolve.Memo.t =
     if Dune_project.implicit_transitive_deps project
     then Memo.Lazy.force requires_link
     else requires_compile
@@ -159,6 +159,49 @@ let create
     let profile = Context.profile context in
     eval_opaque ocaml profile opaque
   in
+  let* library_deps =
+    let* libs = requires_compile in
+    let* libs =
+      (* todo: should not resolve the lib here, prob follow something
+         similar to what is done in Includes.make (transform into ActionBuilder.t values) *)
+      Resolve.read_memo libs
+    in
+    Memo.List.filter_map
+      ~f:(fun (l : Lib.t) ->
+        print_endline (Lib_name.to_string (Lib.name l));
+        let+ ms =
+          match Lib_info.modules (Lib.info l) with
+          | External
+              (* this is an option, maybe can have granular per-module dep tracking on external libs in the future? *)
+              _d -> Memo.return None
+          | Local ->
+            let open Memo.O in
+            let+ modules = Dir_contents.modules_of_lib super_context l in
+            let modules = Option.value_exn modules in
+            Some modules
+        in
+        match ms with
+        | None -> None
+        | Some mods ->
+          (* let intf = Modules.With_vlib.lib_interface mods in *)
+          let entry_mods = Modules.With_vlib.entry_modules mods in
+          let needs_map_module =
+            match entry_mods with
+            | [ wrap ] ->
+              (match Module.source ~ml_kind:Ml_kind.Impl wrap with
+               | None -> None
+               | Some m ->
+                 print_endline (Path.to_string (Module.File.path m));
+                 (match Path.extension (Module.File.path m) with
+                  | ".ml-gen" ->
+                    print_endline "Here";
+                    Some m
+                  | _ -> None))
+            | _ -> None
+          in
+          Some ({ needs_map_module; modules = mods } : Ocamldep.Modules_data.library_dep))
+      libs
+  in
   let ocamldep_modules_data : Ocamldep.Modules_data.t =
     { dir = Obj_dir.dir obj_dir
     ; sandbox
@@ -167,52 +210,8 @@ let create
     ; vimpl
     ; modules
     ; stdlib
+    ; library_deps
     }
-  in
-  let* () =
-    let* r =
-      let open Resolve.Memo.O in
-      let* libs = requires_compile in
-      Resolve.Memo.List.iter
-        ~f:(fun (l : Lib.t) ->
-          let* main = Lib.main_module_name l in
-          let+ mods =
-            match Lib_info.entry_modules (Lib.info l) with
-            | External _d -> Resolve.Memo.return []
-            | Local ->
-              let open Memo.O in
-              let+ modules = Dir_contents.modules_of_lib super_context l in
-              let modules = Option.value_exn modules in
-              Resolve.return (Modules.With_vlib.entry_modules modules)
-          in
-          (* let intf = Modules.With_vlib.lib_interface mods in *)
-          let () =
-            match mods with
-            | [ wrap ] ->
-              (match Module.source ~ml_kind:Ml_kind.Impl wrap with
-               | None -> ()
-               | Some m ->
-                 print_endline (Path.extension (Module.File.path m));
-                 (match Path.extension (Module.File.path m) with
-                  | ".ml-gen" -> print_endline "fakeee"
-                  | _ -> ()))
-            | _ -> ()
-          in
-          let () =
-            print_endline
-              (String.concat
-                 ~sep:","
-                 (List.map ~f:(fun m -> Dyn.to_string (Module.to_dyn m)) mods))
-          in
-          let () =
-            match main with
-            | Some m -> print_endline (Module_name.to_string m)
-            | None -> print_endline "NONE"
-          in
-          print_endline (Lib_name.to_string (Lib.name l)))
-        libs
-    in
-    Resolve.read_memo r
   in
   let+ dep_graphs = Dep_rules.rules ocamldep_modules_data
   and+ bin_annot =

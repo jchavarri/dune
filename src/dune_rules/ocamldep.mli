@@ -3,6 +3,13 @@
 open Import
 
 module Modules_data : sig
+  type library_dep =
+    { (* `Some` if the lib has an entry ml-gen module (which will be needed to pass -map flag to ocamldep *)
+      needs_map_module : Module.File.t option
+    ; (* The lib modules *)
+      modules : Modules.With_vlib.t
+    }
+
   (** Various information needed about a set of modules.
 
       This is a subset of [Compilation_context]. We don't use
@@ -16,7 +23,7 @@ module Modules_data : sig
     ; modules : Modules.With_vlib.t
     ; stdlib : Ocaml_stdlib.t option
     ; sandbox : Sandbox_config.t
-    (* ; libs *)
+    ; library_deps : library_dep list
     }
 end
 

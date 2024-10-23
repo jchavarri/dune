@@ -10,7 +10,7 @@ let transitive_deps_contents modules =
 ;;
 
 let ooi_deps
-  { vimpl; sctx; dir; obj_dir; modules = _; stdlib = _; sandbox = _ }
+  { vimpl; sctx; dir; obj_dir; modules = _; stdlib = _; sandbox = _; library_deps = _ }
   ~dune_version
   ~vlib_obj_map
   ~(ml_kind : Ml_kind.t)

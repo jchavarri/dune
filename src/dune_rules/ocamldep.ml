@@ -1,6 +1,11 @@
 open Import
 
 module Modules_data = struct
+  type library_dep =
+    { needs_map_module : Module.File.t option
+    ; modules : Modules.With_vlib.t
+    }
+
   type t =
     { dir : Path.Build.t
     ; obj_dir : Path.Build.t Obj_dir.t
@@ -9,15 +14,41 @@ module Modules_data = struct
     ; modules : Modules.With_vlib.t
     ; stdlib : Ocaml_stdlib.t option
     ; sandbox : Sandbox_config.t
+    ; library_deps : library_dep list
     }
 end
 
 open Modules_data
 
-let parse_module_names ~dir ~(unit : Module.t) ~modules words =
+let parse_module_names
+  ~dir
+  ~(unit : Module.t)
+  ~modules
+  ~(libdeps_modules : Modules.With_vlib.t list)
+  words
+  =
+  let demangle_module_name ~(lib : Modules.With_vlib.t) name =
+    let name_str = Module_name.to_string name in
+    match Modules.With_vlib.main_module_name lib with
+    | None -> name
+    | Some main ->
+      String.drop_prefix_if_exists name_str ~prefix:(Module_name.to_string main ^ "__")
+      |> Module_name.of_string
+  in
   List.concat_map words ~f:(fun m ->
     let m = Module_name.of_string m in
     match Modules.With_vlib.find_dep modules ~of_:unit m with
+    | Ok [] ->
+      let rec find_in_libdeps = function
+        | [] -> []
+        | lib :: libs ->
+          let demangled_name = demangle_module_name ~lib m in
+          (match Modules.With_vlib.find_dep lib ~of_:unit demangled_name with
+           | Ok [] -> find_in_libdeps libs
+           | Ok s -> s
+           | Error _ -> find_in_libdeps libs)
+      in
+      find_in_libdeps libdeps_modules
     | Ok s -> s
     | Error `Parent_cycle ->
       User_error.raise
@@ -79,7 +110,7 @@ let transitive_deps =
 ;;
 
 let deps_of
-  ({ sandbox; modules; sctx; dir; obj_dir; vimpl = _; stdlib = _ } as md)
+  ({ sandbox; modules; sctx; dir; obj_dir; vimpl = _; stdlib = _; library_deps } as md)
   ~ml_kind
   unit
   =
@@ -103,28 +134,43 @@ let deps_of
        let flags, sandbox =
          Module.pp_flags unit |> Option.value ~default:(Action_builder.return [], sandbox)
        in
+       let map_args =
+         let mlgen_files =
+           List.filter_map ~f:(fun (d : library_dep) -> d.needs_map_module) library_deps
+         in
+         List.concat
+           (List.map
+              ~f:(fun f -> [ Command.Args.A "-map"; Dep (Module.File.path f) ])
+              mlgen_files)
+       in
        Command.run_dyn_prog
          ocamldep
          ~dir:(Path.build (Context.build_dir context))
          ~stdout_to:ocamldep_output
-         [ A "-modules"
-         ; Command.Args.dyn flags
-         ; A "-ml-synonym"
-         ; A ".ml-gen"
-         ; Command.Ml_kind.flag ml_kind
-         ; Dep (Module.File.path source)
-         ]
+         (List.concat
+            [ map_args
+            ; [ A "-modules"
+              ; Command.Args.dyn flags
+              ; A "-ml-synonym"
+              ; A ".ml-gen"
+              ; Command.Ml_kind.flag ml_kind
+              ; Dep (Module.File.path source)
+              ]
+            ])
        >>| Action.Full.add_sandbox sandbox)
   in
   let+ () =
     let produce_all_deps =
       let open Action_builder.O in
+      let libdeps_modules =
+        List.map ~f:(fun (libdep : library_dep) -> libdep.modules) library_deps
+      in
       let paths =
         let+ immediate_deps =
           Path.build ocamldep_output
           |> Action_builder.lines_of
           >>| parse_deps_exn ~file:(Module.File.path source)
-          >>| parse_module_names ~dir:md.dir ~unit ~modules
+          >>| parse_module_names ~dir:md.dir ~unit ~modules ~libdeps_modules
         in
         ( transitive_deps obj_dir immediate_deps
         , List.map immediate_deps ~f:(fun m ->
@@ -166,6 +212,10 @@ let read_immediate_deps_of ~obj_dir ~modules ~ml_kind unit =
     Action_builder.lines_of (Path.build ocamldep_output)
     |> Action_builder.map ~f:(fun lines ->
       parse_deps_exn ~file:(Module.File.path source) lines
-      |> parse_module_names ~dir:(Obj_dir.dir obj_dir) ~unit ~modules)
+      |> parse_module_names
+           ~dir:(Obj_dir.dir obj_dir)
+           ~unit
+           ~modules
+           ~libdeps_modules:(* is this correct?? *) [])
     |> Action_builder.memoize (Path.Build.to_string ocamldep_output)
 ;;
