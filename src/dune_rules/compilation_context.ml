@@ -168,8 +168,7 @@ let create
     in
     Memo.List.filter_map
       ~f:(fun (l : Lib.t) ->
-        print_endline (Lib_name.to_string (Lib.name l));
-        let+ ms =
+        let+ deplib_info =
           match Lib_info.modules (Lib.info l) with
           | External
               (* this is an option, maybe can have granular per-module dep tracking on external libs in the future? *)
@@ -178,11 +177,12 @@ let create
             let open Memo.O in
             let+ modules = Dir_contents.modules_of_lib super_context l in
             let modules = Option.value_exn modules in
-            Some modules
+            let obj_dir = Lib.Local.obj_dir (Lib.Local.of_lib_exn l) in
+            Some (modules, obj_dir)
         in
-        match ms with
+        match deplib_info with
         | None -> None
-        | Some mods ->
+        | Some (mods, obj_dir) ->
           (* let intf = Modules.With_vlib.lib_interface mods in *)
           let entry_mods = Modules.With_vlib.entry_modules mods in
           let needs_map_module =
@@ -191,15 +191,15 @@ let create
               (match Module.source ~ml_kind:Ml_kind.Impl wrap with
                | None -> None
                | Some m ->
-                 print_endline (Path.to_string (Module.File.path m));
+                 (* todo: there must be a better way to do this *)
                  (match Path.extension (Module.File.path m) with
-                  | ".ml-gen" ->
-                    print_endline "Here";
-                    Some m
+                  | ".ml-gen" -> Some m
                   | _ -> None))
             | _ -> None
           in
-          Some ({ needs_map_module; modules = mods } : Ocamldep.Modules_data.library_dep))
+          Some
+            ({ needs_map_module; modules = mods; obj_dir }
+             : Ocamldep.Modules_data.library_dep))
       libs
   in
   let ocamldep_modules_data : Ocamldep.Modules_data.t =

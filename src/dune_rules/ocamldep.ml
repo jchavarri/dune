@@ -4,6 +4,7 @@ module Modules_data = struct
   type library_dep =
     { needs_map_module : Module.File.t option
     ; modules : Modules.With_vlib.t
+    ; obj_dir : Path.Build.t Obj_dir.t
     }
 
   type t =
@@ -21,15 +22,14 @@ end
 open Modules_data
 
 let parse_module_names
-  ~dir
-  ~(unit : Module.t)
-  ~modules
-  ~(libdeps_modules : Modules.With_vlib.t list)
-  words
+  :  dir:Path.Build.t -> unit:Module.t -> modules:Modules.With_vlib.t
+  -> libdeps:library_dep list -> string list
+  -> (Path.Build.t Obj_dir.t option * Module.t) list
   =
-  let demangle_module_name ~(lib : Modules.With_vlib.t) name =
+  fun ~dir ~(unit : Module.t) ~modules ~libdeps words ->
+  let demangle_module_name ~(modules : Modules.With_vlib.t) name =
     let name_str = Module_name.to_string name in
-    match Modules.With_vlib.main_module_name lib with
+    match Modules.With_vlib.main_module_name modules with
     | None -> name
     | Some main ->
       String.drop_prefix_if_exists name_str ~prefix:(Module_name.to_string main ^ "__")
@@ -41,15 +41,18 @@ let parse_module_names
     | Ok [] ->
       let rec find_in_libdeps = function
         | [] -> []
-        | lib :: libs ->
-          let demangled_name = demangle_module_name ~lib m in
-          (match Modules.With_vlib.find_dep lib ~of_:unit demangled_name with
-           | Ok [] -> find_in_libdeps libs
-           | Ok s -> s
-           | Error _ -> find_in_libdeps libs)
+        | (libdep : library_dep) :: libdeps ->
+          let modules = libdep.modules in
+          let demangled_name = demangle_module_name ~modules m in
+          (match Modules.With_vlib.find_dep modules ~of_:unit demangled_name with
+           | Ok [] -> find_in_libdeps libdeps
+           | Ok s -> List.map ~f:(fun m -> Some libdep.obj_dir, m) s
+           | Error _ ->
+             (* not sure if we should do st here *)
+             find_in_libdeps libdeps)
       in
-      find_in_libdeps libdeps_modules
-    | Ok s -> s
+      find_in_libdeps libdeps
+    | Ok s -> List.map ~f:(fun m -> None, m) s
     | Error `Parent_cycle ->
       User_error.raise
         [ Pp.textf
@@ -99,11 +102,12 @@ let parse_deps_exn =
 ;;
 
 let transitive_deps =
-  let transive_dep obj_dir m =
+  let transive_dep obj_dir (libdep_obj_dir, m) =
     (match Module.kind m with
      | Alias _ -> None
      | _ -> if Module.has m ~ml_kind:Intf then Some Ml_kind.Intf else Some Impl)
     |> Option.map ~f:(fun ml_kind ->
+      let obj_dir = Option.value libdep_obj_dir ~default:obj_dir in
       Obj_dir.Module.dep obj_dir (Transitive (m, ml_kind)) |> Path.build)
   in
   fun obj_dir modules -> List.filter_map modules ~f:(transive_dep obj_dir)
@@ -162,18 +166,15 @@ let deps_of
   let+ () =
     let produce_all_deps =
       let open Action_builder.O in
-      let libdeps_modules =
-        List.map ~f:(fun (libdep : library_dep) -> libdep.modules) library_deps
-      in
       let paths =
         let+ immediate_deps =
           Path.build ocamldep_output
           |> Action_builder.lines_of
           >>| parse_deps_exn ~file:(Module.File.path source)
-          >>| parse_module_names ~dir:md.dir ~unit ~modules ~libdeps_modules
+          >>| parse_module_names ~dir:md.dir ~unit ~modules ~libdeps:library_deps
         in
         ( transitive_deps obj_dir immediate_deps
-        , List.map immediate_deps ~f:(fun m ->
+        , List.map immediate_deps ~f:(fun (_obj_dir, m) ->
             Module.obj_name m |> Module_name.Unique.to_string) )
       in
       Action_builder.with_file_targets
@@ -181,9 +182,6 @@ let deps_of
         (let+ sources, extras =
            Action_builder.dyn_paths
              (let+ sources, extras = paths in
-              print_endline
-                ("sources: " ^ String.concat ~sep:"," (List.map ~f:Path.to_string sources));
-              print_endline ("extras: " ^ String.concat ~sep:"," extras);
               (sources, extras), sources)
          in
          Action.Merge_files_into (sources, extras, all_deps_file))
@@ -216,6 +214,7 @@ let read_immediate_deps_of ~obj_dir ~modules ~ml_kind unit =
            ~dir:(Obj_dir.dir obj_dir)
            ~unit
            ~modules
-           ~libdeps_modules:(* is this correct?? *) [])
+           ~libdeps:(* is this correct?? *) []
+      |> List.map ~f:snd)
     |> Action_builder.memoize (Path.Build.to_string ocamldep_output)
 ;;

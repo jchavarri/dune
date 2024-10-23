@@ -8,6 +8,8 @@ module Modules_data : sig
       needs_map_module : Module.File.t option
     ; (* The lib modules *)
       modules : Modules.With_vlib.t
+    ; (* The lib objects dir *)
+      obj_dir : Path.Build.t Obj_dir.t
     }
 
   (** Various information needed about a set of modules.
