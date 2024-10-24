@@ -155,14 +155,11 @@ let for_module md module_ = dict_of_func_concurrently (deps_of md (Normal module
 
 let rules md =
   let modules = md.modules in
-  match Modules.With_vlib.as_singleton modules with
-  | Some m -> Memo.return (Dep_graph.Ml_kind.dummy m)
-  | None ->
-    dict_of_func_concurrently (fun ~ml_kind ->
-      let+ per_module =
-        Modules.With_vlib.obj_map modules
-        |> Module_name.Unique.Parallel_map.parallel_map ~f:(fun _obj_name m ->
-          deps_of md ~ml_kind m)
-      in
-      Dep_graph.make ~dir:md.dir ~per_module)
+  dict_of_func_concurrently (fun ~ml_kind ->
+    let+ per_module =
+      Modules.With_vlib.obj_map modules
+      |> Module_name.Unique.Parallel_map.parallel_map ~f:(fun _obj_name m ->
+        deps_of md ~ml_kind m)
+    in
+    Dep_graph.make ~dir:md.dir ~per_module)
 ;;
