@@ -185,9 +185,13 @@ let create
         | Some (mods, obj_dir) ->
           (* let intf = Modules.With_vlib.lib_interface mods in *)
           let entry_mods = Modules.With_vlib.entry_modules mods in
+          let impl_only_mods = Modules.With_vlib.impl_only mods in
           let needs_map_module =
             match entry_mods with
-            | [ wrap ] ->
+            | [ wrap ]
+            (* If there's only 1 impl module, the ml-gen file will be empty, which makes ocamldep fail if passed as -map
+               exception Failure("a/a.ml-gen : empty map file or parse error") *)
+              when List.length impl_only_mods <> 1 ->
               (match Module.source ~ml_kind:Ml_kind.Impl wrap with
                | None -> None
                | Some m ->
