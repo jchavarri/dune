@@ -140,13 +140,31 @@ end = struct
              let task_lines = List.map displayed_jobs ~f:(fun job ->
                let elapsed = now -. job.Running_jobs.started_at in
                let desc = Format.asprintf "%a" Pp.to_fmt job.Running_jobs.description in
-               (* Strip _build/default/ prefix and truncate *)
+               (* Strip _build/default/ prefix *)
                let desc = match String.drop_prefix desc ~prefix:"_build/default/" with
                  | Some s -> s | None -> desc in
-               let max_len = 60 in
-               let desc = if String.length desc > max_len 
-                          then String.sub desc ~pos:0 ~len:(max_len - 3) ^ "..." 
-                          else desc in
+               (* Smart truncation: keep filename visible, truncate middle *)
+               let max_len = 70 in
+               let desc = 
+                 if String.length desc <= max_len then desc
+                 else
+                   (* Find the last path component (filename) *)
+                   match String.rindex desc '/' with
+                   | None -> String.sub desc ~pos:0 ~len:(max_len - 3) ^ "..."
+                   | Some last_slash ->
+                     let filename = String.sub desc ~pos:(last_slash + 1) 
+                                      ~len:(String.length desc - last_slash - 1) in
+                     let filename_len = String.length filename in
+                     if filename_len >= max_len - 4 then
+                       (* Filename itself is too long, truncate it *)
+                       "..." ^ String.sub filename ~pos:(filename_len - max_len + 6) 
+                                 ~len:(max_len - 6)
+                     else
+                       (* Keep filename, truncate path prefix *)
+                       let prefix_budget = max_len - filename_len - 4 in (* 4 for .../  *)
+                       let prefix = String.sub desc ~pos:0 ~len:prefix_budget in
+                       prefix ^ ".../" ^ filename
+               in
                (* Only show time if > 2s like n2 *)
                if elapsed > 2.0 then sprintf "  %s (%.0fs)" desc elapsed
                else sprintf "  %s" desc) in
