@@ -18,6 +18,7 @@ include struct
   module Diff_promotion = Diff_promotion
   module Targets = Targets
   module Context_name = Context_name
+  module Running_jobs = Running_jobs
 end
 
 module Cached_digest = Dune_digest.Cached_digest
@@ -108,15 +109,40 @@ end = struct
                ; number_of_rules_discovered = total
                ; number_of_rules_failed = failed
                } ->
+             let jobs_count = Dune_engine.Scheduler.running_jobs_count scheduler in
+             (* Get oldest running tasks for display *)
+             let running_tasks =
+               let jobs_state = Fiber.Svar.read Running_jobs.jobs in
+               let jobs_list = Running_jobs.Id.Map.values (Running_jobs.current jobs_state) in
+               let now = Unix.gettimeofday () in
+               jobs_list
+               |> List.sort ~compare:(fun a b -> 
+                    Float.compare a.Running_jobs.started_at b.Running_jobs.started_at)
+               |> List.filteri ~f:(fun i _ -> i < 3)  (* show oldest 3 *)
+               |> List.map ~f:(fun job ->
+                    let elapsed = now -. job.Running_jobs.started_at in
+                    let desc = Format.asprintf "%a" Pp.to_fmt job.Running_jobs.description in
+                    let desc = if String.length desc > 30 
+                               then String.sub desc ~pos:0 ~len:27 ^ "..." 
+                               else desc in
+                    sprintf "%s (%.0fs)" desc elapsed)
+               |> String.concat ~sep:", "
+             in
+             let running_info = 
+               if String.length running_tasks > 0 
+               then sprintf " | %s" running_tasks 
+               else "" 
+             in
              Pp.verbatim
                (sprintf
-                  "Done: %u%% (%u/%u, %u left%s) (jobs: %u)"
+                  "Done: %u%% (%u/%u, %u left%s) (jobs: %u)%s"
                   (if total = 0 then 0 else done_ * 100 / total)
                   done_
                   total
                   (total - done_)
                   (if failed = 0 then "" else sprintf ", %u failed" failed)
-                  (Dune_engine.Scheduler.running_jobs_count scheduler))));
+                  jobs_count
+                  running_info)));
     Fiber.return (Memo.of_thunk get)
   ;;
 end
