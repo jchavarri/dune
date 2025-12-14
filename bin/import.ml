@@ -122,6 +122,10 @@ end = struct
              let max_tasks = 8 in
              let displayed_jobs = List.filteri sorted_jobs ~f:(fun i _ -> i < max_tasks) in
              
+             (* Queue depth: remaining work minus what's currently running *)
+             let remaining = total - done_ in
+             let queued = max 0 (remaining - jobs_count) in
+             
              (* Progress bar like n2: [====----    ] *)
              let bar_width = 20 in
              let done_width = if total = 0 then 0 else done_ * bar_width / total in
@@ -132,12 +136,15 @@ end = struct
                else if i < done_width + running_width then '-'
                else ' ') in
              
-             (* Build the multi-line status *)
-             let header = sprintf "[%s] %u/%u done, %u running%s"
-               bar done_ total jobs_count
+             (* Build the multi-line status with queue depth *)
+             let header = sprintf "[%s] %u/%u done, %u running, %u queued%s"
+               bar done_ total jobs_count queued
                (if failed > 0 then sprintf ", %u failed" failed else "") in
              
-             let task_lines = List.map displayed_jobs ~f:(fun job ->
+             (* Critical path detection: when parallelism is low, oldest task is likely blocking *)
+             let is_critical_path = jobs_count <= 2 && jobs_count > 0 in
+             
+             let task_lines = List.mapi displayed_jobs ~f:(fun idx job ->
                let elapsed = now -. job.Running_jobs.started_at in
                let desc = Format.asprintf "%a" Pp.to_fmt job.Running_jobs.description in
                (* Strip _build/default/ prefix *)
@@ -166,19 +173,24 @@ end = struct
                        let prefix = String.sub desc ~pos:0 ~len:prefix_budget in
                        prefix ^ ".../" ^ filename
                in
+               (* Critical path indicator: oldest task when parallelism is low *)
+               let critical = is_critical_path && idx = 0 in
+               let critical_marker = if critical then "🔥 " else "  " in
                (* Color by duration: green < 5s, yellow < 15s, red >= 15s *)
+               (* Critical path tasks always red to draw attention *)
                let time_str, use_color =
-                 if elapsed > 2.0 then sprintf " (%.0fs)" elapsed, true
+                 if elapsed > 2.0 || critical then sprintf " (%.0fs)" elapsed, true
                  else "", false
                in
                let color_code = 
-                 if not use_color then ""
+                 if critical then "\027[1;31m"  (* bold red for critical path *)
+                 else if not use_color then ""
                  else if elapsed < 5.0 then "\027[32m"   (* green *)
                  else if elapsed < 15.0 then "\027[33m"  (* yellow *)
                  else "\027[31m"                          (* red *)
                in
-               let reset = if use_color then "\027[0m" else "" in
-               sprintf "  %s%s%s%s" color_code desc time_str reset) in
+               let reset = if use_color || critical then "\027[0m" else "" in
+               sprintf "%s%s%s%s%s" critical_marker color_code desc time_str reset) in
              
              let extra = List.length sorted_jobs - max_tasks in
              let extra_line = if extra > 0 then [sprintf "  ...and %d more" extra] else [] in
