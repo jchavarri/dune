@@ -443,7 +443,22 @@ end = struct
                }
              in
              let build_deps deps = Memo.run (build_deps deps) in
-             Action_exec.exec input ~build_deps
+             let action_start = Unix.gettimeofday () in
+             let+ result = Action_exec.exec input ~build_deps in
+             let action_elapsed = Unix.gettimeofday () -. action_start in
+             if action_elapsed > 0.05 then begin
+               (* Color based on duration: green < 0.5s, yellow < 2s, red >= 2s *)
+               let color =
+                 if action_elapsed < 0.5 then `Fg_green
+                 else if action_elapsed < 2.0 then `Fg_yellow
+                 else `Fg_red
+               in
+               Console.print
+                 [ Pp.tag (User_message.Style.Ansi_styles [ color ])
+                     (Pp.textf "%.3fs %s" action_elapsed
+                        (Path.Build.to_string (Targets.Validated.head targets))) ]
+             end;
+             result
            in
            let* action_exec_result = Action_exec.Exec_result.ok_exn action_exec_result in
            let* () =
@@ -474,6 +489,8 @@ end = struct
     | Promote promote, (Some Automatically | None) ->
       Target_promotion.promote ~targets ~promote ~promote_source
   ;;
+
+  (* INSTRUMENTATION: removed RULE timing, ACTION timing is more useful *)
 
   let execute_rule_impl ~rule_kind rule =
     let { Rule.id = _; targets; mode; action; info = _; loc } = rule in
