@@ -93,6 +93,9 @@ module Main : sig
 end = struct
   include Dune_rules.Main
 
+  (* Track build start time for elapsed display *)
+  let build_start_time = ref None
+  
   let setup () =
     let open Fiber.O in
     let* scheduler = Dune_engine.Scheduler.t () in
@@ -103,12 +106,23 @@ end = struct
            | Initializing
            | Restarting_current_build
            | Build_succeeded__now_waiting_for_changes
-           | Build_failed__now_waiting_for_changes -> Pp.nop
+           | Build_failed__now_waiting_for_changes -> 
+             build_start_time := None;
+             Pp.nop
            | Building
                { Build_system.Progress.number_of_rules_executed = done_
                ; number_of_rules_discovered = total
                ; number_of_rules_failed = failed
                } ->
+             (* Track build start time *)
+             let start = match !build_start_time with
+               | Some t -> t
+               | None -> 
+                 let t = Unix.gettimeofday () in
+                 build_start_time := Some t;
+                 t
+             in
+             let build_elapsed = Unix.gettimeofday () -. start in
              let jobs_count = Dune_engine.Scheduler.running_jobs_count scheduler in
              (* n2-style: get oldest running tasks sorted by start time *)
              let jobs_state = Fiber.Svar.read Running_jobs.jobs in
@@ -136,9 +150,14 @@ end = struct
                else if i < done_width + running_width then '-'
                else ' ') in
              
-             (* Build the multi-line status with queue depth *)
-             let header = sprintf "[%s] %u/%u done, %u running, %u queued%s"
-               bar done_ total jobs_count queued
+             (* Build the multi-line status with queue depth and elapsed time *)
+             let elapsed_str = 
+               if build_elapsed < 60.0 then sprintf "%.0fs" build_elapsed
+               else sprintf "%dm%02ds" (int_of_float build_elapsed / 60) 
+                                       (int_of_float build_elapsed mod 60)
+             in
+             let header = sprintf "[%s] %u/%u done, %u running, %u queued (%s)%s"
+               bar done_ total jobs_count queued elapsed_str
                (if failed > 0 then sprintf ", %u failed" failed else "") in
              
              (* Critical path detection: when parallelism is low, oldest task is likely blocking *)
@@ -175,22 +194,20 @@ end = struct
                in
                (* Critical path indicator: oldest task when parallelism is low *)
                let critical = is_critical_path && idx = 0 in
-               let critical_marker = if critical then "🔥 " else "  " in
+               let marker = if critical then "> " else "  " in
                (* Color by duration: green < 5s, yellow < 15s, red >= 15s *)
-               (* Critical path tasks always red to draw attention *)
                let time_str, use_color =
-                 if elapsed > 2.0 || critical then sprintf " (%.0fs)" elapsed, true
+                 if elapsed > 2.0 then sprintf " (%.0fs)" elapsed, true
                  else "", false
                in
                let color_code = 
-                 if critical then "\027[1;31m"  (* bold red for critical path *)
-                 else if not use_color then ""
+                 if not use_color then ""
                  else if elapsed < 5.0 then "\027[32m"   (* green *)
                  else if elapsed < 15.0 then "\027[33m"  (* yellow *)
                  else "\027[31m"                          (* red *)
                in
-               let reset = if use_color || critical then "\027[0m" else "" in
-               sprintf "%s%s%s%s%s" critical_marker color_code desc time_str reset) in
+               let reset = if use_color then "\027[0m" else "" in
+               sprintf "%s%s%s%s%s" marker color_code desc time_str reset) in
              
              let extra = List.length sorted_jobs - max_tasks in
              let extra_line = if extra > 0 then [sprintf "  ...and %d more" extra] else [] in
