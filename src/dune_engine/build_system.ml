@@ -2,11 +2,6 @@ open Import
 open Memo.O
 module Error = Build_system_error
 
-(* INSTRUMENTATION: Get actual process-level parallelism from Running_jobs *)
-let get_running_jobs_count () =
-  let jobs_state = Fiber.Svar.read Running_jobs.jobs in
-  Running_jobs.Id.Map.cardinal (Running_jobs.current jobs_state)
-
 module Progress = struct
   type t =
     { number_of_rules_discovered : int
@@ -448,35 +443,8 @@ end = struct
                }
              in
              let build_deps deps = Memo.run (build_deps deps) in
-             let target_str = 
-               let full = Path.Build.to_string (Targets.Validated.head targets) in
-               (* Strip _build/default/ prefix for cleaner output *)
-               match String.drop_prefix full ~prefix:"_build/default/" with
-               | Some s -> s
-               | None -> full
-             in
-             let action_start = Unix.gettimeofday () in
-             let+ result = Action_exec.exec input ~build_deps in
-             let action_elapsed = Unix.gettimeofday () -. action_start in
-             if action_elapsed > 0.05 then begin
-               (* Color based on duration: green < 0.5s, yellow < 2s, red >= 2s *)
-               let color =
-                 if action_elapsed < 0.5 then `Fg_green
-                 else if action_elapsed < 2.0 then `Fg_yellow
-                 else `Fg_red
-               in
-               (* Show actual OS process parallelism from Running_jobs *)
-               let running = get_running_jobs_count () in
-               Console.print
-                 [ Pp.concat
-                     [ Pp.tag (User_message.Style.Ansi_styles [ `Fg_cyan ]) 
-                         (Pp.textf "[%d] " running)
-                     ; Pp.tag (User_message.Style.Ansi_styles [ color ])
-                         (Pp.textf "%.3fs %s" action_elapsed target_str)
-                     ]
-                 ]
-             end;
-             result
+             (* n2-style: status line handles display, no per-completion logging needed *)
+             Action_exec.exec input ~build_deps
            in
            let* action_exec_result = Action_exec.Exec_result.ok_exn action_exec_result in
            let* () =
