@@ -144,7 +144,8 @@ end = struct
                let desc = match String.drop_prefix desc ~prefix:"_build/default/" with
                  | Some s -> s | None -> desc in
                (* Smart truncation: keep filename visible, truncate middle *)
-               let max_len = 70 in
+               (* Use wider display - most terminals are 120+ cols these days *)
+               let max_len = 100 in
                let desc = 
                  if String.length desc <= max_len then desc
                  else
@@ -165,9 +166,19 @@ end = struct
                        let prefix = String.sub desc ~pos:0 ~len:prefix_budget in
                        prefix ^ ".../" ^ filename
                in
-               (* Only show time if > 2s like n2 *)
-               if elapsed > 2.0 then sprintf "  %s (%.0fs)" desc elapsed
-               else sprintf "  %s" desc) in
+               (* Color by duration: green < 5s, yellow < 15s, red >= 15s *)
+               let time_str, use_color =
+                 if elapsed > 2.0 then sprintf " (%.0fs)" elapsed, true
+                 else "", false
+               in
+               let color_code = 
+                 if not use_color then ""
+                 else if elapsed < 5.0 then "\027[32m"   (* green *)
+                 else if elapsed < 15.0 then "\027[33m"  (* yellow *)
+                 else "\027[31m"                          (* red *)
+               in
+               let reset = if use_color then "\027[0m" else "" in
+               sprintf "  %s%s%s%s" color_code desc time_str reset) in
              
              let extra = List.length sorted_jobs - max_tasks in
              let extra_line = if extra > 0 then [sprintf "  ...and %d more" extra] else [] in
