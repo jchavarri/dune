@@ -448,7 +448,13 @@ end = struct
                }
              in
              let build_deps deps = Memo.run (build_deps deps) in
-             let target_str = Path.Build.to_string (Targets.Validated.head targets) in
+             let target_str = 
+               let full = Path.Build.to_string (Targets.Validated.head targets) in
+               (* Strip _build/default/ prefix for cleaner output *)
+               match String.drop_prefix full ~prefix:"_build/default/" with
+               | Some s -> s
+               | None -> full
+             in
              let action_start = Unix.gettimeofday () in
              let+ result = Action_exec.exec input ~build_deps in
              let action_elapsed = Unix.gettimeofday () -. action_start in
