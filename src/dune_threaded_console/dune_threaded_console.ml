@@ -103,14 +103,9 @@ let make ~frames_per_second (module Base : S) : (module Dune_console.Backend) =
 
            If we have not yet reached the [frame_rate] then we can handle user
            events and sleep for the remaining time. *)
-        (* n2-style: force refresh after timeout to update elapsed times *)
-        let last_render = ref (Unix.gettimeofday ()) in
-        let force_refresh_interval = 0.5 in (* 500ms like n2 *)
         while true do
           Mutex.lock mutex;
-          let now = Unix.gettimeofday () in
-          let force_refresh = now -. !last_render >= force_refresh_interval in
-          (match state.dirty || force_refresh with
+          (match state.dirty with
            | false -> ()
            | true ->
              (match Base.render state with
@@ -119,8 +114,7 @@ let make ~frames_per_second (module Base : S) : (module Dune_console.Backend) =
                 let exn = Exn_with_backtrace.capture exn in
                 raise_notrace (Exn (Render, exn)));
              if state.finish_requested then raise_notrace Exit;
-             state.dirty <- false;
-             last_render := now);
+             state.dirty <- false);
           Mutex.unlock mutex;
           let new_time =
             let now = Unix.gettimeofday () in
@@ -177,8 +171,11 @@ let progress ~frames_per_second =
       (* The current console doesn't react to user events so we just sleep until
          the next loop iteration. Because it doesn't react to user input, it cannot
          modify the UI state, and as a consequence doesn't need the mutex. *)
-      let handle_user_events ~now ~time_budget (_ : Mutex.t) (_ : state) =
+      let handle_user_events ~now ~time_budget (_ : Mutex.t) (state : state) =
         Unix.sleepf time_budget;
+        (* n2-style: re-evaluate the Live thunk to update elapsed times *)
+        Dune_console.Status_line.refresh ();
+        state.dirty <- true;
         now +. time_budget
       ;;
     end)
