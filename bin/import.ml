@@ -103,7 +103,17 @@ end = struct
       (Live
          (fun () ->
            match Fiber.Svar.read Build_system.state with
-           | Initializing
+           | Initializing ->
+             (* Show that we're doing something during noop builds *)
+             let elapsed = match !build_start_time with
+               | None -> 
+                 build_start_time := Some (Unix.gettimeofday ());
+                 0.0
+               | Some t -> Unix.gettimeofday () -. t
+             in
+             if elapsed > 0.5 then (* Only show after 500ms to avoid flicker *)
+               Pp.verbatim (sprintf "Preparing build... (%.0fs)" elapsed)
+             else Pp.nop
            | Restarting_current_build
            | Build_succeeded__now_waiting_for_changes
            | Build_failed__now_waiting_for_changes -> 
