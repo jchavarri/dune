@@ -438,6 +438,7 @@ end = struct
                }
              in
              let build_deps deps = Memo.run (build_deps deps) in
+             (* n2-style: status line handles display, no per-completion logging needed *)
              Action_exec.exec input ~build_deps
            in
            let* action_exec_result = Action_exec.Exec_result.ok_exn action_exec_result in

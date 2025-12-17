@@ -173,8 +173,11 @@ let progress ~frames_per_second =
       (* The current console doesn't react to user events so we just sleep until
          the next loop iteration. Because it doesn't react to user input, it cannot
          modify the UI state, and as a consequence doesn't need the mutex. *)
-      let handle_user_events ~now ~time_budget (_ : Mutex.t) (_ : state) =
+      let handle_user_events ~now ~time_budget (_ : Mutex.t) (state : state) =
         Unix.sleepf (Time.Span.to_secs time_budget);
+        (* n2-style: re-evaluate the Live thunk to update elapsed times *)
+        Dune_console.Status_line.refresh ();
+        state.dirty <- true;
         Time.add now time_budget
       ;;
     end)

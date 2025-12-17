@@ -18,6 +18,7 @@ include struct
   module Diff_promotion = Diff_promotion
   module Targets = Targets
   module Context_name = Context_name
+  module Running_jobs = Running_jobs
 end
 
 module Cached_digest = Dune_digest.Cached_digest
@@ -97,6 +98,9 @@ module Main : sig
 end = struct
   include Dune_rules.Main
 
+  (* Track build start time for elapsed display *)
+  let build_start_time = ref None
+  
   let setup () =
     let open Fiber.O in
     let* scheduler = Dune_engine.Scheduler.t () in
@@ -104,24 +108,127 @@ end = struct
       (Live
          (fun () ->
            match Fiber.Svar.read Build_system.state with
-           | Initializing
+           | Initializing ->
+             (* Show that we're doing something during noop builds *)
+             let elapsed = match !build_start_time with
+               | None -> 
+                 build_start_time := Some (Unix.gettimeofday ());
+                 0.0
+               | Some t -> Unix.gettimeofday () -. t
+             in
+             if elapsed > 0.5 then (* Only show after 500ms to avoid flicker *)
+               Pp.verbatim (sprintf "Preparing build... (%.0fs)" elapsed)
+             else Pp.nop
            | Restarting_current_build
            | Build_succeeded__now_waiting_for_changes
-           | Build_failed__now_waiting_for_changes -> Pp.nop
+           | Build_failed__now_waiting_for_changes -> 
+             build_start_time := None;
+             Pp.nop
            | Building
                { Build_system.Progress.number_of_rules_executed = done_
                ; number_of_rules_discovered = total
                ; number_of_rules_failed = failed
                } ->
-             Pp.verbatim
-               (sprintf
-                  "Done: %u%% (%u/%u, %u left%s) (jobs: %u)"
-                  (if total = 0 then 0 else done_ * 100 / total)
-                  done_
-                  total
-                  (total - done_)
-                  (if failed = 0 then "" else sprintf ", %u failed" failed)
-                  (Dune_engine.Scheduler.running_jobs_count scheduler))));
+             (* Track build start time *)
+             let start = match !build_start_time with
+               | Some t -> t
+               | None -> 
+                 let t = Unix.gettimeofday () in
+                 build_start_time := Some t;
+                 t
+             in
+             let build_elapsed = Unix.gettimeofday () -. start in
+             let jobs_count = Dune_engine.Scheduler.running_jobs_count scheduler in
+             (* n2-style: get oldest running tasks sorted by start time *)
+             let jobs_state = Fiber.Svar.read Running_jobs.jobs in
+             let jobs_list = Running_jobs.Id.Map.values (Running_jobs.current jobs_state) in
+             let now = Time.now () in
+             let sorted_jobs = 
+               jobs_list
+               |> List.sort ~compare:(fun a b -> 
+                    Time.compare a.Running_jobs.started_at b.Running_jobs.started_at)
+             in
+             let max_tasks = 8 in
+             let displayed_jobs = List.filteri sorted_jobs ~f:(fun i _ -> i < max_tasks) in
+             
+             (* Queue depth: remaining work minus what's currently running *)
+             let remaining = total - done_ in
+             let queued = max 0 (remaining - jobs_count) in
+             
+             (* Progress bar like n2: [====----    ] *)
+             let bar_width = 20 in
+             let done_width = if total = 0 then 0 else done_ * bar_width / total in
+             let running_width = if total = 0 then 0 
+                                 else min (bar_width - done_width) (jobs_count * bar_width / max total 1) in
+             let bar = String.init bar_width ~f:(fun i ->
+               if i < done_width then '='
+               else if i < done_width + running_width then '-'
+               else ' ') in
+             
+             (* Build the multi-line status with queue depth and elapsed time *)
+             let elapsed_str = 
+               if build_elapsed < 60.0 then sprintf "%.0fs" build_elapsed
+               else sprintf "%dm%02ds" (int_of_float build_elapsed / 60) 
+                                       (int_of_float build_elapsed mod 60)
+             in
+             let header = sprintf "[%s] %u/%u done, %u running, %u queued (%s)%s"
+               bar done_ total jobs_count queued elapsed_str
+               (if failed > 0 then sprintf ", %u failed" failed else "") in
+             
+             (* Critical path detection: when parallelism is low, oldest task is likely blocking *)
+             let is_critical_path = jobs_count <= 2 && jobs_count > 0 in
+             
+             let task_lines = List.mapi displayed_jobs ~f:(fun idx job ->
+               let elapsed = Time.Span.to_secs (Time.diff now job.Running_jobs.started_at) in
+               let desc = Format.asprintf "%a" Pp.to_fmt job.Running_jobs.description in
+               (* Strip _build/default/ prefix *)
+               let desc = match String.drop_prefix desc ~prefix:"_build/default/" with
+                 | Some s -> s | None -> desc in
+               (* Smart truncation: keep filename visible, truncate middle *)
+               (* Use wider display - most terminals are 120+ cols these days *)
+               let max_len = 100 in
+               let desc = 
+                 if String.length desc <= max_len then desc
+                 else
+                   (* Find the last path component (filename) *)
+                   match String.rindex desc '/' with
+                   | None -> String.sub desc ~pos:0 ~len:(max_len - 3) ^ "..."
+                   | Some last_slash ->
+                     let filename = String.sub desc ~pos:(last_slash + 1) 
+                                      ~len:(String.length desc - last_slash - 1) in
+                     let filename_len = String.length filename in
+                     if filename_len >= max_len - 4 then
+                       (* Filename itself is too long, truncate it *)
+                       "..." ^ String.sub filename ~pos:(filename_len - max_len + 6) 
+                                 ~len:(max_len - 6)
+                     else
+                       (* Keep filename, truncate path prefix *)
+                       let prefix_budget = max_len - filename_len - 4 in (* 4 for .../  *)
+                       let prefix = String.sub desc ~pos:0 ~len:prefix_budget in
+                       prefix ^ ".../" ^ filename
+               in
+               (* Critical path indicator: oldest task when parallelism is low *)
+               let critical = is_critical_path && idx = 0 in
+               let marker = if critical then "> " else "  " in
+               (* Color by duration: green < 5s, yellow < 15s, red >= 15s *)
+               let time_str, use_color =
+                 if elapsed > 2.0 then sprintf " (%.0fs)" elapsed, true
+                 else "", false
+               in
+               let color_code = 
+                 if not use_color then ""
+                 else if elapsed < 5.0 then "\027[32m"   (* green *)
+                 else if elapsed < 15.0 then "\027[33m"  (* yellow *)
+                 else "\027[31m"                          (* red *)
+               in
+               let reset = if use_color then "\027[0m" else "" in
+               sprintf "%s%s%s%s%s" marker color_code desc time_str reset) in
+             
+             let extra = List.length sorted_jobs - max_tasks in
+             let extra_line = if extra > 0 then [sprintf "  ...and %d more" extra] else [] in
+             
+             let all_lines = header :: task_lines @ extra_line in
+             Pp.verbatim (String.concat ~sep:"\n" all_lines ^ "\n")));
     Fiber.return (Memo.of_thunk get)
   ;;
 end
