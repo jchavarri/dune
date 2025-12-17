@@ -3,6 +3,7 @@ type t = float
 let now () = Unix.gettimeofday ()
 let to_secs t = t
 let of_epoch_secs x = x
+let compare = Float.compare
 let diff = ( -. )
 
 module Span = struct

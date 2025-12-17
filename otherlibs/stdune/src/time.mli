@@ -3,6 +3,7 @@ type t
 val now : unit -> t
 val to_secs : t -> float
 val of_epoch_secs : float -> t
+val compare : t -> t -> Ordering.t
 
 module Span : sig
   type t
