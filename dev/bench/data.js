@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1765999800722,
+  "lastUpdate": 1765999807908,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -11456,6 +11456,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (cold, Linux)",
             "value": 60.92045752667334,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": false,
+          "id": "54ee52ebf559490a3ce34f3fffce003086a57337",
+          "message": "Remove reliance on the log file in some cram test (#12989)\n\nUse jq and the trace file instead.\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2025-12-17T13:41:03Z",
+          "tree_id": "7870c60cfd8673a72fc19f2378f79e619344e7ec",
+          "url": "https://github.com/jchavarri/dune/commit/54ee52ebf559490a3ce34f3fffce003086a57337"
+        },
+        "date": 1765999807220,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (warm, Linux)",
+            "value": 1.05787548406,
             "unit": "seconds"
           }
         ]
