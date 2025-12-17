@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1765999550805,
+  "lastUpdate": 1765999557719,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -11340,6 +11340,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (cold, Linux)",
             "value": 58.88929228867334,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "committer": {
+            "email": "javier.chavarri@gmail.com",
+            "name": "Javier Chávarri",
+            "username": "jchavarri"
+          },
+          "distinct": true,
+          "id": "5496fb58931369d3e4d138d93d2a51cab521087c",
+          "message": "Port n2-style live progress display to dune main\n\n- Add Time.compare for comparing timestamps\n- Add Running_jobs module import\n- Implement n2-style multi-line progress with:\n  - Visual progress bar [====----    ]\n  - Live task list with elapsed times and color coding\n  - Queue depth tracking (done/running/queued)\n  - Total build elapsed time\n  - Critical path indicator for bottlenecks\n  - Smart path truncation preserving filenames\n- Update status line handling for multi-line display\n- Add periodic refresh to update elapsed times\n\nSigned-off-by: Javier Chávarri <javier.chavarri@gmail.com>",
+          "timestamp": "2025-12-17T19:09:53Z",
+          "tree_id": "6ca656ccf72f0e285140b2147c63728c54ee6056",
+          "url": "https://github.com/jchavarri/dune/commit/5496fb58931369d3e4d138d93d2a51cab521087c"
+        },
+        "date": 1765999557129,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (warm, Linux)",
+            "value": 1.0277198827400003,
             "unit": "seconds"
           }
         ]
