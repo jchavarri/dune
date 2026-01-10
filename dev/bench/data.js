@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1768070753320,
+  "lastUpdate": 1768070760088,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -11514,6 +11514,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (cold, Linux)",
             "value": 59.01682804118667,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "dd4c3c72b48826035cdf189d778a0ea2f4e157b0",
+          "message": "fix: rename process finish events (#13259)\n\nInstead of using the user provided name of the process in the name\nfield, just use the literal `finish` and include the name in the\narguments. This is consistent with all other events.\n\nI've disabled the rocq tests for now as I'm unable to get them running\non my machine. I'd like to see a nix environment ready for these before\nthey're re-enabled.\n\n---------\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2026-01-10T17:54:40Z",
+          "tree_id": "0fc1a793c2dd428cf925e56ec27b3a7e7a0c6299",
+          "url": "https://github.com/jchavarri/dune/commit/dd4c3c72b48826035cdf189d778a0ea2f4e157b0"
+        },
+        "date": 1768070759609,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (warm, Linux)",
+            "value": 1.0384406872066665,
             "unit": "seconds"
           }
         ]
