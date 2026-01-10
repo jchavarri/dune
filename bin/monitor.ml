@@ -67,17 +67,48 @@ end = struct
     { diagnostics = Diagnostic_id_map.empty; jobs = Job_id_map.empty; progress = Waiting }
   ;;
 
+  let format_elapsed started_at =
+    let elapsed = Unix.gettimeofday () -. started_at in
+    if elapsed < 60.0
+    then sprintf "%.0fs" elapsed
+    else sprintf "%.0fm%.0fs" (floor (elapsed /. 60.0)) (mod_float elapsed 60.0)
+  ;;
+
+  let format_job_description job =
+    let desc = Format.asprintf "%a" Pp.to_fmt (Job.description job) in
+    (* Truncate long descriptions *)
+    if String.length desc > 60 then String.sub desc ~pos:0 ~len:57 ^ "..." else desc
+  ;;
+
   let done_status ~complete ~remaining ~failed state =
+    let running_count = Job_id_map.cardinal state.jobs in
+    let queued = max 0 (remaining - running_count) in
     Pp.textf
-      "Done: %d%% (%d/%d, %d left%s) (jobs: %d)"
-      (if complete + remaining = 0 then 0 else complete * 100 / (complete + remaining))
+      "%d/%d done, %d running, %d queued%s"
       complete
       (complete + remaining)
-      remaining
+      running_count
+      queued
       (match failed with
        | 0 -> ""
        | failed -> sprintf ", %d failed" failed)
-      (Job_id_map.cardinal state.jobs)
+  ;;
+
+  let render_running_jobs state =
+    let jobs = Job_id_map.to_list state.jobs in
+    if List.is_empty jobs
+    then ()
+    else (
+      (* Sort by start time, oldest first *)
+      let sorted =
+        List.sort jobs ~compare:(fun (_, a) (_, b) ->
+          Float.compare (Job.started_at a) (Job.started_at b))
+      in
+      List.iter sorted ~f:(fun (_id, job) ->
+        let elapsed = format_elapsed (Job.started_at job) in
+        let desc = format_job_description job in
+        Console.print_user_message
+          (User_message.make [ Pp.textf "  [%s] %s" elapsed desc ])))
   ;;
 
   let waiting_for_file_system_changes message =
@@ -116,6 +147,7 @@ end = struct
   module Update = struct
     type t =
       | Update_status
+      | Update_jobs
       | Add_diagnostics of Diagnostic.t list
       | Refresh
 
@@ -127,7 +159,7 @@ end = struct
           | Stop id -> Job_id_map.remove acc id)
       in
       state.jobs <- jobs;
-      Update_status
+      Update_jobs
     ;;
 
     let progress state progress =
@@ -169,9 +201,11 @@ end = struct
       (match (update : Update.t) with
        | Add_diagnostics diags -> List.iter diags ~f
        | Update_status -> ()
+       | Update_jobs -> render_running_jobs state
        | Refresh ->
          Console.reset ();
-         Diagnostic_id_map.iter state.diagnostics ~f);
+         Diagnostic_id_map.iter state.diagnostics ~f;
+         render_running_jobs state);
       status state
   ;;
 end
