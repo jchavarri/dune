@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1768572980215,
+  "lastUpdate": 1768573286542,
   "repoUrl": "https://github.com/jchavarri/dune",
   "entries": {
     "Melange Benchmark": [
@@ -11543,6 +11543,35 @@ window.BENCHMARK_DATA = {
           {
             "name": "synthetic build time (warm, Linux)",
             "value": 1.0384406872066665,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@rgrinberg.com",
+            "name": "Rudi Grinberg",
+            "username": "rgrinberg"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2537e6c7cc50b50bf9f079797623093a962f1955",
+          "message": "refactor: remove layer of indirection to the shared cache (#13331)\n\nWe don't have a distributed cache, so the layer of indirection buys us\nnothing.\n\n---------\n\nSigned-off-by: Rudi Grinberg <me@rgrinberg.com>",
+          "timestamp": "2026-01-16T13:35:38Z",
+          "tree_id": "95297307b629908773d28356e8ccbd0b4403c493",
+          "url": "https://github.com/jchavarri/dune/commit/2537e6c7cc50b50bf9f079797623093a962f1955"
+        },
+        "date": 1768573285915,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "synthetic build time (cold, Linux)",
+            "value": 60.410189211846664,
             "unit": "seconds"
           }
         ]
